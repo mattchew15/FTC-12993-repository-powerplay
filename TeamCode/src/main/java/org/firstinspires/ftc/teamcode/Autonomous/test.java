@@ -43,7 +43,7 @@ public class test extends LinearOpMode {
             Setup();
 
             while (opModeIsActive()) {
-            FR.setPower(gamepad1.left_trigger);
+            //FR.setPower(gamepad1.left_trigger);
             if (gamepad1.a){
                 FR.setTargetPosition(1000);
                 FR.setMode(DcMotor.RunMode.RUN_TO_POSITION);
