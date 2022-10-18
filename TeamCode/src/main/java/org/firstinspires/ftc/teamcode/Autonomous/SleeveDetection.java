@@ -35,14 +35,26 @@ public class SleeveDetection extends OpenCvPipeline {
             upper_yellow_bounds  = new Scalar(255, 255, 150, 255),
             lower_cyan_bounds    = new Scalar(0, 125, 171, 255),
             upper_cyan_bounds    = new Scalar(139, 225, 255, 255),
-            lower_magenta_bounds = new Scalar(185, 0, 74, 255),
-            upper_magenta_bounds = new Scalar(255, 105, 165, 255);
+            //Red
+            lower_magenta_bounds = new Scalar(155, 0, 0, 255),
+            upper_magenta_bounds = new Scalar(255, 100, 100, 255);
+            //Green
+            //lower_magenta_bounds = new Scalar(0, 155, 0, 255),
+            //upper_magenta_bounds = new Scalar(100, 255, 100, 255);
+            //Orange
+            //lower_magenta_bounds = new Scalar(155, 78, 0, 255),
+            //upper_magenta_bounds = new Scalar(255, 178, 100, 255);
 
     // Color definitions
     private final Scalar
-            YELLOW  = new Scalar(254, 228, 9),
+            YELLOW  = new Scalar(255, 230, 0),
             CYAN    = new Scalar(18, 159, 204),
-            MAGENTA = new Scalar(217, 1, 86);
+            //Red
+            MAGENTA = new Scalar(255, 0, 0);
+            //Green
+            //MAGENTA = new Scalar(0, 255, 0);
+            //Orange
+            //MAGENTA = new Scalar(255, 128, 0);
 
     // Percent and mat definitions
     public double yelPercent, cyaPercent, magPercent;
