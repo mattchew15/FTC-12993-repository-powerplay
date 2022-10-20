@@ -39,8 +39,8 @@ public class VisionTest extends LinearOpMode {
         while (!isStarted()) {
             telemetry.addData("ROTATION: ", sleeveDetection.getPosition());
             telemetry.addData("Yellow Percent:", sleeveDetection.yelPercent);
-            telemetry.addData("Cyan Percent:", sleeveDetection.cyaPercent);
-            telemetry.addData("Magenta Percent:", sleeveDetection.magPercent);
+            telemetry.addData("Blue Percent:", sleeveDetection.bluPercent);
+            telemetry.addData("Red Percent:", sleeveDetection.redPercent);
             telemetry.update();
         }
 

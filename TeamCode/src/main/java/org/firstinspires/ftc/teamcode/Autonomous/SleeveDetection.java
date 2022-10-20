@@ -12,8 +12,8 @@ import org.openftc.easyopencv.OpenCvPipeline;
 public class SleeveDetection extends OpenCvPipeline {
     /*
     YELLOW  = Parking Left
-    CYAN    = Parking Middle
-    MAGENTA = Parking Right
+    BLUE    = Parking Middle
+    RED = Parking Right
      */
 
     public enum ParkingPosition {
@@ -31,34 +31,24 @@ public class SleeveDetection extends OpenCvPipeline {
 
     // Lower and upper boundaries for colors
     private static final Scalar
-            lower_yellow_bounds  = new Scalar(190, 190, 0, 255),
-            upper_yellow_bounds  = new Scalar(255, 255, 150, 255),
-            lower_cyan_bounds    = new Scalar(0, 125, 171, 255),
-            upper_cyan_bounds    = new Scalar(139, 225, 255, 255),
-            //Red
-            lower_magenta_bounds = new Scalar(155, 0, 0, 255),
-            upper_magenta_bounds = new Scalar(255, 100, 100, 255);
-            //Green
-            //lower_magenta_bounds = new Scalar(0, 155, 0, 255),
-            //upper_magenta_bounds = new Scalar(100, 255, 100, 255);
-            //Orange
-            //lower_magenta_bounds = new Scalar(155, 78, 0, 255),
-            //upper_magenta_bounds = new Scalar(255, 178, 100, 255);
+            lower_yellow_bounds  = new Scalar(188, 163, 0, 255),
+            upper_yellow_bounds  = new Scalar(255, 240, 100, 255),
+            lower_blue_bounds    = new Scalar(15, 26, 98, 255),
+            upper_blue_bounds    = new Scalar(34, 53, 179, 255),
+            lower_red_bounds     = new Scalar(178, 0, 6, 255),
+            upper_red_bounds     = new Scalar(255, 77, 83, 255);
+
 
     // Color definitions
     private final Scalar
             YELLOW  = new Scalar(255, 230, 0),
-            CYAN    = new Scalar(18, 159, 204),
-            //Red
-            MAGENTA = new Scalar(255, 0, 0);
-            //Green
-            //MAGENTA = new Scalar(0, 255, 0);
-            //Orange
-            //MAGENTA = new Scalar(255, 128, 0);
+            BLUE    = new Scalar(0, 20, 255),
+            RED = new Scalar(221, 0, 7);
+
 
     // Percent and mat definitions
-    public double yelPercent, cyaPercent, magPercent;
-    private Mat yelMat = new Mat(), cyaMat = new Mat(), magMat = new Mat(), blurredMat = new Mat();
+    public double yelPercent, bluPercent, redPercent;
+    private Mat yelMat = new Mat(), bluMat = new Mat(), redMat = new Mat(), blurredMat = new Mat();
 
     // Anchor point definitions
     Point sleeve_pointA = new Point(
@@ -83,16 +73,16 @@ public class SleeveDetection extends OpenCvPipeline {
         
         // Gets channels from given source mat
         Core.inRange(blurredMat, lower_yellow_bounds, upper_yellow_bounds, yelMat);
-        Core.inRange(blurredMat, lower_cyan_bounds, upper_cyan_bounds, cyaMat);
-        Core.inRange(blurredMat, lower_magenta_bounds, upper_magenta_bounds, magMat);
+        Core.inRange(blurredMat, lower_blue_bounds, upper_blue_bounds, bluMat);
+        Core.inRange(blurredMat, lower_red_bounds, upper_red_bounds, redMat);
 
         // Gets color specific values
         yelPercent = Core.countNonZero(yelMat);
-        cyaPercent = Core.countNonZero(cyaMat);
-        magPercent = Core.countNonZero(magMat);
+        bluPercent = Core.countNonZero(bluMat);
+        redPercent = Core.countNonZero(redMat);
 
         // Calculates the highest amount of pixels being covered on each side
-        double maxPercent = Math.max(yelPercent, Math.max(cyaPercent, magPercent));
+        double maxPercent = Math.max(yelPercent, Math.max(bluPercent, redPercent));
 
         // Checks all percentages, will highlight bounding box in camera preview
         // based on what color is being detected
@@ -105,22 +95,22 @@ public class SleeveDetection extends OpenCvPipeline {
                     YELLOW,
                     2
             );
-        } else if (maxPercent == cyaPercent) {
+        } else if (maxPercent == bluPercent) {
             position = ParkingPosition.CENTER;
             Imgproc.rectangle(
                     input,
                     sleeve_pointA,
                     sleeve_pointB,
-                    CYAN,
+                    BLUE,
                     2
             );
-        } else if (maxPercent == magPercent) {
+        } else if (maxPercent == redPercent) {
             position = ParkingPosition.RIGHT;
             Imgproc.rectangle(
                     input,
                     sleeve_pointA,
                     sleeve_pointB,
-                    MAGENTA,
+                    RED,
                     2
             );
         }
@@ -128,8 +118,8 @@ public class SleeveDetection extends OpenCvPipeline {
         // Memory cleanup
         blurredMat.release();
         yelMat.release();
-        cyaMat.release();
-        magMat.release();
+        bluMat.release();
+        redMat.release();
 
         return input;
     }
