@@ -26,7 +26,7 @@ public class DriveBase {  // no constructor for this class
     double PowerStrafe;
 
     // config servo position variables
-    public static double IntakeRSRaisedPos = 1, IntakeLSRaisedPos = 1;
+    public static double IntakeRSRaisedPos = 0.75, IntakeLSRaisedPos = 1;
     public static double IntakeRSLoweredPos = 0, IntakeLSLoweredPos = 0;
 
     public void Drivebase_init(HardwareMap hwMap) {
@@ -58,15 +58,21 @@ public class DriveBase {  // no constructor for this class
 
     public void Drive(double LY, double LX, double RX) {
         double denominator = Math.max(Math.abs(LY) + Math.abs(LX) + Math.abs(RX), 1);
-        double frontLeftPower = (LY*PowerBase + LX*PowerStrafe + RX*PowerBaseTurn) / denominator;
-        double backLeftPower = (LY*PowerBase - LX*PowerStrafe + RX*PowerBaseTurn) / denominator;
-        double frontRightPower = (LY*PowerBase - LX*PowerStrafe - RX*PowerBaseTurn) / denominator;
-        double backRightPower = (LY*PowerBase + LX*PowerStrafe - RX*PowerBaseTurn) / denominator;
+        double frontLeftPower = (LY*PowerBase - LX*PowerStrafe - RX*PowerBaseTurn) / denominator;
+        double backLeftPower = (LY*PowerBase + LX*PowerStrafe - RX*PowerBaseTurn) / denominator;
+        double frontRightPower = (LY*PowerBase + LX*PowerStrafe + RX*PowerBaseTurn) / denominator;
+        double backRightPower = (LY*PowerBase - LX*PowerStrafe + RX*PowerBaseTurn) / denominator;
 
         FL.setPower(frontLeftPower);
         BL.setPower(backLeftPower);
         FR.setPower(frontRightPower);
         BR.setPower(backRightPower);
+    }
+    public void motorDirectionTest(double a, double b, double c, double d){
+        FL.setPower(a);
+        BL.setPower(b);
+        FR.setPower(c);
+        BR.setPower(d);
     }
 
     public void PowerToggle(boolean toggle) { // toggle code for a slow drive mode for fine adjustment
@@ -79,8 +85,8 @@ public class DriveBase {  // no constructor for this class
                 } else {
                     //edit these values to change drivecode
                     PowerBase = 1;
-                    PowerBaseTurn = 0.5;
-                    PowerStrafe = 1.1;
+                    PowerBaseTurn = 0.63;
+                    PowerStrafe = 1.05;
                 }
                 PowerToggled = true;
             }

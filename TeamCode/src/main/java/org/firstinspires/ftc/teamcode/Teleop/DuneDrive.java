@@ -74,7 +74,8 @@ public class DuneDrive extends LinearOpMode {
                 // Main loop. Run class methods here to do stuff
                 drivebase.Drive(gamepad1.left_stick_y,gamepad1.left_stick_x,gamepad1.right_stick_x);
                 drivebase.PowerToggle(gamepad1.a);
-                inputs.gamepadRumbleTimer();
+                //inputs.gamepadRumbleTimer();
+                //drivebase.motorDirectionTest(gamepad1.left_stick_y, gamepad1.left_stick_x, gamepad1.right_stick_x, gamepad1.right_stick_y);
 
                 telemetry.update();
 

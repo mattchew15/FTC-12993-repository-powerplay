@@ -11,6 +11,7 @@ public class PID {
     double lastError;
     double integralSum;
     double error;
+    double derivative;
 
 
     public PID(double Kp, double Ki, double Kd){
@@ -22,7 +23,7 @@ public class PID {
     public double update(double target, double state, double maxOutput) { // parameter of the method is the target,
         // PID logic and then return the output
         error = target-state;
-        double derivative = (error-lastError)/timer.seconds();
+        derivative = (error-lastError)/timer.seconds();
         integralSum = integralSum + (error * timer.seconds());
         // set a limit on our integral sum
         if (integralSum > integralSumLimit) {
