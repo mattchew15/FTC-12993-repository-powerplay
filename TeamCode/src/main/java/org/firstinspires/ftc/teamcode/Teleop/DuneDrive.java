@@ -34,8 +34,11 @@ public class DuneDrive extends LinearOpMode {
     Orientation angles;
     // uses the ElapsedTime class from the SDK to create variable GlobalTimer
     ElapsedTime GlobalTimer;
-    int ButtonActiveState;
-    int ButtonState;
+
+    int intaketype; // have to initialize here instead of inside method
+    double turretpositiontype;
+    double liftpositiontype;
+    double outakesequencetimer; // change these into the class, optimize object oriented code its kinda clunky rn
 
     // states for asynchronus sequences
     enum OutakeState {
@@ -44,7 +47,7 @@ public class DuneDrive extends LinearOpMode {
         GRAB, // grip claw
         INITIAL_LIFT, // has to go over intake motors and rev hubs
         TURN_LIFT_TILT,
-        LINKAGE, // linkage extends once nearly finished turning - stability
+        HEIGHT_LINKAGE, // linkage extends once nearly finished turning - stability. Lift goes to correct level simaltaneously
         FINE_ADJUST, // gamepad2 controls fine adjust
         DROP, // gamepad1.rightbumper
         RETURN // calculate the fastest way for everything to be moving simaltaneously
@@ -62,8 +65,8 @@ public class DuneDrive extends LinearOpMode {
         turretlift.motorsSetup();
         outakestate = OutakeState.READY;
 
-        ButtonActiveState = 0;
-        ButtonState = 0;
+        outakesequencetimer = 0;
+        liftpositiontype = 0;
     }
 
     @Override
@@ -93,47 +96,122 @@ public class DuneDrive extends LinearOpMode {
     }
 
     // sequence functions go here;
-    public void liftSequence(boolean Button){
-        if (Button) {
-            if (ButtonActiveState == 0) {
-                ButtonActiveState = 1; // Intake on, holding down
-                ButtonState = 1;
-            }
-            if (ButtonActiveState == 2) {
-                ButtonActiveState = 3; // Intake off, holding down
-                ButtonState = 0;
-            }
-        }
-        else {
-            if (ButtonActiveState == 1) {
-                ButtonActiveState = 2; // Intake on, let go
-            }
-            if (ButtonActiveState == 3) {
-                ButtonActiveState = 0; // Intake off, let go
-            }
-        }
+    public void liftSequence(){
         switch (outakestate) {
             case READY:
                 turretlift.liftTo(0, turretlift.liftPos(), 1);
                 turretlift.turretSpin(0, turretlift.turretPos(), 1);
                 turretlift.readyServos();
-                if (ButtonState == 1) {
+                if (gamepad2.right_bumper) {
                     outakestate = OutakeState.INTAKE;
-                    //IntakeTimer = GlobalTimer.milliseconds(); // Start timer
+                    intaketype = 0; // normal orientated cone
+                }
+                else if (gamepad2.b) {
+                    outakestate = OutakeState.INTAKE;
+                    intaketype = 1; // sideways bar cone
+                }
+                else if (gamepad2.x){
+                    outakestate = OutakeState.INTAKE;
+                    intaketype = 2; // will be lip facing towards robot
                 }
                 break;
+
             case INTAKE:
                 turretlift.liftTo(0, turretlift.liftPos(), 1);
                 turretlift.turretSpin(0, turretlift.turretPos(), 1);
                 turretlift.readyServos();
-                if (gamepad2.dpad_up){}
-                drivebase.intakeSpin(0.6);
-                drivebase.intakeBarUp();
-                if (ButtonState == 1) {
-                    outakestate = OutakeState.INTAKE;
-                    //IntakeTimer = GlobalTimer.milliseconds(); // Start timer
+                if (intaketype == 0){ // normal intake case
+                    drivebase.intakeSpin(0.6);
+                    drivebase.intakeBarUp();
+                    intakesequencetransition();
+                }
+                else if (intaketype == 1 || intaketype == 2) { // second intake case
+                    drivebase.intakeSpin(0.8);
+                    drivebase.intakeBarDown();
+                    intakesequencetransition();
+                }
+
+                break;
+
+            case GRAB:
+                if (GlobalTimer.milliseconds() - outakesequencetimer > 0){ // this if statement is not needed at all
+                    turretlift.closeClaw();
+                    turretPositionChange(); // allows drivers to change the turret position in this state
+                    if (GlobalTimer.milliseconds() - outakesequencetimer > 200){
+                        turretlift.closeClaw(); // not needed, servo is already going to position?
+                        turretlift.liftTo(6 ,turretlift.liftPos(), 1); // make the rotations a variable
+                        if (turretlift.liftTargetReached()){
+                            turretlift.turretSpin(turretpositiontype, turretlift.turretPos(), 1);
+                            if (turretlift.turretTargetReached()){
+                                outakestate = OutakeState.HEIGHT_LINKAGE;
+                            }
+                        }
+                    }
                 }
                 break;
+
+            case HEIGHT_LINKAGE:
+                turretlift.closeClaw();
+                liftPositionChange(); // change this to transition state for fine adjust!!! if you dont want fine adjust then dont do it
+                turretlift.closeClaw();
+                turretlift.liftTo(turretpositiontype ,turretlift.liftPos(), 1); // make the rotations a variable
+                turretlift.turretSpin(turretpositiontype, turretlift.turretPos(), 1);
+                turretlift.tiltUp();
+                turretlift.linkageOut();
+
+                break;
+
+        }
+        if (gamepad2.y && outakestate != OutakeState.READY || gamepad1.y && outakestate != OutakeState.READY){
+            outakestate = OutakeState.RETURN; // return to ready state no matter what state the system is in
+        }
+        intakesequencetransition(); // not sure this works, but at any stage if you press dpad it will go back to the grab phase and you can rotate the turret
+    }
+
+    public void intakesequencetransition(){ // simplifies transition from INTAKE state to GRAB state
+        if (gamepad2.dpad_up){
+            turretpositiontype = 180;
+            outakestate = OutakeState.GRAB;
+            outakesequencetimer = GlobalTimer.milliseconds(); //  reset timer
+        }
+        else if (gamepad2.dpad_left){
+            turretpositiontype = 90;
+            outakestate = OutakeState.GRAB;
+            outakesequencetimer = GlobalTimer.milliseconds(); //  reset timer
+        }
+        else if (gamepad2.dpad_right){
+            turretpositiontype = -90;
+            outakestate = OutakeState.GRAB;
+            outakesequencetimer = GlobalTimer.milliseconds(); //  reset timer
+        }
+        else if (gamepad2.dpad_down){
+            outakestate = OutakeState.GRAB;
+            outakesequencetimer = GlobalTimer.milliseconds(); //  reset timer
+        }
+    }
+
+    public void turretPositionChange(){
+        if (gamepad2.dpad_up){
+            turretpositiontype = 180;
+        }
+        else if (gamepad2.dpad_left){
+            turretpositiontype = 90;
+        }
+        else if (gamepad2.dpad_right){
+            turretpositiontype = -90;
+        }
+        else if (gamepad2.dpad_down){
+            turretpositiontype = 0;
+        }
+    }
+
+    public void liftPositionChange(){
+        if (gamepad2.y){
+            liftpositiontype = 20;
+        }
+        else if (gamepad2.a){
+            liftpositiontype = 8;
         }
     }
 }
+

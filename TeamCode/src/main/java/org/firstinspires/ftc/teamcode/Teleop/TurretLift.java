@@ -28,6 +28,9 @@ public class TurretLift {  // no constructor for this class
     PID turretPID = new PID(TurretKp,TurretKi,TurretKd);
     PID liftPID = new PID(LiftKp,LiftKi,LiftKd);
 
+    // final variables
+    final double turretthresholdDistance = 10;
+    final double liftthresholdDistance = 2;
 
     public void TurretLift_init(HardwareMap hwMap) {
         TurretMotor = hwMap.get(DcMotorEx.class, "TurretMotor");
@@ -73,8 +76,16 @@ public class TurretLift {  // no constructor for this class
         return TurretMotor.getCurrentPosition(); //loop times reading encoder?
     }
 
-    public boolean turretTargetReached(double thresholdDistance){
-        if (turretPID.returnError() < thresholdDistance){
+    public boolean turretTargetReached(){
+        if (turretPID.returnError() < turretthresholdDistance){
+            return true;
+        }
+        else{
+            return false;
+        }
+    }
+    public boolean liftTargetReached(){
+        if (turretPID.returnError() < liftthresholdDistance){
             return true;
         }
         else{
@@ -118,6 +129,7 @@ public class TurretLift {  // no constructor for this class
         tiltReset();
         linkageIn();
     }
+
 
     //state machine sequence functions? finite state machine implimentation
 }
