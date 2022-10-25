@@ -34,6 +34,8 @@ public class DuneDrive extends LinearOpMode {
     Orientation angles;
     // uses the ElapsedTime class from the SDK to create variable GlobalTimer
     ElapsedTime GlobalTimer;
+    int ButtonActiveState;
+    int ButtonState;
 
     // states for asynchronus sequences
     enum OutakeState {
@@ -48,6 +50,9 @@ public class DuneDrive extends LinearOpMode {
         RETURN // calculate the fastest way for everything to be moving simaltaneously
     }
 
+    // create instance of OutakeState Enum and set it to ready
+    OutakeState outakestate = OutakeState.READY;
+
     // random setup function that runs once start is pressed but before main loop
     private void Setup() {
         GlobalTimer = new ElapsedTime(System.nanoTime());
@@ -55,6 +60,10 @@ public class DuneDrive extends LinearOpMode {
         inputs.resetMatchTimer();
         drivebase.motorsSetup();
         turretlift.motorsSetup();
+        outakestate = OutakeState.READY;
+
+        ButtonActiveState = 0;
+        ButtonState = 0;
     }
 
     @Override
@@ -84,5 +93,47 @@ public class DuneDrive extends LinearOpMode {
     }
 
     // sequence functions go here;
-
+    public void liftSequence(boolean Button){
+        if (Button) {
+            if (ButtonActiveState == 0) {
+                ButtonActiveState = 1; // Intake on, holding down
+                ButtonState = 1;
+            }
+            if (ButtonActiveState == 2) {
+                ButtonActiveState = 3; // Intake off, holding down
+                ButtonState = 0;
+            }
+        }
+        else {
+            if (ButtonActiveState == 1) {
+                ButtonActiveState = 2; // Intake on, let go
+            }
+            if (ButtonActiveState == 3) {
+                ButtonActiveState = 0; // Intake off, let go
+            }
+        }
+        switch (outakestate) {
+            case READY:
+                turretlift.liftTo(0, turretlift.liftPos(), 1);
+                turretlift.turretSpin(0, turretlift.turretPos(), 1);
+                turretlift.readyServos();
+                if (ButtonState == 1) {
+                    outakestate = OutakeState.INTAKE;
+                    //IntakeTimer = GlobalTimer.milliseconds(); // Start timer
+                }
+                break;
+            case INTAKE:
+                turretlift.liftTo(0, turretlift.liftPos(), 1);
+                turretlift.turretSpin(0, turretlift.turretPos(), 1);
+                turretlift.readyServos();
+                if (gamepad2.dpad_up){}
+                drivebase.intakeSpin(0.6);
+                drivebase.intakeBarUp();
+                if (ButtonState == 1) {
+                    outakestate = OutakeState.INTAKE;
+                    //IntakeTimer = GlobalTimer.milliseconds(); // Start timer
+                }
+                break;
+        }
+    }
 }

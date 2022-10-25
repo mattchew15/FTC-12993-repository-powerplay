@@ -113,5 +113,11 @@ public class TurretLift {  // no constructor for this class
         LinkageServo.setPosition(LinkageClosedPos);
     }
 
+    public void readyServos(){
+        openClaw();
+        tiltReset();
+        linkageIn();
+    }
+
     //state machine sequence functions? finite state machine implimentation
 }
