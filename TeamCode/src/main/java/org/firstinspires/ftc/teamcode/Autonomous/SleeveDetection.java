@@ -43,7 +43,7 @@ public class SleeveDetection extends OpenCvPipeline {
     private final Scalar
             YELLOW  = new Scalar(229, 255, 0),
             BLUE    = new Scalar(3, 211, 255),
-            RED = new Scalar(255, 0, 0);
+            RED     = new Scalar(255, 0, 0);
 
 
     // Percent and mat definitions
