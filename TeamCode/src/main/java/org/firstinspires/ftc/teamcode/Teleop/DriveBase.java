@@ -26,8 +26,8 @@ public class DriveBase {  // no constructor for this class
     double PowerStrafe;
 
     // config servo position variables
-    public static double IntakeRSRaisedPos = 0.75, IntakeLSRaisedPos = 1;
-    public static double IntakeRSLoweredPos = 0, IntakeLSLoweredPos = 0;
+    public static double IntakeRSRaisedPos = 0.765, IntakeLSRaisedPos = 0.145;
+    public static double IntakeRSLoweredPos = 0.875, IntakeLSLoweredPos = 0.025;
 
     public void Drivebase_init(HardwareMap hwMap) {
 

@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode;
+package org.firstinspires.ftc.teamcode.Autonomous;
 
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.geometry.Vector2d;
@@ -104,6 +104,7 @@ public class RED_AUTO_RIGHT extends LinearOpMode {
             // Read pose
             Pose2d poseEstimate = drive.getPoseEstimate(); // gets the position of the robot
 
+            /*
             // main switch statement logic
             switch (outakestate) {
                 case READY:
@@ -197,6 +198,8 @@ public class RED_AUTO_RIGHT extends LinearOpMode {
 
                     break;
             }
+
+             */
             // Updates driving for trajectories
             drive.update();
             // Print pose to telemetry

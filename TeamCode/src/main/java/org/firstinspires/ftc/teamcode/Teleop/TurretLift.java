@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode.Teleop;
 
+import static org.firstinspires.ftc.robotcore.external.BlocksOpModeCompanion.telemetry;
+
 import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
@@ -29,8 +31,8 @@ public class TurretLift {  // no constructor for this class
     PID liftPID = new PID(LiftKp,LiftKi,LiftKd);
 
     // final variables
-    final double turretthresholdDistance = 10;
-    final double liftthresholdDistance = 2;
+    final double turretthresholdDistance = 20;
+    final double liftthresholdDistance = 50;
     int turretTarget;
     int liftTarget;
 
@@ -64,8 +66,9 @@ public class TurretLift {  // no constructor for this class
     }
 
     // instead of using PID class uses the internal run to position on the motor
-    public void liftToInternalPID(int rotations, double motorPosition, double maxSpeed){
+    public void liftToInternalPID(int rotations, double maxSpeed){
         liftTarget = rotations;
+        //telemetry.addData("lifttarget", liftTarget);
         LiftMotor.setTargetPosition(liftTarget);
         LiftMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         LiftMotor.setPower(maxSpeed);
@@ -90,9 +93,16 @@ public class TurretLift {  // no constructor for this class
             return false;
         }
     }
+    // instead of using PID class uses the internal run to position on the motor
+    public void turretSpinInternalPID(int rotations, double maxSpeed){
+        turretTarget = rotations; // variable is public to this class?
+        TurretMotor.setTargetPosition(turretTarget);
+        TurretMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        TurretMotor.setPower(maxSpeed);
+    }
 
     public boolean turretTargetReachedInteralPID(){
-        if (turretTarget < turretthresholdDistance){
+        if (Math.abs(turretTarget) == Math.abs(turretPos())){
             return true;
         }
         else{
@@ -109,8 +119,8 @@ public class TurretLift {  // no constructor for this class
         }
     }
 
-    public boolean liftTargetReachedInteralPID(){
-        if (liftTarget < turretthresholdDistance){
+    public boolean liftTargetReachedInternalPID(){ // if it works for lift then do for turret
+        if (liftPos() < (liftTarget + liftthresholdDistance) && liftPos() > (liftTarget-liftthresholdDistance)){ //liftthresholdDistance
             return true;
         }
         else{
@@ -118,13 +128,7 @@ public class TurretLift {  // no constructor for this class
         }
     }
 
-    // instead of using PID class uses the internal run to position on the motor
-    public void turretSpinInternalPID(int rotations, double motorPosition, double maxSpeed){
-        turretTarget = rotations; // variable is public to this class?
-        TurretMotor.setTargetPosition(turretTarget);
-        TurretMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        TurretMotor.setPower(maxSpeed);
-    }
+
 
 
     // servo void functions
@@ -156,8 +160,11 @@ public class TurretLift {  // no constructor for this class
         linkageIn();
     }
 
-    public double tickToDegrees(int ticks){
-        return ticks / 0.10424710424;
+    public double degreestoTicks(int degrees){
+        return degrees * 9;
+    }
+    public double tickstoDegrees(int ticks){
+        return ticks / 9;
     }
 
 
