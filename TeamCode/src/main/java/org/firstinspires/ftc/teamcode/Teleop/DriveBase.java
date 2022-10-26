@@ -86,7 +86,7 @@ public class DriveBase {  // no constructor for this class
                 } else {
                     //edit these values to change drivecode
                     PowerBase = 1;
-                    PowerBaseTurn = 0.63;
+                    PowerBaseTurn = 0.65;
                     PowerStrafe = 1.05;
                 }
                 PowerToggled = true;

@@ -31,6 +31,8 @@ public class TurretLift {  // no constructor for this class
     // final variables
     final double turretthresholdDistance = 10;
     final double liftthresholdDistance = 2;
+    int turretTarget;
+    int liftTarget;
 
     public void TurretLift_init(HardwareMap hwMap) {
         TurretMotor = hwMap.get(DcMotorEx.class, "TurretMotor");
@@ -44,7 +46,10 @@ public class TurretLift {  // no constructor for this class
 
     public void motorsSetup(){
         TurretMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        TurretMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER); // run without encoder is if using external PID
+        LiftMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER); // run without encoder is if using external PID
+
+        TurretMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        LiftMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER); // run without encoder is if using external PID
     }
 
     public void liftTo(double rotations, double motorPosition, double maxSpeed){
@@ -60,7 +65,8 @@ public class TurretLift {  // no constructor for this class
 
     // instead of using PID class uses the internal run to position on the motor
     public void liftToInternalPID(int rotations, double motorPosition, double maxSpeed){
-        LiftMotor.setTargetPosition(rotations);
+        liftTarget = rotations;
+        LiftMotor.setTargetPosition(liftTarget);
         LiftMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         LiftMotor.setPower(maxSpeed);
     }
@@ -84,6 +90,16 @@ public class TurretLift {  // no constructor for this class
             return false;
         }
     }
+
+    public boolean turretTargetReachedInteralPID(){
+        if (turretTarget < turretthresholdDistance){
+            return true;
+        }
+        else{
+            return false;
+        }
+    }
+
     public boolean liftTargetReached(){
         if (turretPID.returnError() < liftthresholdDistance){
             return true;
@@ -93,9 +109,19 @@ public class TurretLift {  // no constructor for this class
         }
     }
 
+    public boolean liftTargetReachedInteralPID(){
+        if (liftTarget < turretthresholdDistance){
+            return true;
+        }
+        else{
+            return false;
+        }
+    }
+
     // instead of using PID class uses the internal run to position on the motor
     public void turretSpinInternalPID(int rotations, double motorPosition, double maxSpeed){
-        TurretMotor.setTargetPosition(rotations);
+        turretTarget = rotations; // variable is public to this class?
+        TurretMotor.setTargetPosition(turretTarget);
         TurretMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         TurretMotor.setPower(maxSpeed);
     }
@@ -128,6 +154,10 @@ public class TurretLift {  // no constructor for this class
         openClaw();
         tiltReset();
         linkageIn();
+    }
+
+    public double tickToDegrees(int ticks){
+        return ticks / 0.10424710424;
     }
 
 
