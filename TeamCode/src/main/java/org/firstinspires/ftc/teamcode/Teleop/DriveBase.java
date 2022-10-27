@@ -107,7 +107,7 @@ public class DriveBase {  // no constructor for this class
     }
     public void intakeSpin(double speedDirection){
         IntakeRMotor.setPower(speedDirection);
-        IntakeRMotor.setPower(speedDirection);
+        IntakeLMotor.setPower(speedDirection);
     }
 
 }
