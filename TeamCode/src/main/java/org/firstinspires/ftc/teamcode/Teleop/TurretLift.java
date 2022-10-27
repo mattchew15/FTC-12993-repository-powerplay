@@ -18,9 +18,9 @@ public class TurretLift {  // no constructor for this class
     private Servo TiltServo;
 
     //config variables can be changed/tuned in dashboard
-    public static double ClawOpenPos = 0, ClawClosedPos = 1;
+    public static double ClawOpenPos = 0.25, ClawClosedPos = 0.4;
     public static double LinkageFullPos = 0.3, LinkageHalfPos = 0.16, LinkageClosedPos = 0.01;
-    public static double TiltUpPos = 0.3, TiltDownPos = 0.85;
+    public static double TiltUpPos = 0.3, TiltDownPos = 0.85, TiltHalfPos = 0.48;
 
     //editable dashboard variables must be public static - PID values for turret and lift that can be tuned
     public static double TurretKp = 0.1, TurretKi = 0.001, TurretKd = 0.05;
@@ -31,7 +31,7 @@ public class TurretLift {  // no constructor for this class
     PID liftPID = new PID(LiftKp,LiftKi,LiftKd);
 
     // final variables
-    final double turretthresholdDistance = 20;
+    final double turretthresholdDistance = degreestoTicks(5);
     final double liftthresholdDistance = 50;
     int turretTarget;
     int liftTarget;
@@ -136,11 +136,12 @@ public class TurretLift {  // no constructor for this class
         ClawServo.setPosition(ClawOpenPos);
     }
     public void closeClaw(){
-        ClawServo.setPosition(ClawOpenPos);
+        ClawServo.setPosition(ClawClosedPos);
     }
     public void tiltUp(){
         TiltServo.setPosition(TiltUpPos);
     }
+    public void tiltUpHalf(){TiltServo.setPosition(TiltHalfPos);}
     public void tiltReset(){
         TiltServo.setPosition(TiltDownPos);
     }
