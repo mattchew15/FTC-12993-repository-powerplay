@@ -39,6 +39,7 @@ public class DuneDrive extends LinearOpMode {
     double turretpositiontype;
     int liftpositiontype;
     double outakesequencetimer; // change these into the class, optimize object oriented code its kinda clunky rn
+    int liftHighPosition = 850;
 
     // states for asynchronus sequences
     enum OutakeState {
@@ -110,14 +111,17 @@ public class DuneDrive extends LinearOpMode {
                     outakestate = OutakeState.INTAKE;
                     intaketype = 0; // normal orientated cone
                 }
-                else if (gamepad2.b) {
+                else if (gamepad2.left_bumper) {
                     outakestate = OutakeState.INTAKE;
                     intaketype = 1; // sideways bar cone
                 }
+                /*
                 else if (gamepad2.x){
                     outakestate = OutakeState.INTAKE;
                     intaketype = 2; // will be lip facing towards robot
                 }
+                */
+
                 break;
 
             case INTAKE:
@@ -125,12 +129,12 @@ public class DuneDrive extends LinearOpMode {
                 turretlift.turretSpinInternalPID(0, 1);
                 turretlift.readyServos();
                 if (intaketype == 0){ // normal intake case
-                    drivebase.intakeSpin(0.6);
+                    drivebase.intakeSpin(0.65);
                     drivebase.intakeBarUp();
                     intakesequencetransition();
                 }
                 else if (intaketype == 1 || intaketype == 2) { // second intake case
-                    drivebase.intakeSpin(0.8);
+                    drivebase.intakeSpin(0.65);
                     drivebase.intakeBarDown();
                     intakesequencetransition();
                 }
@@ -142,17 +146,16 @@ public class DuneDrive extends LinearOpMode {
                     drivebase.intakeSpin(0);
                     turretlift.closeClaw();
                     turretlift.linkageIn();
+                    drivebase.intakeBarDown();
                     turretPositionChange(); // allows drivers to change the turret position in this state
                     if (GlobalTimer.milliseconds() - outakesequencetimer > 200){
                         turretlift.closeClaw(); // not needed, servo is already going to position?
                         turretlift.liftToInternalPID(350,1);
+                        turretlift.tiltUpHalf();
                         if (turretlift.liftTargetReachedInternalPID()){
                             telemetry.addLine("lift is up");
                             turretlift.turretSpinInternalPID((int)Math.round(turretpositiontype), 1); //
-                            turretlift.tiltUp();
-                            if (turretlift.turretTargetReachedInteralPID()){
-                                outakestate = OutakeState.HEIGHT_LINKAGE;
-                            }
+                            outakestate = OutakeState.HEIGHT_LINKAGE;
                         }
                     }
                 }
@@ -162,19 +165,23 @@ public class DuneDrive extends LinearOpMode {
                 turretlift.closeClaw();
                 turretlift.liftToInternalPID(liftpositiontype,1);
                 turretlift.turretSpinInternalPID((int)Math.round(turretpositiontype), 1);
-                turretlift.tiltUp();
-                turretlift.linkageOutHalf();
+                if (turretlift.liftTargetReached() && liftpositiontype == liftHighPosition){
+                    turretlift.tiltUp();
+                }
+                else{
+                    turretlift.tiltUpHalf();
+                }
                 liftPositionChange(); // change this to transition state for fine adjust!!! if you dont want fine adjust then dont do it
                 break;
 
             case DROP:
                 turretlift.liftToInternalPID(liftpositiontype,1);
                 turretlift.turretSpinInternalPID((int)Math.round(turretpositiontype), 1);
-                turretlift.linkageOut();
                 if (GlobalTimer.milliseconds() - outakesequencetimer > 300){
                     if (gamepad1.right_bumper){ //
                         turretlift.openClaw();
-                        // outakesequencetimer = GlobalTimer.milliseconds(); //  reset timer
+                        turretlift.linkageIn();
+                        outakesequencetimer = GlobalTimer.milliseconds(); //  reset timer
                         outakestate = OutakeState.RETURN;
                     }
                 }
@@ -182,24 +189,27 @@ public class DuneDrive extends LinearOpMode {
                 break;
 
             case RETURN:
-                turretlift.turretSpinInternalPID(0, 1);
-                turretlift.readyServos();
-                if (turretlift.turretTargetReachedInteralPID()){
-                    //telemetry.addData("turret return target reached?", true);
-                    telemetry.addLine("turret return target reached");
-                    turretlift.liftToInternalPID(0,0.5); // could be faster
-                    if (turretlift.liftTargetReachedInternalPID()){
-                        turretlift.openClaw();
-                        outakestate = OutakeState.READY;
+                if (GlobalTimer.milliseconds() - outakesequencetimer > 300){
+                    turretlift.turretSpinInternalPID(0, 1);
+                    turretlift.readyServos();
+                    drivebase.intakeSpin(-0.1);
+                    if (turretlift.turretTargetReachedInteralPID()){
+                        //telemetry.addData("turret return target reached?", true);
+                        telemetry.addLine("turret return target reached");
+                        turretlift.liftToInternalPID(0,0.5); // could be faster
+                        if (turretlift.liftTargetReachedInternalPID()){
+                            turretlift.openClaw();
+                            outakestate = OutakeState.READY;
+                        }
                     }
                 }
-
                 break;
         }
-        if (gamepad2.left_bumper && outakestate != OutakeState.READY || gamepad1.left_bumper && outakestate != OutakeState.READY){
+        if (gamepad2.b && outakestate != OutakeState.READY || gamepad1.b && outakestate != OutakeState.READY){
             outakestate = OutakeState.RETURN; // return to ready state no matter what state the system is in
         }
         intakesequencetransition(); // not sure this works, but at any stage if you press dpad it will go back to the grab phase and you can rotate the turret
+        liftPositionChangenostatechange();
     }
 
     public void intakesequencetransition(){ // simplifies transition from INTAKE state to GRAB state
@@ -241,21 +251,42 @@ public class DuneDrive extends LinearOpMode {
 
     public void liftPositionChange(){
         if (gamepad2.y){
-            liftpositiontype = 700;
+            liftpositiontype = liftHighPosition;
             outakestate = OutakeState.DROP;
+            turretlift.tiltUp();
+            turretlift.linkageOut();
             outakesequencetimer = GlobalTimer.milliseconds(); //  reset timer
         }
         else if (gamepad2.a){
-            liftpositiontype = 350;
+            liftpositiontype = 450;
             turretlift.tiltReset();
+            turretlift.linkageOutQuarter();
             outakestate = OutakeState.DROP;
             outakesequencetimer = GlobalTimer.milliseconds(); //  reset timer
         }
-        else if (gamepad2.dpad_up){
-            liftpositiontype = 500;
+        else if (gamepad2.x){
+            liftpositiontype = 630;
             outakestate = OutakeState.DROP;
+            turretlift.linkageOutHalf();
             outakesequencetimer = GlobalTimer.milliseconds(); //  reset timer
         }
+
+
+    }
+    public void liftPositionChangenostatechange(){
+        if (gamepad2.y){
+            liftpositiontype = liftHighPosition;
+        }
+        else if (gamepad2.a){
+            liftpositiontype = 450;
+            turretlift.tiltReset();
+
+        }
+        else if (gamepad2.x){
+            liftpositiontype = 630;
+        }
+
+
     }
 }
 
