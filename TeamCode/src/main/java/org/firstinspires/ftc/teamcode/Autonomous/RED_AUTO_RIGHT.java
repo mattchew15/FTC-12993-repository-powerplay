@@ -45,6 +45,9 @@ public class RED_AUTO_RIGHT extends LinearOpMode {
     // class members
     ElapsedTime GlobalTimer;
     int stacknumber; // 5 for 5 cones, 4 for 4 cones etc.
+    double autoTimer;
+    int liftHighPosition = 850;
+    boolean outakeReady;
 
     // create class instances
     SampleMecanumDrive drive = new SampleMecanumDrive(hardwareMap); // before was in init but can be here
@@ -66,7 +69,7 @@ public class RED_AUTO_RIGHT extends LinearOpMode {
     AutoState currentState = AutoState.IDLE;
 
     // Define our start pose
-    Pose2d startPose = new Pose2d(15, -63, Math.toRadians(0));
+    Pose2d startPose = new Pose2d(35, -63, Math.toRadians(90));
     // Initialize SampleMecanumDrive
 
     // functions runs on init
@@ -78,6 +81,8 @@ public class RED_AUTO_RIGHT extends LinearOpMode {
         turretlift.motorsSetup();
 
         currentState = AutoState.IDLE; // this go here?
+        autoTimer = 0;
+        outakeReady = true;
     }
 
 
@@ -90,9 +95,19 @@ public class RED_AUTO_RIGHT extends LinearOpMode {
         drive.setPoseEstimate(startPose);
 
         // trajectories that aren't changing should all be here
-        Trajectory DumpLower = drive.trajectoryBuilder(startPose, true)
-                .lineToConstantHeading(new Vector2d(2, -81))
+        Trajectory PreloadDrive = drive.trajectoryBuilder(startPose)
+                .lineToLinearHeading(new Pose2d(35, -40, Math.toRadians(90))) // spline to spline heading, first angle is target, second angle is target angle during path
+                .splineToSplineHeading(new Pose2d(35, -12, Math.toRadians(180)), Math.toRadians(90)) // end effects shape of spline, first angle is the target heading
                 .build();
+
+        Trajectory IntoConeStack = drive.trajectoryBuilder(PreloadDrive.end())
+                .lineTo(new Vector2d(47,-12))
+                .build();
+
+        Trajectory OutConeStack = drive.trajectoryBuilder(PreloadDrive.end())
+                .lineTo(new Vector2d(35,-12))
+                .build();
+
 
         waitForStart();
         if (isStopRequested()) return;
@@ -104,35 +119,26 @@ public class RED_AUTO_RIGHT extends LinearOpMode {
             // Read pose
             Pose2d poseEstimate = drive.getPoseEstimate(); // gets the position of the robot
 
-            /*
+
             // main switch statement logic
-            switch (outakestate) {
-                case READY:
-                    turretlift.liftToInternalPID(0,turretlift.liftPos(),1);
-                    turretlift.turretSpinInternalPID(0,turretlift.turretPos(), 1);
-                    turretlift.readyServos();
-                    if (gamepad2.right_bumper) {
-                        outakestate = DuneDrive.OutakeState.INTAKE;
-                        intaketype = 0; // normal orientated cone
-                    }
-                    else if (gamepad2.b) {
-                        outakestate = DuneDrive.OutakeState.INTAKE;
-                        intaketype = 1; // sideways bar cone
-                    }
-                    else if (gamepad2.x){
-                        outakestate = DuneDrive.OutakeState.INTAKE;
-                        intaketype = 2; // will be lip facing towards robot
+            switch (currentState) {
+                case PRELOAD_DRIVE:
+                    drive.followTrajectoryAsync(PreloadDrive);
+                    // get outake ready - do timer to make it later, putt hsi in a function
+                    outakeOutReady(160,1,350);
+                    if (!drive.isBusy()) {
+                        currentState = AutoState.PRELOAD_DROP;
+                        autoTimer = GlobalTimer.milliseconds();
+                        drive.followTrajectoryAsync(IntoConeStack);
+                        turretlift.openClaw();
                     }
                     break;
 
-                case INTAKE:
-                    turretlift.liftToInternalPID(0,turretlift.liftPos(),1);
-                    turretlift.turretSpinInternalPID(0,turretlift.turretPos(), 1);
-                    turretlift.readyServos();
-                    if (intaketype == 0){ // normal intake case
-                        drivebase.intakeSpin(0.6);
-                        drivebase.intakeBarUp();
-                        intakesequencetransition();
+                case PRELOAD_DROP:
+                    if (GlobalTimer.milliseconds() - autoTimer > 300){
+                        readyOutake();
+                    }
+
                     }
                     else if (intaketype == 1 || intaketype == 2) { // second intake case
                         drivebase.intakeSpin(0.8);
@@ -198,8 +204,6 @@ public class RED_AUTO_RIGHT extends LinearOpMode {
 
                     break;
             }
-
-             */
             // Updates driving for trajectories
             drive.update();
             // Print pose to telemetry
@@ -209,6 +213,37 @@ public class RED_AUTO_RIGHT extends LinearOpMode {
 
     }
 
+    public void readyOutake(){
+        turretlift.turretSpinInternalPID(0, 1);
+        turretlift.readyServos();
+        drivebase.intakeSpin(-0.1);
+        if (turretlift.turretTargetReachedInteralPID()){
+            //telemetry.addData("turret return target reached?", true);
+            telemetry.addLine("turret return target reached");
+            turretlift.liftToInternalPID(0,0.5); // could be faster
+            if (turretlift.liftTargetReachedInternalPID()){
+                turretlift.openClaw();
+                outakeReady = true; // need a false here
+            }
+        }
+    }
+
+    public void outakeOutReady(int turretPosition, int liftSpeed, int liftposition){ // way to use timers here
+        if (turretlift.liftTargetReachedInternalPID()){
+            telemetry.addLine("lift is up");
+            turretlift.turretSpinInternalPID((int)Math.round(turretlift.degreestoTicks(turretPosition)), 1); //
+
+        }
+        else{
+            drivebase.intakeSpin(0);
+            turretlift.closeClaw();
+            turretlift.linkageIn();
+            drivebase.intakeBarDown();
+            turretlift.liftToInternalPID(liftposition,liftSpeed);
+            turretlift.tiltUpHalf();
+            outakeReady = false;
+        }
+    }
 }
 
 
