@@ -128,9 +128,6 @@ public class TurretLift {  // no constructor for this class
         }
     }
 
-
-
-
     // servo void functions
     public void openClaw(){
         ClawServo.setPosition(ClawOpenPos);

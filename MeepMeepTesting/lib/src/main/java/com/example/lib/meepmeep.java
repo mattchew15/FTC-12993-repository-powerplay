@@ -20,15 +20,8 @@ public class meepmeep {
                                 .splineToSplineHeading(new Pose2d(35, -12, Math.toRadians(180)), Math.toRadians(90)) // end effects shape of spline, first angle is the target heading
                                 .lineTo(new Vector2d(47,-12))
                                 .lineTo(new Vector2d(35,-12))
-                                .lineTo(new Vector2d(47,-12))
-                                .lineTo(new Vector2d(35,-12))
-                                .lineTo(new Vector2d(47,-12))
-                                .lineTo(new Vector2d(35,-12))
-                                .lineTo(new Vector2d(47,-12))
-                                .lineTo(new Vector2d(35,-12))
-                                .lineTo(new Vector2d(47,-12))
-                                .lineTo(new Vector2d(35,-12))
-
+                                .lineTo(new Vector2d(58.5,-12))
+                                .lineTo(new Vector2d(12,-12))
                                 .build()
                 );
 
