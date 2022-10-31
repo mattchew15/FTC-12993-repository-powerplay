@@ -55,7 +55,7 @@ import java.util.Locale;
  * @see <a href="http://www.adafruit.com/products/2472">Adafruit IMU</a>
  */
 @TeleOp(name = "Sensor: BNO055 IMU", group = "Sensor")
-@Disabled                            // Comment this out to add to the opmode list
+//@Disabled                            // Comment this out to add to the opmode list
 public class SensorBNO055IMU extends LinearOpMode
     {
     //----------------------------------------------------------------------------------------------
@@ -103,6 +103,9 @@ public class SensorBNO055IMU extends LinearOpMode
 
         // Loop and update the dashboard
         while (opModeIsActive()) {
+            telemetry.addData("xVelocityHeading", imu.getAngularVelocity().xRotationRate);
+            telemetry.addData("yVelocityHeading", imu.getAngularVelocity().yRotationRate);
+            telemetry.addData("zVelocityHeading", imu.getAngularVelocity().zRotationRate);
             telemetry.update();
         }
     }

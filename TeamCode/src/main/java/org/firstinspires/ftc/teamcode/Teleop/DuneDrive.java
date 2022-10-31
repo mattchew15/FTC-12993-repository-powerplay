@@ -148,14 +148,14 @@ public class DuneDrive extends LinearOpMode {
                     turretlift.linkageIn();
                     drivebase.intakeBarDown();
                     turretPositionChange(); // allows drivers to change the turret position in this state
-                    if (GlobalTimer.milliseconds() - outakesequencetimer > 200){
+                    if (GlobalTimer.milliseconds() - outakesequencetimer > 300){
                         turretlift.closeClaw(); // not needed, servo is already going to position?
                         turretlift.liftToInternalPID(350,1);
                         turretlift.tiltUpHalf();
                         if (turretlift.liftTargetReachedInternalPID()){
                             telemetry.addLine("lift is up");
                             turretlift.turretSpinInternalPID((int)Math.round(turretpositiontype), 1); //
-                            outakestate = OutakeState.HEIGHT_LINKAGE;
+                            outakestate = OutakeState.HEIGHT_LINKAGE; // it goes to height linkage thats why the lift goes up by default
                         }
                     }
                 }
@@ -175,7 +175,7 @@ public class DuneDrive extends LinearOpMode {
                 break;
 
             case DROP:
-                turretlift.liftToInternalPID(liftpositiontype,1);
+                turretlift.liftToInternalPID(liftpositiontype - 80,1); // makes the lift drop before it returns
                 turretlift.turretSpinInternalPID((int)Math.round(turretpositiontype), 1);
                 if (GlobalTimer.milliseconds() - outakesequencetimer > 300){
                     if (gamepad1.right_bumper){ //
@@ -185,18 +185,17 @@ public class DuneDrive extends LinearOpMode {
                         outakestate = OutakeState.RETURN;
                     }
                 }
-
                 break;
 
             case RETURN:
                 if (GlobalTimer.milliseconds() - outakesequencetimer > 300){
                     turretlift.turretSpinInternalPID(0, 1);
                     turretlift.readyServos();
-                    drivebase.intakeSpin(-0.1);
+                    drivebase.intakeSpin(-0.5);
                     if (turretlift.turretTargetReachedInteralPID()){
                         //telemetry.addData("turret return target reached?", true);
                         telemetry.addLine("turret return target reached");
-                        turretlift.liftToInternalPID(0,0.5); // could be faster
+                        turretlift.liftToInternalPID(0,0.85); // could be faster
                         if (turretlift.liftTargetReachedInternalPID()){
                             turretlift.openClaw();
                             outakestate = OutakeState.READY;
@@ -254,7 +253,7 @@ public class DuneDrive extends LinearOpMode {
             liftpositiontype = liftHighPosition;
             outakestate = OutakeState.DROP;
             turretlift.tiltUp();
-            turretlift.linkageOut();
+            turretlift.linkageOutHalf();
             outakesequencetimer = GlobalTimer.milliseconds(); //  reset timer
         }
         else if (gamepad2.a){
@@ -265,8 +264,9 @@ public class DuneDrive extends LinearOpMode {
             outakesequencetimer = GlobalTimer.milliseconds(); //  reset timer
         }
         else if (gamepad2.x){
-            liftpositiontype = 630;
+            liftpositiontype = 700;
             outakestate = OutakeState.DROP;
+            turretlift.tiltUpHalf();
             turretlift.linkageOutHalf();
             outakesequencetimer = GlobalTimer.milliseconds(); //  reset timer
         }

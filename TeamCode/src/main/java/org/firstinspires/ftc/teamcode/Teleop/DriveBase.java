@@ -52,7 +52,7 @@ public class DriveBase {  // no constructor for this class
         FL.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
         //reverse correct motors
-        FL.setDirection(DcMotorSimple.Direction.REVERSE); //DcMotorSimple class?
+        //FL.setDirection(DcMotorSimple.Direction.REVERSE); //DcMotorSimple class?
         BL.setDirection(DcMotorSimple.Direction.REVERSE);
         IntakeLMotor.setDirection(DcMotorSimple.Direction.REVERSE); // one intake motor is reversed
     }
@@ -74,6 +74,14 @@ public class DriveBase {  // no constructor for this class
         BL.setPower(b);
         FR.setPower(c);
         BR.setPower(d);
+    }
+    public int getMotorPosition(){
+        return FL.getCurrentPosition();
+    }
+    public void runtoPositionTest(int Position){
+        FL.setTargetPosition(Position);
+        FL.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        FL.setPower(1);
     }
 
     public void PowerToggle(boolean toggle) { // toggle code for a slow drive mode for fine adjustment

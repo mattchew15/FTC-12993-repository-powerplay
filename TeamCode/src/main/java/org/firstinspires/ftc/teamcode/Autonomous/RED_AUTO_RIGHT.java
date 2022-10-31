@@ -44,10 +44,9 @@ public class RED_AUTO_RIGHT extends LinearOpMode {
 
     // class members
     ElapsedTime GlobalTimer;
-    int stacknumber; // 5 for 5 cones, 4 for 4 cones etc.
     double autoTimer;
-    int liftHighPosition = 850;
-    int liftMidPosition = 650;
+    final int liftHighPosition = 850;
+    final int liftMidPosition = 650;
     int heightChangeInterval;
     boolean outakeResetReady;
     boolean outakeOutReady;
@@ -55,14 +54,13 @@ public class RED_AUTO_RIGHT extends LinearOpMode {
     int SignalRotation;
 
     // create class instances
-    SampleMecanumDrive drive = new SampleMecanumDrive(hardwareMap); // before was in init but can be here
-    DriveBase drivebase = new DriveBase();
+    SampleMecanumDrive drive = new SampleMecanumDrive(hardwareMap); // road drive class
+    DriveBase drivebase = new DriveBase(); // hardware classes
     TurretLift turretlift = new TurretLift();
     Inputs inputs = new Inputs();
     SleeveDetection sleeveDetection = new SleeveDetection();
     OpenCvCamera camera;
-    String webcamName = "Webcam 1";
-
+    String webcamName = "Webcam 1"; // what our webcam is called in hardware class
 
     enum AutoState {
         PRELOAD_DRIVE,
@@ -81,7 +79,7 @@ public class RED_AUTO_RIGHT extends LinearOpMode {
     Pose2d startPose = new Pose2d(35, -63, Math.toRadians(90));
     // Initialize SampleMecanumDrive
 
-    // functions runs on init
+    // function runs on init
     private void Setup() {
         GlobalTimer = new ElapsedTime(System.nanoTime());
         GlobalTimer.reset();
@@ -89,7 +87,7 @@ public class RED_AUTO_RIGHT extends LinearOpMode {
         drivebase.motorsSetup();
         turretlift.motorsSetup();
 
-        currentState = AutoState.IDLE; // this go here?
+        currentState = AutoState.PRELOAD_DRIVE; // this go here?
         autoTimer = 0;
         outakeResetReady = true;
         outakeOutReady = false;
@@ -175,6 +173,7 @@ public class RED_AUTO_RIGHT extends LinearOpMode {
 
         while (opModeIsActive() && !isStopRequested()) {
             // Read pose
+
             Pose2d poseEstimate = drive.getPoseEstimate(); // gets the position of the robot
             // main switch statement logic
             switch (currentState) {
@@ -211,7 +210,7 @@ public class RED_AUTO_RIGHT extends LinearOpMode {
                                 outakeOutReady(170,1,liftMidPosition, liftMidPosition);
                                 if (!drive.isBusy() && outakeOutReady){
                                     turretlift.openClaw();
-                                    if (numCycles == 5){
+                                    if (numCycles == 3){
                                         currentState = AutoState.PARK;
                                         autoTimer = GlobalTimer.milliseconds(); // reset timer
                                         numCycles += 1;
@@ -282,18 +281,20 @@ public class RED_AUTO_RIGHT extends LinearOpMode {
         turretlift.turretSpinInternalPID(0, 1);
         turretlift.liftToInternalPID(360,0.5);
         turretlift.readyServos();
-        drivebase.intakeSpin(-0.1);
         if (turretlift.turretTargetReachedInteralPID()){
             turretlift.liftToInternalPID(200 - heightChangeInterval,0.5); // could be faster
+            turretlift.openClaw();
+            turretlift.linkageOut();
             if (turretlift.liftTargetReachedInternalPID()){
-                turretlift.openClaw();
-                turretlift.linkageOut();
                 outakeResetReady = true; // need a false here if (turretlift.liftTargetReachedInternalPID())
             }
             else{
-                outakeResetReady = false; // need a false here
+                outakeResetReady = false;
             }
+        }else{
+            outakeResetReady = false;
         }
+
     }
 
     public void outakeOutReady(int turretPosition, int liftSpeed, int liftposition, int liftposition2){ // way to use timers here
