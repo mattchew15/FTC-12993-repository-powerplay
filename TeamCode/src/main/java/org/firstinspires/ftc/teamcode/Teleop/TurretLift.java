@@ -7,6 +7,9 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.hardware.VoltageSensor;
+
+import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
 
 @Config // Allows dashboard to tune
 public class TurretLift {  // no constructor for this class
@@ -77,6 +80,10 @@ public class TurretLift {  // no constructor for this class
     public void turretSpin(double targetRotations, double motorPosition, double maxSpeed){
         double output = turretPID.update(targetRotations,motorPosition,maxSpeed); //does a lift to with external PID instead of just regular encoders
         TurretMotor.setPower(output);
+    }
+
+    public double getLiftVoltage (){
+        return LiftMotor.getCurrent(CurrentUnit.AMPS);
     }
 
     // returns get current position so that when setting the current state for the PID loop

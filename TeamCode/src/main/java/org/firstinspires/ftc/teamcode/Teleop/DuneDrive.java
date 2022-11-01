@@ -93,6 +93,7 @@ public class DuneDrive extends LinearOpMode {
                 telemetry.addData("LiftMotorPosition", turretlift.liftPos());
                 telemetry.addData("turretPosition", turretlift.tickstoDegrees((int)Math.round(turretlift.turretPos())));
                 telemetry.addData("turret raw position", turretlift.turretPos());
+                telemetry.addData("lift motor current draw", turretlift.getLiftVoltage());
                 telemetry.addData("sequence state", outakestate);
                 telemetry.update();
 
@@ -175,13 +176,14 @@ public class DuneDrive extends LinearOpMode {
                 break;
 
             case DROP:
-                turretlift.liftToInternalPID(liftpositiontype - 80,1); // makes the lift drop before it returns
+                turretlift.liftToInternalPID(liftpositiontype,1); // makes the lift drop before it returns
                 turretlift.turretSpinInternalPID((int)Math.round(turretpositiontype), 1);
                 if (GlobalTimer.milliseconds() - outakesequencetimer > 300){
                     if (gamepad1.right_bumper){ //
                         turretlift.openClaw();
                         turretlift.linkageIn();
                         outakesequencetimer = GlobalTimer.milliseconds(); //  reset timer
+                        turretlift.liftToInternalPID(liftpositiontype - 80,1); // makes the lift drop before it returns
                         outakestate = OutakeState.RETURN;
                     }
                 }
