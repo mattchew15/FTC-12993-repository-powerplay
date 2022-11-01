@@ -183,7 +183,7 @@ public class DuneDrive extends LinearOpMode {
                         turretlift.openClaw();
                         turretlift.linkageIn();
                         outakesequencetimer = GlobalTimer.milliseconds(); //  reset timer
-                        turretlift.liftToInternalPID(liftpositiontype - 80,1); // makes the lift drop before it returns
+                        turretlift.liftToInternalPID(liftpositiontype - 200,1); // makes the lift drop before it returns
                         outakestate = OutakeState.RETURN;
                     }
                 }
@@ -202,6 +202,9 @@ public class DuneDrive extends LinearOpMode {
                             turretlift.openClaw();
                             outakestate = OutakeState.READY;
                         }
+                    }
+                    else {
+                        turretlift.liftToInternalPID(350,0.1); // could be faster
                     }
                 }
                 break;
