@@ -31,20 +31,18 @@ public class SleeveDetection extends OpenCvPipeline {
 
     // Lower and upper boundaries for colors
     private static final Scalar
-            lower_yellow_bounds  = new Scalar(140, 120, 0, 255),
-            upper_yellow_bounds  = new Scalar(240, 255, 105, 255),
-            lower_blue_bounds    = new Scalar(0, 110, 135, 255),
-            upper_blue_bounds    = new Scalar(80, 223, 255, 255),
+            lower_yellow_bounds  = new Scalar(100, 100, 0, 255),
+            upper_yellow_bounds  = new Scalar(255, 255, 150, 255),
+            lower_blue_bounds    = new Scalar(0, 0, 255, 255),
+            upper_blue_bounds    = new Scalar(150, 255, 255, 255),
             lower_red_bounds     = new Scalar(140, 0, 5, 255),
             upper_red_bounds     = new Scalar(255, 77, 83, 255);
 
-
     // Color definitions
     private final Scalar
-            YELLOW  = new Scalar(229, 255, 0),
-            BLUE    = new Scalar(3, 211, 255),
+            YELLOW  = new Scalar(255, 255, 0),
+            BLUE    = new Scalar(0, 0, 255),
             RED     = new Scalar(255, 0, 0);
-
 
     // Percent and mat definitions
     public double yelPercent, bluPercent, redPercent;
