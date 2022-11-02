@@ -54,10 +54,10 @@ public class RED_AUTO_RIGHT extends LinearOpMode {
     int SignalRotation;
 
     // create class instances
-    SampleMecanumDrive drive = new SampleMecanumDrive(hardwareMap); // road drive class
-    DriveBase drivebase = new DriveBase(); // hardware classes
+
+    //DriveBase drivebase = new DriveBase(); // hardware classes
     TurretLift turretlift = new TurretLift();
-    Inputs inputs = new Inputs();
+    //Inputs inputs = new Inputs();
     SleeveDetection sleeveDetection = new SleeveDetection();
     OpenCvCamera camera;
     String webcamName = "Webcam 1"; // what our webcam is called in hardware class
@@ -83,8 +83,8 @@ public class RED_AUTO_RIGHT extends LinearOpMode {
     private void Setup() {
         GlobalTimer = new ElapsedTime(System.nanoTime());
         GlobalTimer.reset();
-        inputs.resetMatchTimer();
-        drivebase.motorsSetup();
+        //inputs.resetMatchTimer();
+        //drivebase.motorsSetup();
         turretlift.motorsSetup();
 
         currentState = AutoState.PRELOAD_DRIVE; // this go here?
@@ -98,6 +98,10 @@ public class RED_AUTO_RIGHT extends LinearOpMode {
 
     @Override
     public void runOpMode() throws InterruptedException {
+        // initialize hardware
+        //drivebase.Drivebase_init(hardwareMap);
+        turretlift.TurretLift_init(hardwareMap);
+        SampleMecanumDrive drive = new SampleMecanumDrive(hardwareMap); // road drive class
 
         int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
         camera = OpenCvCameraFactory.getInstance().createWebcam(hardwareMap.get(WebcamName.class, webcamName), cameraMonitorViewId);
@@ -123,7 +127,7 @@ public class RED_AUTO_RIGHT extends LinearOpMode {
         drive.setPoseEstimate(startPose);
 
         // trajectories that aren't changing should all be here
-        Trajectory PreloadDrive = drive.trajectoryBuilder(startPose)
+        Trajectory PreloadDrive = drive.trajectoryBuilder(startPose, true)
                 .lineToLinearHeading(new Pose2d(35, -40, Math.toRadians(90))) // spline to spline heading, first angle is target, second angle is target angle during path
                 .splineToSplineHeading(new Pose2d(35, -12, Math.toRadians(180)), Math.toRadians(90)) // end effects shape of spline, first angle is the target heading
                 .build();
@@ -170,18 +174,26 @@ public class RED_AUTO_RIGHT extends LinearOpMode {
             SignalRotation = 2;
 
         }
+        // runs instantly once
+        drive.followTrajectoryAsync(PreloadDrive);
 
         while (opModeIsActive() && !isStopRequested()) {
             // Read pose
-
             Pose2d poseEstimate = drive.getPoseEstimate(); // gets the position of the robot
+
+            // Print pose to telemetry
+            telemetry.addData("x", poseEstimate.getX());
+            telemetry.addData("y", poseEstimate.getY());
+            telemetry.addData("heightChangeInterval", heightChangeInterval);
+            telemetry.addData("autostate", currentState);
+            telemetry.addData("number of cycles:", numCycles);
+
             // main switch statement logic
             switch (currentState) {
                 case PRELOAD_DRIVE:
-                    drive.followTrajectoryAsync(PreloadDrive);
                     // get outake ready - do timer to make it later, putt hsi in a function
                     outakeOutReady(160,1,350, liftHighPosition);
-                    if (!drive.isBusy()) {
+                    if (!drive.isBusy() && outakeOutReady) {
                         currentState = AutoState.PRELOAD_DROP;
                         autoTimer = GlobalTimer.milliseconds();
                         turretlift.openClaw();
@@ -267,12 +279,8 @@ public class RED_AUTO_RIGHT extends LinearOpMode {
             }
             // Updates driving for trajectories
             drive.update();
-            // Print pose to telemetry
-            telemetry.addData("x", poseEstimate.getX());
-            telemetry.addData("y", poseEstimate.getY());
-            telemetry.addData("heightChangeInterval", heightChangeInterval);
-            telemetry.addData("autostate", currentState);
-            telemetry.addData("number of cycles:", numCycles);
+
+            telemetry.update();
         }
 
     }
@@ -298,6 +306,7 @@ public class RED_AUTO_RIGHT extends LinearOpMode {
     }
 
     public void outakeOutReady(int turretPosition, int liftSpeed, int liftposition, int liftposition2){ // way to use timers here
+        turretlift.liftToInternalPID(liftposition, 1);
         if (turretlift.liftTargetReachedInternalPID()){
             telemetry.addLine("lift is up");
             turretlift.turretSpinInternalPID((int)Math.round(turretlift.degreestoTicks(turretPosition)), 1); //
@@ -311,10 +320,10 @@ public class RED_AUTO_RIGHT extends LinearOpMode {
             }
         }
         else{
-            drivebase.intakeSpin(0);
+            //drivebase.intakeSpin(0);
             turretlift.closeClaw();
             turretlift.linkageIn();
-            drivebase.intakeBarDown();
+            //drivebase.intakeBarDown();
             turretlift.liftToInternalPID(liftposition,liftSpeed);
             turretlift.tiltUpHalf();
             outakeOutReady = false;
