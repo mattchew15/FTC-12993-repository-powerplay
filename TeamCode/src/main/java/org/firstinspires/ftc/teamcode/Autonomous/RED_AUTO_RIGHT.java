@@ -52,6 +52,7 @@ public class RED_AUTO_RIGHT extends LinearOpMode {
     boolean outakeOutReady;
     int numCycles;
     int SignalRotation;
+    int slowerVelocityConstraint;
 
     // create class instances
 
@@ -66,7 +67,9 @@ public class RED_AUTO_RIGHT extends LinearOpMode {
         PRELOAD_DRIVE,
         PRELOAD_DROP,
         DRIVE_INTO_STACK,
+        WAIT_AFTER_GRAB_STACK,
         DRIVE_OUT_STACK,
+        WAIT_AFTER_DUMP_MID,
         PARK,
         IDLE
     }
@@ -75,8 +78,7 @@ public class RED_AUTO_RIGHT extends LinearOpMode {
     // Default to IDLE
     AutoState currentState = AutoState.IDLE;
 
-    // Define our start pose
-    Pose2d startPose = new Pose2d(35, -63, Math.toRadians(90));
+
     // Initialize SampleMecanumDrive
 
     // function runs on init
@@ -93,8 +95,10 @@ public class RED_AUTO_RIGHT extends LinearOpMode {
         outakeOutReady = false;
         numCycles = 0;
         heightChangeInterval = 0;
+        slowerVelocityConstraint = 20;
     }
-
+    // Define our start pose
+    Pose2d startPose = new Pose2d(35, -63, Math.toRadians(-90));
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -128,24 +132,38 @@ public class RED_AUTO_RIGHT extends LinearOpMode {
 
         // trajectories that aren't changing should all be here
         Trajectory PreloadDrive = drive.trajectoryBuilder(startPose, true)
-                .lineToLinearHeading(new Pose2d(35, -40, Math.toRadians(90))) // spline to spline heading, first angle is target, second angle is target angle during path
-                .splineToSplineHeading(new Pose2d(35, -12, Math.toRadians(180)), Math.toRadians(90)) // end effects shape of spline, first angle is the target heading
+                .lineToLinearHeading(new Pose2d(37, -15, Math.toRadians(4)))
+                //.splineTo(new Vector2d(35, -40), Math.toRadians(-90)) // spline to spline heading, first angle is target, second angle is target angle during path
+                //.splineToSplineHeading(new Pose2d(35, -12, Math.toRadians(0)), Math.toRadians(-90)) // end effects shape of spline, first angle is the target heading
                 .build();
 
-        Trajectory IntoConeStack = drive.trajectoryBuilder(PreloadDrive.end())
-                .lineTo(new Vector2d(47,-12))
+        Trajectory IntoConeStackPreload = drive.trajectoryBuilder(PreloadDrive.end())
+                .lineTo(new Vector2d(50,-4.5), SampleMecanumDrive.getVelocityConstraint(slowerVelocityConstraint, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH),
+                        SampleMecanumDrive.getAccelerationConstraint(DriveConstants.MAX_ACCEL))
                 .build();
 
-        Trajectory OutConeStack = drive.trajectoryBuilder(IntoConeStack.end())
-                .lineTo(new Vector2d(35,-12))
+        Trajectory OutConeStackAfterPreload = drive.trajectoryBuilder(IntoConeStackPreload.end())
+                .lineTo(new Vector2d(36,-6), SampleMecanumDrive.getVelocityConstraint(slowerVelocityConstraint, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH),
+                        SampleMecanumDrive.getAccelerationConstraint(DriveConstants.MAX_ACCEL))
+                .build();
+
+
+        Trajectory OutConeStack = drive.trajectoryBuilder(new Pose2d(50, -7, Math.toRadians(0)))
+                .lineTo(new Vector2d(36,-6), SampleMecanumDrive.getVelocityConstraint(slowerVelocityConstraint, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH),
+                        SampleMecanumDrive.getAccelerationConstraint(DriveConstants.MAX_ACCEL))
+                .build();
+
+        Trajectory IntoConeStack = drive.trajectoryBuilder(OutConeStack.end())
+                .lineToLinearHeading(new Pose2d(50.5, -8, Math.toRadians(0)), SampleMecanumDrive.getVelocityConstraint(slowerVelocityConstraint, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH),
+                        SampleMecanumDrive.getAccelerationConstraint(DriveConstants.MAX_ACCEL))
                 .build();
 
         Trajectory ParkRight = drive.trajectoryBuilder(OutConeStack.end())
-                .lineTo(new Vector2d(58.5,-12))
+                .lineTo(new Vector2d(60,-6))
                 .build();
 
         Trajectory ParkLeft = drive.trajectoryBuilder(OutConeStack.end())
-                .lineTo(new Vector2d(12,-12))
+                .lineTo(new Vector2d(5,-6))
                 .build();
 
         while (!isStarted()) {
@@ -154,6 +172,7 @@ public class RED_AUTO_RIGHT extends LinearOpMode {
             telemetry.addData("Blue Percent:", sleeveDetection.bluPercent);
             telemetry.addData("Red Percent:", sleeveDetection.redPercent);
             telemetry.update();
+            turretlift.closeClaw();
         }
 
 
@@ -176,6 +195,8 @@ public class RED_AUTO_RIGHT extends LinearOpMode {
         }
         // runs instantly once
         drive.followTrajectoryAsync(PreloadDrive);
+        autoTimer = GlobalTimer.milliseconds(); // reset timer
+        turretlift.closeClaw();
 
         while (opModeIsActive() && !isStopRequested()) {
             // Read pose
@@ -187,68 +208,106 @@ public class RED_AUTO_RIGHT extends LinearOpMode {
             telemetry.addData("heightChangeInterval", heightChangeInterval);
             telemetry.addData("autostate", currentState);
             telemetry.addData("number of cycles:", numCycles);
+            telemetry.addData ("outtakeoutReady", outakeOutReady);
+            telemetry.addData ("outtakeresetReady", outakeResetReady);
 
             // main switch statement logic
             switch (currentState) {
                 case PRELOAD_DRIVE:
-                    // get outake ready - do timer to make it later, putt hsi in a function
-                    outakeOutReady(160,1,350, liftHighPosition);
-                    if (!drive.isBusy() && outakeOutReady) {
-                        currentState = AutoState.PRELOAD_DROP;
-                        autoTimer = GlobalTimer.milliseconds();
-                        turretlift.openClaw();
-                    }
+                    turretlift.closeClaw();
+                    outakeOutReady(-130,1,350, liftHighPosition); // get outake ready - do timer to make it later, putt hsi in a function
+                    if (!drive.isBusy() && outakeOutReady) { //
+                        if (GlobalTimer.milliseconds() - autoTimer > 0){
+                            turretlift.openClaw(); // preload drop
+                            telemetry.addLine("PRELOAD DROP!!");
+                            currentState = AutoState.PRELOAD_DROP;
+                            autoTimer = GlobalTimer.milliseconds();
+                            drive.followTrajectoryAsync(IntoConeStackPreload);
+                            }
+                        } // this timer goes off at the start of the code
                     break;
 
                 case PRELOAD_DROP:
-                    if (GlobalTimer.milliseconds() - autoTimer > 300){
-                        readyOutake();
-                        drive.followTrajectoryAsync(IntoConeStack);
-                        if (drive.isBusy()){
-                            turretlift.closeClaw();
-                            currentState = AutoState.DRIVE_OUT_STACK;
+                    if (GlobalTimer.milliseconds() - autoTimer > 200){
+                        readyOutake();  // linkage goes in
+                        if (!drive.isBusy()){
+                            telemetry.addLine("drive is finished first stack intake ready");
+                            if (GlobalTimer.milliseconds() - autoTimer > 2000) {
+                                telemetry.addLine("grab");
+                                turretlift.closeClaw();
+                                currentState = AutoState.WAIT_AFTER_GRAB_STACK;
+                                autoTimer = GlobalTimer.milliseconds(); // ready to grab stack
+                            }
+                        }
+                    }
+                    else {
+                        turretlift.liftToInternalPID(600,1); // move the lift down when it drops
+                    }
+                    break;
+
+                case WAIT_AFTER_GRAB_STACK:
+                    if (GlobalTimer.milliseconds() - autoTimer > 700){
+                        turretlift.linkageNearlyOut();
+                        turretlift.liftToInternalPID(liftMidPosition,1);
+                        if (GlobalTimer.milliseconds() - autoTimer > 800){
+                            turretlift.linkageIn();
+                            if (GlobalTimer.milliseconds() - autoTimer > 1300){ // timer to let the linkage extend
+                                if (numCycles == 0){
+                                    drive.followTrajectoryAsync(OutConeStackAfterPreload);
+                                    currentState = AutoState.DRIVE_OUT_STACK;
+                                    autoTimer = GlobalTimer.milliseconds(); // reset timer
+                                }
+                                else{
+                                    drive.followTrajectoryAsync(OutConeStack);
+                                    currentState = AutoState.DRIVE_OUT_STACK;
+                                    autoTimer = GlobalTimer.milliseconds(); // reset timer
+                                }
+                            }
+                            }
+                        }
+                    break;
+
+                case DRIVE_OUT_STACK:
+                    outakeOutReady(130,1,liftMidPosition, liftMidPosition);
+
+                    if (!drive.isBusy() && outakeOutReady){
+                        turretlift.openClaw();
+                        if (numCycles == 3){
+                            currentState = AutoState.PARK;
+                            autoTimer = GlobalTimer.milliseconds(); // reset timer
+                            numCycles += 1;
+                        }
+                        else{
+                            heightChangeInterval += 26; // tune this changes how high it changes each time
+                            numCycles += 1;
+                            currentState = AutoState.WAIT_AFTER_DUMP_MID;
                             autoTimer = GlobalTimer.milliseconds(); // reset timer
                         }
                     }
                     break;
 
-                case DRIVE_OUT_STACK:
-                    if (GlobalTimer.milliseconds() - autoTimer > 200){ // this if statement is not needed at all
-                        turretlift.liftToInternalPID(liftMidPosition,1);
-                        if (GlobalTimer.milliseconds() - autoTimer > 300){
-                            turretlift.linkageIn();
-                            drive.followTrajectoryAsync(OutConeStack);
-                            if (GlobalTimer.milliseconds() - autoTimer > 350){
-                                outakeOutReady(170,1,liftMidPosition, liftMidPosition);
-                                if (!drive.isBusy() && outakeOutReady){
-                                    turretlift.openClaw();
-                                    if (numCycles == 3){
-                                        currentState = AutoState.PARK;
-                                        autoTimer = GlobalTimer.milliseconds(); // reset timer
-                                        numCycles += 1;
-                                    }
-                                    else{
-                                        heightChangeInterval += 20; // tune this changes how high it changes each time
-                                        numCycles += 1;
-                                        currentState = AutoState.DRIVE_INTO_STACK;
-                                        autoTimer = GlobalTimer.milliseconds(); // reset timer
-                                    }
-                                }
-                            }
+                case WAIT_AFTER_DUMP_MID:
+                    turretlift.liftToInternalPID(liftMidPosition - 300, 1);
+                    if (GlobalTimer.milliseconds() - autoTimer > 200){
+                        turretlift.linkageIn();
+                        if (GlobalTimer.milliseconds() - autoTimer > 900){
+                            currentState = AutoState.DRIVE_INTO_STACK;
+                            autoTimer = GlobalTimer.milliseconds(); // reset timer
+                            drive.followTrajectoryAsync(IntoConeStack);
                         }
                     }
                     break;
 
                 case DRIVE_INTO_STACK:
-                    if (GlobalTimer.milliseconds() - autoTimer > 200){
-                        drive.followTrajectoryAsync(IntoConeStack);
                         readyOutake();
                         if (!drive.isBusy() && outakeResetReady){
-                            turretlift.closeClaw();
-                            currentState = AutoState.DRIVE_OUT_STACK;
-                            autoTimer = GlobalTimer.milliseconds(); // reset timer
+                            if (GlobalTimer.milliseconds() - autoTimer > 2000) {
+                                telemetry.addLine("grab");
+                                turretlift.closeClaw();
+                                currentState = AutoState.WAIT_AFTER_GRAB_STACK;
+                                autoTimer = GlobalTimer.milliseconds(); // ready to grab stack
+                            }
                         }
-                    }
                     break;
 
                 case PARK:
@@ -256,30 +315,26 @@ public class RED_AUTO_RIGHT extends LinearOpMode {
                         readyOutake();
                         if (SignalRotation == 1){
                             drive.followTrajectoryAsync(ParkLeft);
-                            if (!drive.isBusy()){
-                                currentState = AutoState.IDLE;
-                            }
+                            currentState = AutoState.IDLE;
                         }
                         else if (SignalRotation == 3){
                             drive.followTrajectoryAsync(ParkRight);
-                            if (!drive.isBusy()){
-                                currentState = AutoState.IDLE;
-                            }
+                            currentState = AutoState.IDLE;
                         }
                         else{
-                            currentState = AutoState.IDLE;
+                            currentState = AutoState.IDLE; // doesn't have to drive anywhere, already in position hopefully
                         }
                     }
                     break;
 
                 case IDLE:
-                    telemetry.addLine("W Auto");
+                    telemetry.addLine("WWWWWWWWWWW");
+                    outakeIdle();
                     break;
 
             }
             // Updates driving for trajectories
             drive.update();
-
             telemetry.update();
         }
 
@@ -287,46 +342,54 @@ public class RED_AUTO_RIGHT extends LinearOpMode {
 
     public void readyOutake(){
         turretlift.turretSpinInternalPID(0, 1);
-        turretlift.liftToInternalPID(360,0.5);
         turretlift.readyServos();
-        if (turretlift.turretTargetReachedInteralPID()){
-            turretlift.liftToInternalPID(200 - heightChangeInterval,0.5); // could be faster
-            turretlift.openClaw();
-            turretlift.linkageOut();
+        if (turretlift.liftPos() < 400){
+            turretlift.liftToInternalPID(145 - heightChangeInterval,0.5); // could be faster
+            turretlift.openClawHard();
             if (turretlift.liftTargetReachedInternalPID()){
+                turretlift.linkageOut();
                 outakeResetReady = true; // need a false here if (turretlift.liftTargetReachedInternalPID())
-            }
-            else{
-                outakeResetReady = false;
             }
         }else{
             outakeResetReady = false;
+            turretlift.liftToInternalPID(350,0.5);
         }
-
     }
 
     public void outakeOutReady(int turretPosition, int liftSpeed, int liftposition, int liftposition2){ // way to use timers here
-        turretlift.liftToInternalPID(liftposition, 1);
-        if (turretlift.liftTargetReachedInternalPID()){
-            telemetry.addLine("lift is up");
+        if (turretlift.liftPos() > 300){
             turretlift.turretSpinInternalPID((int)Math.round(turretlift.degreestoTicks(turretPosition)), 1); //
             if (turretlift.turretTargetReachedInteralPID()){
                 turretlift.liftToInternalPID(liftposition2, 1);
                 turretlift.tiltUp();
-                turretlift.linkageOutHalf();
-                if (turretlift.liftTargetReachedInternalPID()){
+                turretlift.linkageOut();
+                if (turretlift.liftPos() > liftposition2 - 100){
                     outakeOutReady = true;
+                    telemetry.addLine("lift is up");
                 }
             }
         }
         else{
-            //drivebase.intakeSpin(0);
+            turretlift.liftToInternalPID(liftposition, 1);
             turretlift.closeClaw();
-            turretlift.linkageIn();
-            //drivebase.intakeBarDown();
-            turretlift.liftToInternalPID(liftposition,liftSpeed);
+            //turretlift.linkageIn(); // might cause trouble
             turretlift.tiltUpHalf();
             outakeOutReady = false;
+        }
+    }
+    public void outakeIdle(){
+        turretlift.turretSpinInternalPID(0, 1);
+        turretlift.readyServos();
+        if (turretlift.liftPos() < 400){
+            turretlift.liftToInternalPID(0,1); // could be faster
+            turretlift.closeClaw();
+            turretlift.linkageIn();
+            if (turretlift.liftTargetReachedInternalPID()){
+                outakeResetReady = true; // need a false here if (tusrretlift.liftTargetReachedInternalPID())
+            }
+        }else{
+            outakeResetReady = false;
+            turretlift.liftToInternalPID(350,0.5);
         }
     }
 }

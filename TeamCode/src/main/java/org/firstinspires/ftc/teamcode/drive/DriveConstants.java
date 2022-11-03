@@ -46,8 +46,8 @@ public class DriveConstants {
      * convenience. Make sure to exclude any gear ratio included in MOTOR_CONFIG from GEAR_RATIO.
      */
     public static double WHEEL_RADIUS = 1.8898; // in
-    public static double GEAR_RATIO = 1.2380952380952381; // output (wheel) speed / input (motor) speed
-    public static double TRACK_WIDTH = 19.5; // in
+    public static double GEAR_RATIO = 0.95; // output (wheel) speed / input (motor) speed
+    public static double TRACK_WIDTH = 16; // in
 
     /*
      * These are the feedforward parameters used to model the drive motor behavior. If you are using
@@ -99,10 +99,10 @@ public class DriveConstants {
      * https://github.com/acmerobotics/road-runner-quickstart/issues/91
 
      */
-    public static double MAX_VEL = 70;
-    public static double MAX_ACCEL = 70;
-    public static double MAX_ANG_VEL = Math.toRadians(300);
-    public static double MAX_ANG_ACCEL = Math.toRadians(300);
+    public static double MAX_VEL = 60;
+    public static double MAX_ACCEL = 30;
+    public static double MAX_ANG_VEL = Math.toRadians(230);
+    public static double MAX_ANG_ACCEL = Math.toRadians(230);
 
 
     public static double encoderTicksToInches(double ticks) {

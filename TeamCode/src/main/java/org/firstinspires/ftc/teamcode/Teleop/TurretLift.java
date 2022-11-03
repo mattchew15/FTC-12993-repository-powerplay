@@ -21,8 +21,8 @@ public class TurretLift {  // no constructor for this class
     private Servo TiltServo;
 
     //config variables can be changed/tuned in dashboard
-    public static double ClawOpenPos = 0.28, ClawClosedPos = 0.44;
-    public static double LinkageFullPos = 0.3, LinkageHalfPos = 0.16, LinkageQuarterPos = 0.1, LinkageClosedPos = 0.01;
+    public static double ClawOpenPos = 0.33, ClawClosedPos = 0.46, ClawCloseSoftPos = 0.42, ClawOpenHardPos = 0.24;
+    public static double LinkageFullPos = 0.3, LinkageHalfPos = 0.16, LinkageQuarterPos = 0.1, LinkageClosedPos = 0.01, LinkageNearlyOutPos = 0.28;
     public static double TiltUpPos = 0.3, TiltDownPos = 0.85, TiltHalfPos = 0.48;
 
     //editable dashboard variables must be public static - PID values for turret and lift that can be tuned
@@ -142,6 +142,9 @@ public class TurretLift {  // no constructor for this class
     public void closeClaw(){
         ClawServo.setPosition(ClawClosedPos);
     }
+    public void closeClawSoft() {ClawServo.setPosition(ClawCloseSoftPos);}
+    public void openClawHard(){
+        ClawServo.setPosition(ClawOpenHardPos);}
     public void tiltUp(){
         TiltServo.setPosition(TiltUpPos);
     }
@@ -159,6 +162,7 @@ public class TurretLift {  // no constructor for this class
     public void linkageIn(){
         LinkageServo.setPosition(LinkageClosedPos);
     }
+    public void linkageNearlyOut(){LinkageServo.setPosition(LinkageNearlyOutPos);}
 
     public void readyServos(){
         openClaw();

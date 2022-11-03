@@ -192,7 +192,9 @@ public class DuneDrive extends LinearOpMode {
             case RETURN:
                 if (GlobalTimer.milliseconds() - outakesequencetimer > 300){
                     turretlift.turretSpinInternalPID(0, 1);
-                    turretlift.readyServos();
+                    turretlift.tiltReset();
+                    turretlift.linkageIn();
+                    turretlift.closeClaw();
                     drivebase.intakeSpin(-0.5);
                     if (turretlift.turretTargetReachedInteralPID()){
                         //telemetry.addData("turret return target reached?", true);

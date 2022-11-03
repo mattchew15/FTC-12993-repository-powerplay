@@ -15,9 +15,9 @@ public class meepmeep {
                 // Set bot constraints: maxVel, maxAccel, maxAngVel, maxAngAccel, track width
                 .setConstraints(60, 60, Math.toRadians(180), Math.toRadians(180), 15)
                 .followTrajectorySequence(drive ->
-                        drive.trajectorySequenceBuilder(new Pose2d(35, -63, Math.toRadians(90)))
-                                .lineToLinearHeading(new Pose2d(35, -40, Math.toRadians(90))) // spline to spline heading, first angle is target, second angle is target angle during path
-                                .splineToSplineHeading(new Pose2d(35, -12, Math.toRadians(180)), Math.toRadians(90)) // end effects shape of spline, first angle is the target heading
+                        drive.trajectorySequenceBuilder(new Pose2d(35, -63, Math.toRadians(-90)))
+                                 // spline to spline heading, first angle is target, second angle is target angle during path
+                                .splineToSplineHeading(new Pose2d(35, -12, Math.toRadians(0)), Math.toRadians(-90)) // end effects shape of spline, first angle is the target heading
                                 .lineTo(new Vector2d(47,-12))
                                 .lineTo(new Vector2d(35,-12))
                                 .lineTo(new Vector2d(58.5,-12))

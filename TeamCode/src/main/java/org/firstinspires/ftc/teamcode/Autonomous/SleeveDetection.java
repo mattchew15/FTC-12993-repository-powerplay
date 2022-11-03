@@ -93,22 +93,23 @@ public class SleeveDetection extends OpenCvPipeline {
                     YELLOW,
                     2
             );
-        } else if (maxPercent == bluPercent) {
-            position = ParkingPosition.CENTER;
-            Imgproc.rectangle(
-                    input,
-                    sleeve_pointA,
-                    sleeve_pointB,
-                    BLUE,
-                    2
-            );
-        } else if (maxPercent == redPercent) {
+        }  else if (maxPercent == redPercent) {
             position = ParkingPosition.RIGHT;
             Imgproc.rectangle(
                     input,
                     sleeve_pointA,
                     sleeve_pointB,
                     RED,
+                    2
+            );
+        }
+        else if (maxPercent == bluPercent){  //
+            position = ParkingPosition.CENTER;
+            Imgproc.rectangle(
+                    input,
+                    sleeve_pointA,
+                    sleeve_pointB,
+                    BLUE,
                     2
             );
         }
