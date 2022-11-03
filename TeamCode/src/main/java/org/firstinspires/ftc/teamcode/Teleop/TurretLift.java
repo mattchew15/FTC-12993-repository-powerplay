@@ -21,7 +21,7 @@ public class TurretLift {  // no constructor for this class
     private Servo TiltServo;
 
     //config variables can be changed/tuned in dashboard
-    public static double ClawOpenPos = 0.33, ClawClosedPos = 0.46, ClawCloseSoftPos = 0.42, ClawOpenHardPos = 0.24;
+    public static double ClawOpenPos = 0.34, ClawClosedPos = 0.47, ClawCloseSoftPos = 0.42, ClawOpenHardPos = 0.24;
     public static double LinkageFullPos = 0.3, LinkageHalfPos = 0.16, LinkageQuarterPos = 0.1, LinkageClosedPos = 0.01, LinkageNearlyOutPos = 0.28;
     public static double TiltUpPos = 0.3, TiltDownPos = 0.85, TiltHalfPos = 0.48;
 
