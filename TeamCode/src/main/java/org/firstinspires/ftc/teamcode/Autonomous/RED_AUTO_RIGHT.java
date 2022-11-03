@@ -235,8 +235,8 @@ public class RED_AUTO_RIGHT extends LinearOpMode {
                             if (GlobalTimer.milliseconds() - autoTimer > 2000) {
                                 telemetry.addLine("grab");
                                 turretlift.closeClaw();
-                                currentState = AutoState.WAIT_AFTER_GRAB_STACK;
                                 autoTimer = GlobalTimer.milliseconds(); // ready to grab stack
+                                currentState = AutoState.WAIT_AFTER_GRAB_STACK;
                             }
                         }
                     }
