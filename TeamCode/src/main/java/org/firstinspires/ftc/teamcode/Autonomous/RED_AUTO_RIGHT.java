@@ -220,9 +220,9 @@ public class RED_AUTO_RIGHT extends LinearOpMode {
                         if (GlobalTimer.milliseconds() - autoTimer > 0){
                             turretlift.openClaw(); // preload drop
                             telemetry.addLine("PRELOAD DROP!!");
-                            currentState = AutoState.PRELOAD_DROP;
                             autoTimer = GlobalTimer.milliseconds();
                             drive.followTrajectoryAsync(IntoConeStackPreload);
+                            currentState = AutoState.PRELOAD_DROP;
                             }
                         } // this timer goes off at the start of the code
                     break;
