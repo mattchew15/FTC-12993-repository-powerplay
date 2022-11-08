@@ -39,8 +39,8 @@ import java.util.Vector;
 
 
 
-@Autonomous(name = "RED_AUTO_RIGHT")
-public class RED_AUTO_RIGHT extends LinearOpMode {
+@Autonomous(name = "PRELOAD_PARK_LEFT")
+public class PRELOAD_PARK_LEFT extends LinearOpMode {
 
     // class members
     ElapsedTime GlobalTimer;
@@ -99,7 +99,7 @@ public class RED_AUTO_RIGHT extends LinearOpMode {
         slowerVelocityConstraint = 20;
     }
     // Define our start pose
-    Pose2d startPose = new Pose2d(35, -69, Math.toRadians(-90));
+    Pose2d startPose = new Pose2d(-35, -69, Math.toRadians(-90));
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -134,50 +134,50 @@ public class RED_AUTO_RIGHT extends LinearOpMode {
         // trajectories that aren't changing should all be here
 
         Trajectory InitialTurn = drive.trajectoryBuilder(startPose, true)
-                .lineToLinearHeading(new Pose2d(32, -50, Math.toRadians(4)))
+                .lineToLinearHeading(new Pose2d(-35, -9, Math.toRadians(-90)))
                 //.splineTo(new Vector2d(35, -40), Math.toRadians(-90)) // spline to spline heading, first angle is target, second angle is target angle during path
                 //.splineToSplineHeading(new Pose2d(35, -12, Math.toRadians(0)), Math.toRadians(-90)) // end effects shape of spline, first angle is the target heading
                 .build();
 
 
         Trajectory PreloadDrive = drive.trajectoryBuilder(InitialTurn.end(), true)
-                .lineToLinearHeading(new Pose2d(30, -15.5, Math.toRadians(1)))
+                .lineToLinearHeading(new Pose2d(-31, -15, Math.toRadians(1)))
                 //.lineTo(new Vector2d(33, -15))
                 //.splineTo(new Vector2d(35, -40), Math.toRadians(-90)) // spline to spline heading, first angle is target, second angle is target angle during path
                 //.splineToSplineHeading(new Pose2d(35, -12, Math.toRadians(0)), Math.toRadians(-90)) // end effects shape of spline, first angle is the target heading
                 .build();
 
         Trajectory IntoConeStackPreload = drive.trajectoryBuilder(PreloadDrive.end())
-                .lineTo(new Vector2d(48.5,-9.2), SampleMecanumDrive.getVelocityConstraint(slowerVelocityConstraint, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH),
+                .lineTo(new Vector2d(-48.5,-9.2), SampleMecanumDrive.getVelocityConstraint(slowerVelocityConstraint, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH),
                         SampleMecanumDrive.getAccelerationConstraint(DriveConstants.MAX_ACCEL))
                 .build();
 
         Trajectory OutConeStackAfterPreload = drive.trajectoryBuilder(IntoConeStackPreload.end())
-                .lineTo(new Vector2d(33,-5), SampleMecanumDrive.getVelocityConstraint(slowerVelocityConstraint, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH),
+                .lineTo(new Vector2d(-33,-5), SampleMecanumDrive.getVelocityConstraint(slowerVelocityConstraint, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH),
                         SampleMecanumDrive.getAccelerationConstraint(DriveConstants.MAX_ACCEL))
                 .build();
 
 
         Trajectory OutConeStack = drive.trajectoryBuilder(IntoConeStackPreload.end())
-                .lineTo(new Vector2d(27,-9.5), SampleMecanumDrive.getVelocityConstraint(slowerVelocityConstraint, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH),
+                .lineTo(new Vector2d(-28,-9.5), SampleMecanumDrive.getVelocityConstraint(slowerVelocityConstraint, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH),
                         SampleMecanumDrive.getAccelerationConstraint(DriveConstants.MAX_ACCEL))
                 .build();
 
         Trajectory IntoConeStack = drive.trajectoryBuilder(OutConeStack.end())
-                .lineToLinearHeading(new Pose2d(48.5, -9.2, Math.toRadians(0)), SampleMecanumDrive.getVelocityConstraint(slowerVelocityConstraint, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH),
+                .lineToLinearHeading(new Pose2d(-48.5, -9.2, Math.toRadians(0)), SampleMecanumDrive.getVelocityConstraint(slowerVelocityConstraint, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH),
                         SampleMecanumDrive.getAccelerationConstraint(DriveConstants.MAX_ACCEL))
                 .build();
 
         Trajectory ParkRight = drive.trajectoryBuilder(OutConeStack.end())
-                .lineTo(new Vector2d(62,-9))
+                .lineTo(new Vector2d(-3,-9))
                 .build();
 
         Trajectory ParkLeft = drive.trajectoryBuilder(OutConeStack.end())
-                .lineTo(new Vector2d(-1,-9))
+                .lineTo(new Vector2d(-62,-9))
                 .build();
 
         Trajectory ParkCentre = drive.trajectoryBuilder(OutConeStack.end())
-                .lineTo(new Vector2d(28,-9))
+                .lineTo(new Vector2d(-28,-9))
                 .build();
 
         while (!isStarted()) {
@@ -230,8 +230,8 @@ public class RED_AUTO_RIGHT extends LinearOpMode {
                 case INITIAL_TURN_DRIVE:
                     turretlift.closeClaw();
                     if (!drive.isBusy()) { //
-                        currentState = AutoState.PRELOAD_DRIVE;
-                        drive.followTrajectoryAsync(PreloadDrive);
+                        currentState = AutoState.PARK;
+                        //drive.followTrajectoryAsync(PreloadDrive);
                         autoTimer = GlobalTimer.milliseconds(); // reset timer
                         turretlift.closeClaw();
 
@@ -240,16 +240,15 @@ public class RED_AUTO_RIGHT extends LinearOpMode {
 
                 case PRELOAD_DRIVE:
                     turretlift.closeClaw();
-                    outakeOutReady(-130,1,350, liftHighPosition); // get outake ready - do timer to make it later, putt hsi in a function
-                    if (!drive.isBusy() && outakeOutReady) { //
+                    //outakeOutReady(130,1,350, liftHighPosition); // get outake ready - do timer to make it later, putt hsi in a function
+                    if (!drive.isBusy()) { //
                         if (GlobalTimer.milliseconds() - autoTimer > 2500){
-                            turretlift.openClaw(); // preload drop
+                            //turretlift.openClaw(); // preload drop
                             telemetry.addLine("PRELOAD DROP!!");
                             autoTimer = GlobalTimer.milliseconds();
-                            drive.followTrajectoryAsync(IntoConeStackPreload);
-                            currentState = AutoState.PRELOAD_DROP;
-                            }
-                        } // this timer goes off at the start of the code
+                            currentState = AutoState.PARK;
+                        }
+                    } // this timer goes off at the start of the code
                     break;
 
                 case PRELOAD_DROP:
@@ -288,8 +287,8 @@ public class RED_AUTO_RIGHT extends LinearOpMode {
                                     autoTimer = GlobalTimer.milliseconds(); // reset timer
                                 }
                             }
-                            }
                         }
+                    }
                     break;
 
                 case DRIVE_OUT_STACK:
@@ -324,19 +323,19 @@ public class RED_AUTO_RIGHT extends LinearOpMode {
                     break;
 
                 case DRIVE_INTO_STACK:
-                        readyOutake();
-                        if (!drive.isBusy() && outakeResetReady){
-                            if (GlobalTimer.milliseconds() - autoTimer > 2000) {
-                                telemetry.addLine("grab");
-                                turretlift.closeClaw();
-                                currentState = AutoState.WAIT_AFTER_GRAB_STACK;
-                                autoTimer = GlobalTimer.milliseconds(); // ready to grab stack
-                            }
+                    readyOutake();
+                    if (!drive.isBusy() && outakeResetReady){
+                        if (GlobalTimer.milliseconds() - autoTimer > 2000) {
+                            telemetry.addLine("grab");
+                            turretlift.closeClaw();
+                            currentState = AutoState.WAIT_AFTER_GRAB_STACK;
+                            autoTimer = GlobalTimer.milliseconds(); // ready to grab stack
                         }
+                    }
                     break;
 
                 case PARK:
-                    if (GlobalTimer.milliseconds() - autoTimer > 200){
+                    if (GlobalTimer.milliseconds() - autoTimer > 400){
                         readyOutake();
                         if (SignalRotation == 1){
                             drive.followTrajectoryAsync(ParkLeft);

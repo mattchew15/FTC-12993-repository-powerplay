@@ -190,7 +190,7 @@ public class DuneDrive extends LinearOpMode {
                 break;
 
             case RETURN:
-                if (GlobalTimer.milliseconds() - outakesequencetimer > 300){
+                if (GlobalTimer.milliseconds() - outakesequencetimer > 300){ // make faster
                     turretlift.turretSpinInternalPID(0, 1);
                     turretlift.tiltReset();
                     turretlift.linkageIn();
@@ -199,15 +199,17 @@ public class DuneDrive extends LinearOpMode {
                     if (turretlift.turretTargetReachedInteralPID()){
                         //telemetry.addData("turret return target reached?", true);
                         telemetry.addLine("turret return target reached");
-                        turretlift.liftToInternalPID(0,0.85); // could be faster
+                        turretlift.liftToInternalPID(0,0.8); // slower so nothing breaks
                         if (turretlift.liftTargetReachedInternalPID()){
                             turretlift.openClaw();
                             outakestate = OutakeState.READY;
                         }
+                    } else {
+                        turretlift.liftToInternalPID(350,1); // going down while turning
                     }
-                    else {
-                        turretlift.liftToInternalPID(350,0.1); // could be faster
-                    }
+                }
+                else {
+                    turretlift.liftToInternalPID(350,1); // could be faster
                 }
                 break;
         }
