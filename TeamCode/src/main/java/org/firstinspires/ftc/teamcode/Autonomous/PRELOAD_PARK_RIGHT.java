@@ -353,7 +353,7 @@ public class PRELOAD_PARK_RIGHT extends LinearOpMode {
                     break;
 
                 case IDLE:
-                    telemetry.addLine("WWWWWWWWWWW");
+                    telemetry.addLine("idle");
                     outakeIdle();
                     break;
 
