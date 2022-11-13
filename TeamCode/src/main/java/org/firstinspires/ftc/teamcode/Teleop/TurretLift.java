@@ -5,6 +5,7 @@ import static org.firstinspires.ftc.robotcore.external.BlocksOpModeCompanion.tel
 import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.DigitalChannel;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.VoltageSensor;
@@ -19,6 +20,7 @@ public class TurretLift {  // no constructor for this class
     private Servo ClawServo;
     private Servo LinkageServo;
     private Servo TiltServo;
+    private DigitalChannel limitswitch;
 
     //config variables can be changed/tuned in dashboard
     public static double ClawOpenPos = 0.45, ClawClosedPos = 0.57, ClawCloseSoftPos = 0.54, ClawOpenHardPos = 0.4;
@@ -39,6 +41,7 @@ public class TurretLift {  // no constructor for this class
     int turretTarget;
     int liftTarget;
 
+
     public void TurretLift_init(HardwareMap hwMap) {
         TurretMotor = hwMap.get(DcMotorEx.class, "TurretMotor");
         LiftMotor = hwMap.get(DcMotorEx.class, "LiftMotor");
@@ -46,6 +49,7 @@ public class TurretLift {  // no constructor for this class
         ClawServo = hwMap.get(Servo.class, "ClawS");
         LinkageServo = hwMap.get(Servo.class, "LinkageS");
         TiltServo = hwMap.get(Servo.class, "TiltS");
+        limitswitch = hwMap.get(DigitalChannel.class, "touch_sensor");
 
     }
 
@@ -55,6 +59,7 @@ public class TurretLift {  // no constructor for this class
 
         TurretMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         LiftMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER); // run without encoder is if using external PID
+        limitswitch.setMode(DigitalChannel.Mode.INPUT);
     }
 
     public void liftTo(double rotations, double motorPosition, double maxSpeed){
@@ -99,6 +104,10 @@ public class TurretLift {  // no constructor for this class
         else{
             return false;
         }
+    }
+
+    public boolean intakeTouchPressed() {
+        return limitswitch.getState();
     }
     // instead of using PID class uses the internal run to position on the motor
     public void turretSpinInternalPID(int rotations, double maxSpeed){

@@ -15,10 +15,14 @@ public class meepmeep {
                 // Set bot constraints: maxVel, maxAccel, maxAngVel, maxAngAccel, track width
                 .setConstraints(60, 60, Math.toRadians(180), Math.toRadians(180), 15)
                 .followTrajectorySequence(drive ->
-                        drive.trajectorySequenceBuilder(new Pose2d(35, -63, Math.toRadians(-90)))
+                        drive.trajectorySequenceBuilder(new Pose2d(30, -48, Math.toRadians(180)))
                                  // spline to spline heading, first angle is target, second angle is target angle during path
-                                .lineToLinearHeading(new Pose2d(35, -50, Math.toRadians(0)))
+
+
+                                .splineToConstantHeading(new Vector2d(30, -10), Math.toRadians(180))
+                                .splineToConstantHeading(new Vector2d(36, -5), Math.toRadians(180))
                                 .lineTo(new Vector2d(35, -12))
+                               // .lineTo(new Vector2d(41, -11))
 
                                 .build()
                 );
