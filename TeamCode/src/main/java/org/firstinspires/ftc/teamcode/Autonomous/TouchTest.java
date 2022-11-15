@@ -11,7 +11,7 @@ import com.qualcomm.robotcore.hardware.TouchSensor;
 
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 
-@TeleOp(name = "Sensor: RevTouchSensor", group = "Sensor")
+@Autonomous(name = "Sensor: RevTouchSensor", group = "Sensor")
 
 public class TouchTest extends LinearOpMode {
 
