@@ -30,7 +30,7 @@ public class TouchTest extends LinearOpMode {
         waitForStart();
         while(opModeIsActive()) {
 
-            if(sensorTouchClaw.getState() == true){
+            if(sensorTouchClaw.getState() == false){
                 telemetry.addData("Digital touch", "Is pressed");
             }
             else {
