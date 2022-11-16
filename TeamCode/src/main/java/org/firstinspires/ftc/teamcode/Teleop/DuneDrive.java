@@ -49,13 +49,11 @@ public class DuneDrive extends LinearOpMode {
         // to go up and down from 5 to 0, then presses other pickup dpad pickup and height adjust like normal
         // mika toggles left button to enter and exit mode, gamepad rumble feedback occurs when switched mode for both drivers
         GRAB, // grip claw
-        INITIAL_LIFT, // has to go over intake motors and rev hubs
-        TURN_LIFT_TILT,
         HEIGHT_LINKAGE, // linkage extends once nearly finished turning - stability. Lift goes to correct level simaltaneously
         FINE_ADJUST, // gamepad2 controls fine adjust
         DROP, // gamepad1.rightbumper
-        RETURN // calculate the fastest way for everything to be moving simaltaneously
-
+        RETURN, // calculate the fastest way for everything to be moving simaltaneously
+        MANUAL_ENCODER_RESET // USE VERY CAREFULLY
     }
 
     // create instance of OutakeState Enum and set it to ready
@@ -94,6 +92,7 @@ public class DuneDrive extends LinearOpMode {
                 drivebase.PowerToggle(gamepad1.a);
                 liftSequence();
                 inputs.intakeStackToggleMode(gamepad2.left_stick_button);
+                inputs.manualResetToggleMode(gamepad2.right_stick_button);
                 inputs.cycleToggleUp(gamepad2.right_bumper);
                 inputs.cycleToggleDown(gamepad2.left_bumper);
                 //inputs.gamepadRumbleTimer();
@@ -143,6 +142,7 @@ public class DuneDrive extends LinearOpMode {
                 if (turretlift.liftPos() > 80){ // greater then the height it hits the bar
                     turretlift.linkageOut(); // should be driving to touch tthe cone, not extending to touch the cone
                     turretlift.openClawHard(); // makes alligning easier
+                    intakesequencetransition(); // limit switch might be annoying
                 }
                 else{
                     turretlift.linkageIn();
@@ -244,17 +244,33 @@ public class DuneDrive extends LinearOpMode {
                     turretlift.liftToInternalPID(350,1); // could be faster
                 }
                 break;
+
+            case MANUAL_ENCODER_RESET: // manual reset in case anything happens
+                turretlift.liftMotorRawControl(gamepad2.right_stick_y);
+                turretlift.turretMotorRawControl(gamepad2.left_stick_x);
+                turretlift.tiltReset();
+                turretlift.linkageIn();
+                turretlift.closeClaw();
+                if (gamepad2.right_bumper){
+                    turretlift.encodersReset();
+                    outakestate = OutakeState.READY;
+                }
+                break;
+
         }
         if (gamepad2.b && outakestate != OutakeState.READY || gamepad1.b && outakestate != OutakeState.READY){
             outakestate = OutakeState.RETURN; // return to ready state no matter what state the system is in
         }
         intakesequencetransition(); // not sure this works, but at any stage if you press dpad it will go back to the grab phase and you can rotate the turret
         liftPositionChangenostatechange();
+        if (inputs.ManualResetToggleMode){
+            outakestate = OutakeState.MANUAL_ENCODER_RESET;
+        }
     }
 
     public void intakesequencetransition(){ // simplifies transition from INTAKE state to GRAB state
-        if (gamepad2.dpad_up && outakestate != OutakeState.DROP){ // favour the mid level over the other one
-            turretpositiontype = turretlift.degreestoTicks(180);
+        if (gamepad2.dpad_up || turretlift.intakeTouchPressed()){ // this was here dont know why && outakestate != OutakeState.DROP
+            turretpositiontype = turretlift.degreestoTicks(180); // by default it will go 180 if limit switch touched
             outakestate = OutakeState.GRAB;
             outakesequencetimer = GlobalTimer.milliseconds(); //  reset timer
         }

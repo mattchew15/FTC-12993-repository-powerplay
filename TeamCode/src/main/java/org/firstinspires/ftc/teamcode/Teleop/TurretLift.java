@@ -64,6 +64,22 @@ public class TurretLift {  // no constructor for this class
         sensorTouchClaw.setMode(DigitalChannel.Mode.INPUT);
     }
 
+    public void encodersReset(){
+        TurretMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        LiftMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER); // run without encoder is if using external PID
+    }
+
+    public void liftMotorRawControl(double manualcontrollift){
+        TurretMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        TurretMotor.setPower(manualcontrollift * 0.35);
+    }
+
+    public void turretMotorRawControl(double manualcontrolturret){
+        TurretMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        TurretMotor.setPower(manualcontrolturret * 0.7);
+    }
+
+
     public void liftTo(double rotations, double motorPosition, double maxSpeed){
         double output = liftPID.update(rotations,motorPosition,maxSpeed); //does a lift to with external PID instead of just regular encoders
         LiftMotor.setPower(output);

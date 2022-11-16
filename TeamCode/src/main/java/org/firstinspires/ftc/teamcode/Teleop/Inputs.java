@@ -13,7 +13,9 @@ public class Inputs {
     final double TEN_TO_ENDGAME = 80.0;
     final double ENDGAME = 90.0;
     public boolean Toggled;
+    public boolean ToggledManualReset;
     public boolean IntakeStackToggleMode;
+    public boolean ManualResetToggleMode;
     public boolean IntakeHeightCycleUp;
     public boolean IntakeHeightCycleDown;
     public int IntakeHeightState;
@@ -26,6 +28,8 @@ public class Inputs {
         IntakeHeightCycleUp = false;
         IntakeHeightCycleDown = false;
         IntakeHeightState = 0; // for fifth cone stack we have 0 height change
+        ToggledManualReset = false;
+        ManualResetToggleMode = false;
     }
 
     public void gamepadRumbleTimer (){
@@ -56,6 +60,22 @@ public class Inputs {
         else {
             Toggled = false;
 
+        }
+    }
+
+    public void manualResetToggleMode(boolean togglebtn) {
+        if (togglebtn) {
+            if (!ToggledManualReset) { // the first time you first press it it will change stuff, then won't go past this if statement
+                if (ManualResetToggleMode) {
+                    ManualResetToggleMode = false; // will have to access this variable in dune drive
+                } else {
+                    ManualResetToggleMode = true;
+                }
+                ToggledManualReset = true;
+            }
+        }
+        else {
+            ToggledManualReset = false;
         }
     }
 
