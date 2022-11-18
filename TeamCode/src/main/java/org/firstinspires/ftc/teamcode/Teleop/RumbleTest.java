@@ -11,6 +11,12 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 
 public class RumbleTest extends LinearOpMode{
 
+    ElapsedTime MatchTimer = new ElapsedTime();
+
+    final double THIRTY_TO_ENDGAME = 60.0;
+    final double TEN_TO_ENDGAME = 80.0;
+    final double ENDGAME = 90.0;
+
     Gamepad.RumbleEffect customRumbleEffect;
 
     @Override
