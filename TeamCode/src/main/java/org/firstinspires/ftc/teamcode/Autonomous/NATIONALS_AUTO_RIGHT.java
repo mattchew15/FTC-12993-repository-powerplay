@@ -41,6 +41,7 @@ import java.util.Vector;
 
 @Autonomous(name = "NATIONALS_AUTO_RIGHT")
 public class NATIONALS_AUTO_RIGHT extends LinearOpMode {
+    //:)
 
     // class members
     ElapsedTime GlobalTimer;
