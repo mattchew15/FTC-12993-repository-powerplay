@@ -20,7 +20,7 @@ public class TurretLift {  // no constructor for this class
     private Servo ClawServo;
     private Servo LinkageServo;
     private Servo TiltServo;
-    private DigitalChannel limitswitch;
+    private DigitalChannel sensorTouchClaw;
 
     //config variables can be changed/tuned in dashboard
     public static double ClawOpenPos = 0.45, ClawClosedPos = 0.57, ClawCloseSoftPos = 0.54, ClawOpenHardPos = 0.4;
@@ -49,7 +49,9 @@ public class TurretLift {  // no constructor for this class
         ClawServo = hwMap.get(Servo.class, "ClawS");
         LinkageServo = hwMap.get(Servo.class, "LinkageS");
         TiltServo = hwMap.get(Servo.class, "TiltS");
-        limitswitch = hwMap.get(DigitalChannel.class, "touch_sensor");
+        sensorTouchClaw = hwMap.get(DigitalChannel.class, "sensor_touchClaw");
+        sensorTouchClaw.setMode(DigitalChannel.Mode.INPUT);
+
 
     }
 
@@ -59,8 +61,24 @@ public class TurretLift {  // no constructor for this class
 
         TurretMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         LiftMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER); // run without encoder is if using external PID
-        limitswitch.setMode(DigitalChannel.Mode.INPUT);
+        sensorTouchClaw.setMode(DigitalChannel.Mode.INPUT);
     }
+
+    public void encodersReset(){
+        TurretMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        LiftMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER); // run without encoder is if using external PID
+    }
+
+    public void liftMotorRawControl(double manualcontrollift){
+        TurretMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        TurretMotor.setPower(manualcontrollift * 0.35);
+    }
+
+    public void turretMotorRawControl(double manualcontrolturret){
+        TurretMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        TurretMotor.setPower(manualcontrolturret * 0.7);
+    }
+
 
     public void liftTo(double rotations, double motorPosition, double maxSpeed){
         double output = liftPID.update(rotations,motorPosition,maxSpeed); //does a lift to with external PID instead of just regular encoders
@@ -107,7 +125,7 @@ public class TurretLift {  // no constructor for this class
     }
 
     public boolean intakeTouchPressed() {
-        return limitswitch.getState();
+        return sensorTouchClaw.getState();
     }
     // instead of using PID class uses the internal run to position on the motor
     public void turretSpinInternalPID(int rotations, double maxSpeed){

@@ -343,14 +343,16 @@ public class NATIONALS_AUTO_RIGHT extends LinearOpMode {
     }
 
     public void readyOutake(){
-        turretlift.turretSpinInternalPID(-180, 1);
+        turretlift.turretSpinInternalPID(0, 1);
         if (turretlift.turretTargetReachedInteralPID()){
             turretlift.liftToInternalPID(145 - heightChangeInterval,0.5); // could be faster
             turretlift.openClawHard();
-            turretlift.linkageOutHalf();
             if (turretlift.liftTargetReachedInternalPID()){
                 turretlift.linkageOut(); // should be driving to touch tthe cone, not extending to touch the cone
                 outakeResetReady = true; // need a false here if (turretlift.liftTargetReachedInternalPID())
+            }
+            else {
+                turretlift.linkageOutHalf();
             }
         }else{
             outakeResetReady = false;
