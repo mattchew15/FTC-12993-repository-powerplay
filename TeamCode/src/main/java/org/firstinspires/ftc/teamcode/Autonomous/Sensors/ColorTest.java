@@ -47,6 +47,8 @@ public class ColorTest extends LinearOpMode {
                     .addData("Green", "%.3f", colors.green)
                     .addData("Blue", "%.3f", colors.blue);
 
+            telemetry.update();
+
         }
     }
 }
