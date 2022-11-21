@@ -12,6 +12,7 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.DigitalChannel;
 import com.qualcomm.robotcore.hardware.DistanceSensor;
+import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
@@ -24,6 +25,21 @@ import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 
 @TeleOp(name = "DuneDrive")
 public class DuneDrive extends LinearOpMode {
+
+
+    //Rumble
+    Gamepad.RumbleEffect halfRumbleEffect;
+    Gamepad.RumbleEffect endgameRumbleEffect;
+    Gamepad.RumbleEffect tenRumbleEffect;
+    Gamepad.RumbleEffect oneFourthRumbleEffect;
+
+    //Timing for rumble
+    ElapsedTime runtime = new ElapsedTime();
+
+    final double halfTime = 60.0;
+    final double endgame = 90.0;
+    final double tenTime = 110.0;
+    final double oneFourth = 30.0;
 
     //create new instances of class
     DriveBase drivebase = new DriveBase();
@@ -75,6 +91,35 @@ public class DuneDrive extends LinearOpMode {
 
     @Override
     public void runOpMode() {
+
+        oneFourthRumbleEffect = new Gamepad.RumbleEffect.Builder()
+                .addStep(1.0, 1.0, 100)
+                .addStep(0.0, 0.0, 100)
+                .addStep(1.0, 1.0, 100)
+                .addStep(0.0, 0.0, 100)
+                .addStep(1.0, 1.0, 100)
+                .addStep(0.0, 0.0, 100)
+                .addStep(1.0, 1.0, 100)
+                .build();
+
+        halfRumbleEffect = new Gamepad.RumbleEffect.Builder()
+                .addStep(1.0, 1.0, 500)
+                .addStep(0.0, 0.0, 300)
+                .addStep(1.0, 1.0, 750)
+                .build();
+
+        endgameRumbleEffect = new Gamepad.RumbleEffect.Builder()
+                .addStep(1.0, 1.0, 500)
+                .addStep(0.0, 0.0, 300)
+                .addStep(1.0, 1.0, 250)
+                .addStep(0.0, 0.0, 100)
+                .addStep(1.0, 1.0, 250)
+                .build();
+
+        tenRumbleEffect = new Gamepad.RumbleEffect.Builder()
+                .addStep(1.0, 1.0, 1000)
+                .build();
+
         // this is basically init, all setup, hardware classes etc get initialized here
         drivebase.Drivebase_init(hardwareMap);
         turretlift.TurretLift_init(hardwareMap);
@@ -83,6 +128,24 @@ public class DuneDrive extends LinearOpMode {
         // waits for user to press start on driverhub
         waitForStart();
         if (opModeIsActive()) {
+
+            if (runtime.seconds() == tenTime) {
+                gamepad1.runRumbleEffect(tenRumbleEffect);
+                gamepad2.runRumbleEffect(tenRumbleEffect);
+            }
+            else if (runtime.seconds() == endgame) {
+                gamepad1.runRumbleEffect(endgameRumbleEffect);
+                gamepad2.runRumbleEffect(endgameRumbleEffect);
+            }
+            else if (runtime.seconds() == halfTime) {
+                gamepad1.runRumbleEffect(halfRumbleEffect);
+                gamepad2.runRumbleEffect(halfRumbleEffect);
+            }
+            else if (runtime.seconds() == oneFourth) {
+                gamepad1.runRumbleEffect(oneFourthRumbleEffect);
+                gamepad2.runRumbleEffect(oneFourthRumbleEffect);
+            }
+
             // runs setup function before main loop
             Setup();
 

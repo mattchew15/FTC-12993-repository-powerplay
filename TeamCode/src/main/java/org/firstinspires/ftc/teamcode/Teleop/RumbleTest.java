@@ -11,12 +11,25 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 
 public class RumbleTest extends LinearOpMode{
 
+    //Timing for rumble
+    ElapsedTime runtime = new ElapsedTime();
+
+    final double halfTime = 60.0;
+    final double endgame = 90.0;
+    final double tenTime = 110.0;
+    final double oneFourth = 30.0;
+
     Gamepad.RumbleEffect testRumbleEffect;
     Gamepad.RumbleEffect halfRumbleEffect;
     Gamepad.RumbleEffect endgameRumbleEffect;
     Gamepad.RumbleEffect tenRumbleEffect;
     Gamepad.RumbleEffect onefourthRumbleEffect;
     Gamepad.RumbleEffect girlMode;
+
+    boolean one = true;
+    boolean two = false;
+    boolean three = false;
+    boolean four = false;
 
     @Override
     public void runOpMode() {
@@ -60,25 +73,37 @@ public class RumbleTest extends LinearOpMode{
         tenRumbleEffect = new Gamepad.RumbleEffect.Builder()
                 .addStep(1.0, 1.0, 1000)
                 .build();
+
         waitForStart();
+        runtime.reset();
         while(opModeIsActive()) {
+
+            telemetry.addData(">>", runtime);
+            telemetry.update();
 
             if(gamepad1.a){
                 gamepad1.runRumbleEffect(testRumbleEffect);
             }
-            else if(gamepad1.b){
+            if(gamepad1.b || (runtime.seconds() > oneFourth && one)){
                 gamepad1.runRumbleEffect(onefourthRumbleEffect);
+                one = false;
+                two = true;
             }
-            else if(gamepad1.x){
-                gamepad1.runRumbleEffect(tenRumbleEffect);
-            }
-            else if(gamepad1.y){
+            if(gamepad1.y || (runtime.seconds() > halfTime) && two){
                 gamepad1.runRumbleEffect(halfRumbleEffect);
+                two = false;
+                three = true;
             }
-            else if(gamepad1.dpad_up){
+            if(gamepad1.dpad_up || (runtime.seconds() > endgame) && three){
                 gamepad1.runRumbleEffect(endgameRumbleEffect);
+                three = false;
+                four = true;
             }
-            else if(gamepad1.dpad_down){
+            if(gamepad1.x || (runtime.seconds() > tenTime && four)){
+                gamepad1.runRumbleEffect(tenRumbleEffect);
+                four = false;
+            }
+            if(gamepad1.dpad_down){
                 gamepad1.runRumbleEffect(girlMode);
             }
 
