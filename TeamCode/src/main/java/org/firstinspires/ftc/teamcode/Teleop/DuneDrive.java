@@ -41,6 +41,11 @@ public class DuneDrive extends LinearOpMode {
     final double tenTime = 110.0;
     final double oneFourth = 30.0;
 
+    boolean one = true;
+    boolean two = false;
+    boolean three = false;
+    boolean four = false;
+
     //create new instances of class
     DriveBase drivebase = new DriveBase();
     TurretLift turretlift = new TurretLift();
@@ -129,21 +134,24 @@ public class DuneDrive extends LinearOpMode {
         waitForStart();
         if (opModeIsActive()) {
 
-            if (runtime.seconds() == tenTime) {
-                gamepad1.runRumbleEffect(tenRumbleEffect);
-                gamepad2.runRumbleEffect(tenRumbleEffect);
-            }
-            else if (runtime.seconds() == endgame) {
-                gamepad1.runRumbleEffect(endgameRumbleEffect);
-                gamepad2.runRumbleEffect(endgameRumbleEffect);
-            }
-            else if (runtime.seconds() == halfTime) {
-                gamepad1.runRumbleEffect(halfRumbleEffect);
-                gamepad2.runRumbleEffect(halfRumbleEffect);
-            }
-            else if (runtime.seconds() == oneFourth) {
+            if(runtime.seconds() > oneFourth && one){
                 gamepad1.runRumbleEffect(oneFourthRumbleEffect);
-                gamepad2.runRumbleEffect(oneFourthRumbleEffect);
+                one = false;
+                two = true;
+            }
+            if(runtime.seconds() > halfTime && two){
+                gamepad1.runRumbleEffect(halfRumbleEffect);
+                two = false;
+                three = true;
+            }
+            if(runtime.seconds() > endgame && three){
+                gamepad1.runRumbleEffect(endgameRumbleEffect);
+                three = false;
+                four = true;
+            }
+            if(runtime.seconds() > tenTime && four) {
+                gamepad1.runRumbleEffect(tenRumbleEffect);
+                four = false;
             }
 
             // runs setup function before main loop
