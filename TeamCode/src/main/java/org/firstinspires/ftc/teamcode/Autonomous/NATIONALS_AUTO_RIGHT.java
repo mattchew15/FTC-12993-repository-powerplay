@@ -63,7 +63,7 @@ public class NATIONALS_AUTO_RIGHT extends LinearOpMode {
     //DriveBase drivebase = new DriveBase(); // hardware classes
     TurretLift turretlift = new TurretLift();
     //Inputs inputs = new Inputs();
-    SleeveDetection sleeveDetection = new SleeveDetection();
+    AprilTagAutonomousInitDetectionExample sleeveDetection = new AprilTagAutonomousInitDetectionExample();
     OpenCvCamera camera;
     String webcamName = "Webcam 1"; // what our webcam is called in hardware class
 
@@ -112,24 +112,6 @@ public class NATIONALS_AUTO_RIGHT extends LinearOpMode {
         turretlift.TurretLift_init(hardwareMap);
         SampleMecanumDrive drive = new SampleMecanumDrive(hardwareMap); // road drive class
 
-        int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
-        camera = OpenCvCameraFactory.getInstance().createWebcam(hardwareMap.get(WebcamName.class, webcamName), cameraMonitorViewId);
-        sleeveDetection = new SleeveDetection();
-        camera.setPipeline(sleeveDetection);
-
-        camera.openCameraDeviceAsync(new OpenCvCamera.AsyncCameraOpenListener()
-        {
-            @Override
-            public void onOpened()
-            {
-                camera.startStreaming(320,240, OpenCvCameraRotation.SIDEWAYS_LEFT);
-            }
-
-            @Override
-            public void onError(int errorCode) {}
-        });
-
-
         // functions runs on startz
         Setup();
         // Set inital pose
@@ -167,10 +149,10 @@ public class NATIONALS_AUTO_RIGHT extends LinearOpMode {
                 .build();
 
         while (!isStarted()) {
-            telemetry.addData("ROTATION: ", sleeveDetection.getPosition());
-            telemetry.addData("Yellow Percent:", sleeveDetection.yelPercent);
-            telemetry.addData("Blue Percent:", sleeveDetection.bluPercent);
-            telemetry.addData("Red Percent:", sleeveDetection.redPercent);
+            telemetry.addLine(String.format("\nDetected tag ID=%d", sleeveDetection.tagOfInterest.id));
+            telemetry.addLine(String.format("Rotation Yaw: %.2f degrees", Math.toDegrees(sleeveDetection.tagOfInterest.pose.yaw)));
+            telemetry.addLine(String.format("Rotation Pitch: %.2f degrees", Math.toDegrees(sleeveDetection.tagOfInterest.pose.pitch)));
+            telemetry.addLine(String.format("Rotation Roll: %.2f degrees", Math.toDegrees(sleeveDetection.tagOfInterest.pose.roll)));
             telemetry.update();
             turretlift.closeClaw();
         }
@@ -181,11 +163,11 @@ public class NATIONALS_AUTO_RIGHT extends LinearOpMode {
 
         // open cv changes the state at the start depending on cone rotation
         // open cv vision if statements to change variable and display telemetry here
-        if (sleeveDetection.getPosition() == SleeveDetection.ParkingPosition.LEFT) {
+        if (sleeveDetection.tagOfInterest.id == 1) {
             telemetry.addLine("Rotation Left");
             SignalRotation = 1;
 
-        } else if (sleeveDetection.getPosition() == SleeveDetection.ParkingPosition.RIGHT) {
+        } else if (sleeveDetection.tagOfInterest.id == 3) {
             telemetry.addLine("Rotation Right");
             SignalRotation = 3;
         } else {
