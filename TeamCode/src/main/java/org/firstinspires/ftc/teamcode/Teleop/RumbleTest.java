@@ -11,33 +11,75 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 
 public class RumbleTest extends LinearOpMode{
 
-    ElapsedTime MatchTimer = new ElapsedTime();
-
-    final double THIRTY_TO_ENDGAME = 60.0;
-    final double TEN_TO_ENDGAME = 80.0;
-    final double ENDGAME = 90.0;
-
-    Gamepad.RumbleEffect customRumbleEffect;
+    Gamepad.RumbleEffect testRumbleEffect;
+    Gamepad.RumbleEffect halfRumbleEffect;
+    Gamepad.RumbleEffect endgameRumbleEffect;
+    Gamepad.RumbleEffect tenRumbleEffect;
+    Gamepad.RumbleEffect onefourthRumbleEffect;
+    Gamepad.RumbleEffect girlMode;
 
     @Override
-    public void runOpMode(){
+    public void runOpMode() {
 
-        customRumbleEffect = new Gamepad.RumbleEffect.Builder()
+        testRumbleEffect = new Gamepad.RumbleEffect.Builder()
                 .addStep(0.0, 1.0, 500)  //  Rumble right motor 100% for 500 mSec
                 .addStep(0.0, 0.0, 300)  //  Pause for 300 mSec
-                .addStep(1.0, 0.0, 250)  //  Rumble left motor 100% for 250 mSec
-                .addStep(0.0, 0.0, 250)  //  Pause for 250 mSec
-                .addStep(1.0, 0.0, 250)  //  Rumble left motor 100% for 250 mSec
+                .addStep(1.0, 0.0, 500)  //  Rumble left motor 100% for 250 mSec
+                .addStep(0.0, 0.0, 300)  //  Pause for 250 mSec
+                .addStep(1.0, 1.0, 500)  //  Rumble left motor 100% for 250 mSec
                 .build();
 
+        onefourthRumbleEffect = new Gamepad.RumbleEffect.Builder()
+                .addStep(1.0, 1.0, 100)
+                .addStep(0.0, 0.0, 100)
+                .addStep(1.0, 1.0, 100)
+                .addStep(0.0, 0.0, 100)
+                .addStep(1.0, 1.0, 100)
+                .addStep(0.0, 0.0, 100)
+                .addStep(1.0, 1.0, 100)
+                .build();
+
+        halfRumbleEffect = new Gamepad.RumbleEffect.Builder()
+                .addStep(1.0, 1.0, 500)
+                .addStep(0.0, 0.0, 300)
+                .addStep(1.0, 1.0, 750)
+                .build();
+
+        endgameRumbleEffect = new Gamepad.RumbleEffect.Builder()
+                .addStep(1.0, 1.0, 500)
+                .addStep(0.0, 0.0, 300)
+                .addStep(1.0, 1.0, 250)
+                .addStep(0.0, 0.0, 100)
+                .addStep(1.0, 1.0, 250)
+                .build();
+
+        girlMode = new Gamepad.RumbleEffect.Builder()
+                .addStep(1.0, 1.0, 5000)
+                .build();
+
+        tenRumbleEffect = new Gamepad.RumbleEffect.Builder()
+                .addStep(1.0, 1.0, 1000)
+                .build();
         waitForStart();
         while(opModeIsActive()) {
 
             if(gamepad1.a){
-                gamepad1.runRumbleEffect(customRumbleEffect);
+                gamepad1.runRumbleEffect(testRumbleEffect);
             }
             else if(gamepad1.b){
-                gamepad1.stopRumble();
+                gamepad1.runRumbleEffect(onefourthRumbleEffect);
+            }
+            else if(gamepad1.x){
+                gamepad1.runRumbleEffect(tenRumbleEffect);
+            }
+            else if(gamepad1.y){
+                gamepad1.runRumbleEffect(halfRumbleEffect);
+            }
+            else if(gamepad1.dpad_up){
+                gamepad1.runRumbleEffect(endgameRumbleEffect);
+            }
+            else if(gamepad1.dpad_down){
+                gamepad1.runRumbleEffect(girlMode);
             }
 
         }
