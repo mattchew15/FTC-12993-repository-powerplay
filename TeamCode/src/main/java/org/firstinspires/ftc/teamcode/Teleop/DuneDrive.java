@@ -51,6 +51,7 @@ public class DuneDrive extends LinearOpMode {
     TurretLift turretlift = new TurretLift();
     Inputs inputs = new Inputs();
 
+
     // uses the Orientation class from the SDK to create variable angles
     Orientation angles;
     // uses the ElapsedTime class from the SDK to create variable GlobalTimer
@@ -94,9 +95,12 @@ public class DuneDrive extends LinearOpMode {
         liftpositiontype = 350;
     }
 
+
     @Override
     public void runOpMode() {
-
+        while (!isStarted()) {
+            turretlift.releaseClaw();
+        }
         rumbleSetup();
 
         // this is basically init, all setup, hardware classes etc get initialized here
