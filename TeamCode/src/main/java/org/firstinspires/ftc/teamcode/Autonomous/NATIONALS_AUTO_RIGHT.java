@@ -109,7 +109,7 @@ public class NATIONALS_AUTO_RIGHT extends LinearOpMode {
     public void runOpMode() throws InterruptedException {
 
         int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
-        camera = OpenCvCameraFactory.getInstance().createWebcam(hardwareMap.get(WebcamName.class, "Webcam 1"), cameraMonitorViewId);
+        camera = OpenCvCameraFactory.getInstance().createWebcam(hardwareMap.get(WebcamName.class, "WebcamRight"), cameraMonitorViewId); // cahnge which webcam is streaming
         sleeveDetection.aprilTagDetectionPipeline = new AprilTagDetectionPipeline(sleeveDetection.tagsize, sleeveDetection.fx, sleeveDetection.fy, sleeveDetection.cx, sleeveDetection.cy);
 
         camera.setPipeline(sleeveDetection.aprilTagDetectionPipeline);
@@ -216,7 +216,6 @@ public class NATIONALS_AUTO_RIGHT extends LinearOpMode {
 
             // main switch statement logic
             switch (currentState) {
-
                 case PRELOAD_DRIVE:
                     turretlift.closeClaw();
                     outakeOutReady(180,1,350, liftMidPosition); // get outake ready - do timer to make it later, putt hsi in a function
