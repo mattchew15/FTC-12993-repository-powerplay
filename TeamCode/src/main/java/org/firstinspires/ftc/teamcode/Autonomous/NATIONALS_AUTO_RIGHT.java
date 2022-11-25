@@ -107,6 +107,27 @@ public class NATIONALS_AUTO_RIGHT extends LinearOpMode {
 
     @Override
     public void runOpMode() throws InterruptedException {
+
+        int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
+        camera = OpenCvCameraFactory.getInstance().createWebcam(hardwareMap.get(WebcamName.class, "Webcam 1"), cameraMonitorViewId);
+        sleeveDetection.aprilTagDetectionPipeline = new AprilTagDetectionPipeline(sleeveDetection.tagsize, sleeveDetection.fx, sleeveDetection.fy, sleeveDetection.cx, sleeveDetection.cy);
+
+        camera.setPipeline(sleeveDetection.aprilTagDetectionPipeline);
+        camera.openCameraDeviceAsync(new OpenCvCamera.AsyncCameraOpenListener()
+        {
+            @Override
+            public void onOpened()
+            {
+                camera.startStreaming(800,448, OpenCvCameraRotation.UPRIGHT);
+            }
+
+            @Override
+            public void onError(int errorCode)
+            {
+
+            }
+        });
+
         // initialize hardware
         //drivebase.Drivebase_init(hardwareMap);
         turretlift.TurretLift_init(hardwareMap);
