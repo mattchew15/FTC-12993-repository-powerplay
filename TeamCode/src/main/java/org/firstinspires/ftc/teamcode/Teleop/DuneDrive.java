@@ -97,67 +97,24 @@ public class DuneDrive extends LinearOpMode {
     @Override
     public void runOpMode() {
 
-        oneFourthRumbleEffect = new Gamepad.RumbleEffect.Builder()
-                .addStep(1.0, 1.0, 100)
-                .addStep(0.0, 0.0, 100)
-                .addStep(1.0, 1.0, 100)
-                .addStep(0.0, 0.0, 100)
-                .addStep(1.0, 1.0, 100)
-                .addStep(0.0, 0.0, 100)
-                .addStep(1.0, 1.0, 100)
-                .build();
-
-        halfRumbleEffect = new Gamepad.RumbleEffect.Builder()
-                .addStep(1.0, 1.0, 500)
-                .addStep(0.0, 0.0, 300)
-                .addStep(1.0, 1.0, 750)
-                .build();
-
-        endgameRumbleEffect = new Gamepad.RumbleEffect.Builder()
-                .addStep(1.0, 1.0, 500)
-                .addStep(0.0, 0.0, 300)
-                .addStep(1.0, 1.0, 250)
-                .addStep(0.0, 0.0, 100)
-                .addStep(1.0, 1.0, 250)
-                .build();
-
-        tenRumbleEffect = new Gamepad.RumbleEffect.Builder()
-                .addStep(1.0, 1.0, 1000)
-                .build();
+        rumbleSetup();
 
         // this is basically init, all setup, hardware classes etc get initialized here
         drivebase.Drivebase_init(hardwareMap);
         turretlift.TurretLift_init(hardwareMap);
 
 
+
         // waits for user to press start on driverhub
         waitForStart();
         if (opModeIsActive()) {
-
-            if(runtime.seconds() > oneFourth && one){
-                gamepad1.runRumbleEffect(oneFourthRumbleEffect);
-                one = false;
-                two = true;
-            }
-            if(runtime.seconds() > halfTime && two){
-                gamepad1.runRumbleEffect(halfRumbleEffect);
-                two = false;
-                three = true;
-            }
-            if(runtime.seconds() > endgame && three){
-                gamepad1.runRumbleEffect(endgameRumbleEffect);
-                three = false;
-                four = true;
-            }
-            if(runtime.seconds() > tenTime && four) {
-                gamepad1.runRumbleEffect(tenRumbleEffect);
-                four = false;
-            }
-
+            runtime.reset();
             // runs setup function before main loop
             Setup();
 
             while (opModeIsActive()) {
+
+                rumble();
                 // Main loop. Run class methods here to do stuff
                 drivebase.Drive(gamepad1.left_stick_y,gamepad1.left_stick_x,gamepad1.right_stick_x);
                 drivebase.PowerToggle(gamepad1.a);
@@ -413,6 +370,58 @@ public class DuneDrive extends LinearOpMode {
         else if (gamepad2.x){
             liftpositiontype = 630;
         }
+    }
+
+    public void rumble(){
+        if(runtime.seconds() > oneFourth && one){
+            gamepad1.runRumbleEffect(oneFourthRumbleEffect);
+            one = false;
+            two = true;
+        }
+        if(runtime.seconds() > halfTime && two){
+            gamepad1.runRumbleEffect(halfRumbleEffect);
+            two = false;
+            three = true;
+        }
+        if(runtime.seconds() > endgame && three){
+            gamepad1.runRumbleEffect(endgameRumbleEffect);
+            three = false;
+            four = true;
+        }
+        if(runtime.seconds() > tenTime && four) {
+            gamepad1.runRumbleEffect(tenRumbleEffect);
+            four = false;
+        }
+    }
+
+    public void rumbleSetup() {
+        oneFourthRumbleEffect = new Gamepad.RumbleEffect.Builder()
+                .addStep(1.0, 1.0, 100)
+                .addStep(0.0, 0.0, 100)
+                .addStep(1.0, 1.0, 100)
+                .addStep(0.0, 0.0, 100)
+                .addStep(1.0, 1.0, 100)
+                .addStep(0.0, 0.0, 100)
+                .addStep(1.0, 1.0, 100)
+                .build();
+
+        halfRumbleEffect = new Gamepad.RumbleEffect.Builder()
+                .addStep(1.0, 1.0, 500)
+                .addStep(0.0, 0.0, 300)
+                .addStep(1.0, 1.0, 750)
+                .build();
+
+        endgameRumbleEffect = new Gamepad.RumbleEffect.Builder()
+                .addStep(1.0, 1.0, 500)
+                .addStep(0.0, 0.0, 300)
+                .addStep(1.0, 1.0, 250)
+                .addStep(0.0, 0.0, 100)
+                .addStep(1.0, 1.0, 250)
+                .build();
+
+        tenRumbleEffect = new Gamepad.RumbleEffect.Builder()
+                .addStep(1.0, 1.0, 1000)
+                .build();
     }
 }
 

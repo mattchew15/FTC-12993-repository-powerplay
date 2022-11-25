@@ -4,11 +4,13 @@ import static org.firstinspires.ftc.robotcore.external.BlocksOpModeCompanion.tel
 
 import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.robotcore.hardware.AnalogInput;
+import com.qualcomm.robotcore.hardware.CRServoImpl;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DigitalChannel;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.hardware.ServoImplEx;
 import com.qualcomm.robotcore.hardware.VoltageSensor;
 
 import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
@@ -18,7 +20,7 @@ public class TurretLift {  // no constructor for this class
 
     private DcMotorEx TurretMotor;
     private DcMotorEx LiftMotor;
-    private Servo ClawServo;
+    private ServoImplEx ClawServo;
     private Servo LinkageServo;
     private Servo TiltServo;
     private DigitalChannel sensorTouchClaw;
@@ -48,7 +50,7 @@ public class TurretLift {  // no constructor for this class
         TurretMotor = hwMap.get(DcMotorEx.class, "TurretMotor");
         LiftMotor = hwMap.get(DcMotorEx.class, "LiftMotor");
 
-        ClawServo = hwMap.get(Servo.class, "ClawS");
+        ClawServo = hwMap.get(ServoImplEx.class, "ClawS");
         LinkageServo = hwMap.get(Servo.class, "LinkageS");
         TiltServo = hwMap.get(Servo.class, "TiltS");
         sensorTouchClaw = hwMap.get(DigitalChannel.class, "sensor_touchClaw");
@@ -172,6 +174,9 @@ public class TurretLift {  // no constructor for this class
     }
 
     // servo void functions
+    public void releaseClaw(){
+        ClawServo.setPwmDisable();
+    }
     public void openClaw(){
         ClawServo.setPosition(ClawOpenPos);
     }

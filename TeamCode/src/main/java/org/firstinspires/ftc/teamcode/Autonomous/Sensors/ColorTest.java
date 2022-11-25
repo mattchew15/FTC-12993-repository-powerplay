@@ -44,8 +44,7 @@ public class ColorTest extends LinearOpMode {
 
             telemetry.addLine()
                     .addData("Red", "%.3f", colors.red)
-                    .addData("Green", "%.3f", colors.green)
-                    .addData("Blue", "%.3f", colors.blue);
+                    .addData("\nBlue", "%.3f", colors.blue);
 
             telemetry.update();
 
