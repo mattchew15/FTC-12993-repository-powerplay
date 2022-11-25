@@ -33,7 +33,6 @@ import org.openftc.easyopencv.OpenCvInternalCamera;
 
 import java.util.ArrayList;
 
-    @TeleOp
     public class AprilTagAutonomousInitDetectionExample extends LinearOpMode
     {
         OpenCvCamera camera;
@@ -54,9 +53,13 @@ import java.util.ArrayList;
         double tagsize = 0.166;
 
         // Tag ID 1,2,3 from the 36h11 family
+        /*
         int LEFT = 1;
         int MIDDLE = 2;
         int RIGHT = 3;
+         */
+
+
         AprilTagDetection tagOfInterest = null;
 
         @Override
@@ -98,7 +101,7 @@ import java.util.ArrayList;
 
                     for(AprilTagDetection tag : currentDetections)
                     {
-                        if(tag.id == LEFT || tag.id == MIDDLE || tag.id == RIGHT)
+                        if(tag.id == 1 || tag.id == 2 || tag.id == 3)
                         {
                             tagOfInterest = tag;
                             tagFound = true;
@@ -195,11 +198,11 @@ import java.util.ArrayList;
             }
         */ // original code end
 
-            if(tagOfInterest == null || tagOfInterest.id ==LEFT) {
+            if(tagOfInterest == null || tagOfInterest.id == 1) {
                 //trajectory
 
             }
-            else if(tagOfInterest.id == MIDDLE) {
+            else if(tagOfInterest.id == 2) {
                 //trajectory (in our case its just implementing it into the park whatever auton but we could make it even more efficient by
                 // just leaving it in here and calling the entire class)
             }
@@ -208,7 +211,6 @@ import java.util.ArrayList;
             }
 
             /* You wouldn't have this in your autonomous, this is just to prevent the sample from ending */
-            while (opModeIsActive()) {sleep(20);}
         }
 
         void tagToTelemetry(AprilTagDetection detection)

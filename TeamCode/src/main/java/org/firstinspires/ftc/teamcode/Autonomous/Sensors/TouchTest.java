@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.Autonomous;
+package org.firstinspires.ftc.teamcode.Autonomous.Sensors;
 
 import android.text.method.Touch;
 
@@ -11,7 +11,7 @@ import com.qualcomm.robotcore.hardware.TouchSensor;
 
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 
-@TeleOp(name = "Sensor: RevTouchSensor", group = "Sensor")
+@Autonomous(name = "Sensor: RevTouchSensor", group = "Sensor")
 
 public class TouchTest extends LinearOpMode {
 
@@ -30,7 +30,7 @@ public class TouchTest extends LinearOpMode {
         waitForStart();
         while(opModeIsActive()) {
 
-            if(sensorTouchClaw.getState() == true){
+            if(sensorTouchClaw.getState() == false){
                 telemetry.addData("Digital touch", "Is pressed");
             }
             else {
