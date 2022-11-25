@@ -21,7 +21,7 @@ public class TurretLift {  // no constructor for this class
     private DcMotorEx TurretMotor;
     private DcMotorEx LiftMotor;
     private ServoImplEx ClawServo;
-    private Servo LinkageServo;
+    private ServoImplEx LinkageServo;
     private Servo TiltServo;
     private DigitalChannel sensorTouchClaw;
     AnalogInput linkagePosition;
@@ -51,7 +51,7 @@ public class TurretLift {  // no constructor for this class
         LiftMotor = hwMap.get(DcMotorEx.class, "LiftMotor");
 
         ClawServo = hwMap.get(ServoImplEx.class, "ClawS");
-        LinkageServo = hwMap.get(Servo.class, "LinkageS");
+        LinkageServo = hwMap.get(ServoImplEx.class, "LinkageS");
         TiltServo = hwMap.get(Servo.class, "TiltS");
         sensorTouchClaw = hwMap.get(DigitalChannel.class, "sensor_touchClaw");
         sensorTouchClaw.setMode(DigitalChannel.Mode.INPUT);
@@ -192,6 +192,9 @@ public class TurretLift {  // no constructor for this class
     public void tiltUpHalf(){TiltServo.setPosition(TiltHalfPos);}
     public void tiltReset(){
         TiltServo.setPosition(TiltDownPos);
+    }
+    public void linkageRelease(){
+        LinkageServo.setPwmDisable();
     }
     public void linkageOut(){
         LinkageServo.setPosition(LinkageFullPos);
