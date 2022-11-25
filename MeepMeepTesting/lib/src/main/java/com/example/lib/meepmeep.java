@@ -8,7 +8,7 @@ import com.noahbres.meepmeep.roadrunner.entity.RoadRunnerBotEntity;
 
 public class meepmeep {
     public static void main(String[] args) {
-        MeepMeep meepMeep = new MeepMeep(600);
+        MeepMeep meepMeep = new MeepMeep(605);
         Pose2d startPose = new Pose2d(34, -59, Math.toRadians(0));
 
         RoadRunnerBotEntity myBot = new DefaultBotBuilder(meepMeep)
@@ -22,7 +22,9 @@ public class meepmeep {
                                 //.splineToConstantHeading(new Vector2d(35, -10), Math.toRadians(90))
                                 //.splineToConstantHeading(new Vector2d(36, -5), Math.toRadians(180))
                                 .lineTo(new Vector2d(35, -11.71))
-                                .lineTo(new Vector2d(41, -11.71))
+                                .lineTo(new Vector2d(58.33, -11.71))
+                                .lineTo(new Vector2d(11.67, -11.71))
+                                .lineTo(new Vector2d(58.33, -11.71))
 
                                 .build()
                 );
