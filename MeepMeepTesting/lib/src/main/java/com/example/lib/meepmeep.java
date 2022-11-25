@@ -9,20 +9,20 @@ import com.noahbres.meepmeep.roadrunner.entity.RoadRunnerBotEntity;
 public class meepmeep {
     public static void main(String[] args) {
         MeepMeep meepMeep = new MeepMeep(600);
-        Pose2d startPose = new Pose2d(15, -63, Math.toRadians(0));
+        Pose2d startPose = new Pose2d(34, -59, Math.toRadians(0));
 
         RoadRunnerBotEntity myBot = new DefaultBotBuilder(meepMeep)
                 // Set bot constraints: maxVel, maxAccel, maxAngVel, maxAngAccel, track width
                 .setConstraints(60, 60, Math.toRadians(180), Math.toRadians(180), 15)
                 .followTrajectorySequence(drive ->
-                        drive.trajectorySequenceBuilder(new Pose2d(30, -48, Math.toRadians(180)))
+                        drive.trajectorySequenceBuilder(new Pose2d(35, -58.58, Math.toRadians(0)))
                                  // spline to spline heading, first angle is target, second angle is target angle during path
 
 
-                                .splineToConstantHeading(new Vector2d(30, -10), Math.toRadians(180))
-                                .splineToConstantHeading(new Vector2d(36, -5), Math.toRadians(180))
-                                .lineTo(new Vector2d(35, -12))
-                               // .lineTo(new Vector2d(41, -11))
+                                //.splineToConstantHeading(new Vector2d(35, -10), Math.toRadians(90))
+                                //.splineToConstantHeading(new Vector2d(36, -5), Math.toRadians(180))
+                                .lineTo(new Vector2d(35, -11.71))
+                                .lineTo(new Vector2d(41, -11.71))
 
                                 .build()
                 );

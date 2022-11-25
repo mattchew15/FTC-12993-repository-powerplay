@@ -39,7 +39,7 @@ import java.util.Vector;
 
 
 
-@Autonomous(name = "PRELOAD_PARK_LEFT")
+@Autonomous(name = "PRELOAD_PARK_LEFT", group = "Autonomous")
 public class PRELOAD_PARK_LEFT extends LinearOpMode {
 
     // class members

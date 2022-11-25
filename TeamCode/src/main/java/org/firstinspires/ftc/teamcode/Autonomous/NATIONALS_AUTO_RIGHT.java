@@ -39,7 +39,7 @@ import java.util.Vector;
 
 
 
-@Autonomous(name = "NATIONALS_AUTO_RIGHT")
+@Autonomous(name = "NATIONALS_AUTO_RIGHT", group = "Autonomous")
 public class NATIONALS_AUTO_RIGHT extends LinearOpMode {
     //:)
 
