@@ -173,6 +173,7 @@ public class DuneDrive extends LinearOpMode {
                 telemetry.addData("turret raw position", turretlift.turretPos());
                 telemetry.addData("lift motor current draw", turretlift.getLiftVoltage());
                 telemetry.addData("sequence state", outakestate);
+                telemetry.addData("linkageposition:", turretlift.getLinkagePosition());
                 telemetry.update();
 
             }
@@ -203,7 +204,6 @@ public class DuneDrive extends LinearOpMode {
                     intaketype = 2; // will be lip facing towards robot
                 }
                 */
-
                 break;
 
             case PICKUP_STACK:
@@ -413,8 +413,6 @@ public class DuneDrive extends LinearOpMode {
         else if (gamepad2.x){
             liftpositiontype = 630;
         }
-
-
     }
 }
 

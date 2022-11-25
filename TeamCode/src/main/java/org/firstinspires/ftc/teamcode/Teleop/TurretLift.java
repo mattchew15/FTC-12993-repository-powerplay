@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode.Teleop;
 import static org.firstinspires.ftc.robotcore.external.BlocksOpModeCompanion.telemetry;
 
 import com.acmerobotics.dashboard.config.Config;
+import com.qualcomm.robotcore.hardware.AnalogInput;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DigitalChannel;
@@ -21,6 +22,7 @@ public class TurretLift {  // no constructor for this class
     private Servo LinkageServo;
     private Servo TiltServo;
     private DigitalChannel sensorTouchClaw;
+    AnalogInput linkagePosition;
 
     //config variables can be changed/tuned in dashboard
     public static double ClawOpenPos = 0.45, ClawClosedPos = 0.57, ClawCloseSoftPos = 0.54, ClawOpenHardPos = 0.4;
@@ -51,9 +53,10 @@ public class TurretLift {  // no constructor for this class
         TiltServo = hwMap.get(Servo.class, "TiltS");
         sensorTouchClaw = hwMap.get(DigitalChannel.class, "sensor_touchClaw");
         sensorTouchClaw.setMode(DigitalChannel.Mode.INPUT);
-
+        linkagePosition = hwMap.get(AnalogInput.class, "linkageEncoder");
 
     }
+
 
     public void motorsSetup(){
         TurretMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
@@ -128,6 +131,12 @@ public class TurretLift {  // no constructor for this class
         return sensorTouchClaw.getState();
     }
     // instead of using PID class uses the internal run to position on the motor
+
+    public double getLinkagePosition(){
+        double position = linkagePosition.getVoltage() / 3.3 * 360;
+        return position;
+    }
+
     public void turretSpinInternalPID(int rotations, double maxSpeed){
         turretTarget = rotations; // variable is public to this class?
         TurretMotor.setTargetPosition(turretTarget);
