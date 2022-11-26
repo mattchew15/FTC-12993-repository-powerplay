@@ -27,12 +27,14 @@ import org.opencv.core.Mat;
 import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
 import org.opencv.imgproc.Imgproc;
+import org.openftc.apriltag.AprilTagDetection;
 import org.openftc.easyopencv.OpenCvCamera;
 import org.openftc.easyopencv.OpenCvCameraFactory;
 import org.openftc.easyopencv.OpenCvCameraRotation;
 import org.openftc.easyopencv.OpenCvPipeline;
 import org.openftc.easyopencv.OpenCvWebcam;
 
+import java.util.ArrayList;
 import java.util.Queue;
 import java.util.Vector;
 
@@ -41,7 +43,6 @@ import java.util.Vector;
 
 @Autonomous(name = "NATIONALS_AUTO_RIGHT", group = "Autonomous")
 public class NATIONALS_AUTO_RIGHT extends LinearOpMode {
-    //:)
 
     // class members
     ElapsedTime GlobalTimer;
@@ -54,8 +55,8 @@ public class NATIONALS_AUTO_RIGHT extends LinearOpMode {
     int numCycles;
     int SignalRotation;
     int slowerVelocityConstraint;
-    final double outconestackX = 27;
-    final double outconestackY = -9.5;
+    final double outconestackX = 34;
+    final double outconestackY = -20;
     final double outconestackRotation = 0;
 
     // create class instances
@@ -63,9 +64,33 @@ public class NATIONALS_AUTO_RIGHT extends LinearOpMode {
     //DriveBase drivebase = new DriveBase(); // hardware classes
     TurretLift turretlift = new TurretLift();
     //Inputs inputs = new Inputs();
-    AprilTagAutonomousInitDetectionExample sleeveDetection = new AprilTagAutonomousInitDetectionExample();
     OpenCvCamera camera;
-    String webcamName = "Webcam 1"; // what our webcam is called in hardware class
+    AprilTagDetectionPipeline aprilTagDetectionPipeline;
+
+    static final double FEET_PER_METER = 3.28084;
+
+    // Lens intrinsics
+    // UNITS ARE PIXELS
+    // NOTE: this calibration is for the C920 webcam at 800x448.
+    // You will need to do your own calibration for other configurations!
+    double fx = 578.272;
+    double fy = 578.272;
+    double cx = 402.145;
+    double cy = 221.506;
+
+    // UNITS ARE METERS
+    double tagsize = 0.166;
+
+    // Tag ID 1,2,3 from the 36h11 family
+        /*
+        int LEFT = 1;
+        int MIDDLE = 2;
+        int RIGHT = 3;
+         */
+
+
+    AprilTagDetection tagOfInterest = null;
+
 
     enum AutoState {
         PRELOAD_DRIVE,
@@ -109,10 +134,10 @@ public class NATIONALS_AUTO_RIGHT extends LinearOpMode {
     public void runOpMode() throws InterruptedException {
 
         int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
-        camera = OpenCvCameraFactory.getInstance().createWebcam(hardwareMap.get(WebcamName.class, "WebcamRight"), cameraMonitorViewId); // cahnge which webcam is streaming
-        sleeveDetection.aprilTagDetectionPipeline = new AprilTagDetectionPipeline(sleeveDetection.tagsize, sleeveDetection.fx, sleeveDetection.fy, sleeveDetection.cx, sleeveDetection.cy);
+        camera = OpenCvCameraFactory.getInstance().createWebcam(hardwareMap.get(WebcamName.class, "WebcamLeft"), cameraMonitorViewId);
+        aprilTagDetectionPipeline = new AprilTagDetectionPipeline(tagsize, fx, fy, cx, cy);
 
-        camera.setPipeline(sleeveDetection.aprilTagDetectionPipeline);
+        camera.setPipeline(aprilTagDetectionPipeline);
         camera.openCameraDeviceAsync(new OpenCvCamera.AsyncCameraOpenListener()
         {
             @Override
@@ -128,6 +153,7 @@ public class NATIONALS_AUTO_RIGHT extends LinearOpMode {
             }
         });
 
+
         // initialize hardware
         //drivebase.Drivebase_init(hardwareMap);
         turretlift.TurretLift_init(hardwareMap);
@@ -141,7 +167,7 @@ public class NATIONALS_AUTO_RIGHT extends LinearOpMode {
         // trajectories that aren't changing should all be here
 
         Trajectory PreloadDrive = drive.trajectoryBuilder(startPose)
-                .lineToLinearHeading(new Pose2d(30, -48, Math.toRadians(outconestackRotation)))
+                .lineToLinearHeading(new Pose2d(36.5, -20, Math.toRadians(outconestackRotation)))
                 //.lineTo(new Vector2d(33, -15))
                 //.splineTo(new Vector2d(35, -40), Math.toRadians(-90)) // spline to spline heading, first angle is target, second angle is target angle during path
                 //.splineToSplineHeading(new Pose2d(35, -12, Math.toRadians(0)), Math.toRadians(-90)) // end effects shape of spline, first angle is the target heading
@@ -170,12 +196,61 @@ public class NATIONALS_AUTO_RIGHT extends LinearOpMode {
                 .build();
 
         while (!isStarted()) {
-            telemetry.addLine(String.format("\nDetected tag ID=%d", sleeveDetection.tagOfInterest.id));
-            telemetry.addLine(String.format("Rotation Yaw: %.2f degrees", Math.toDegrees(sleeveDetection.tagOfInterest.pose.yaw)));
-            telemetry.addLine(String.format("Rotation Pitch: %.2f degrees", Math.toDegrees(sleeveDetection.tagOfInterest.pose.pitch)));
-            telemetry.addLine(String.format("Rotation Roll: %.2f degrees", Math.toDegrees(sleeveDetection.tagOfInterest.pose.roll)));
+            ArrayList<AprilTagDetection> currentDetections = aprilTagDetectionPipeline.getLatestDetections();
+
+            if(currentDetections.size() != 0)
+            {
+                boolean tagFound = false;
+
+                for(AprilTagDetection tag : currentDetections)
+                {
+                    if(tag.id == 1 || tag.id == 2 || tag.id == 3)
+                    {
+                        tagOfInterest = tag;
+                        tagFound = true;
+                        break;
+                    }
+                }
+
+                if(tagFound)
+                {
+                    telemetry.addLine("Tag of interest is in sight!\n\nLocation data:");
+                    tagToTelemetry(tagOfInterest);
+                }
+                else
+                {
+                    telemetry.addLine("Don't see tag of interest :(");
+
+                    if(tagOfInterest == null)
+                    {
+                        telemetry.addLine("(The tag has never been seen)");
+                    }
+                    else
+                    {
+                        telemetry.addLine("\nBut we HAVE seen the tag before; last seen at:");
+                        tagToTelemetry(tagOfInterest);
+                    }
+                }
+
+            }
+            else
+            {
+                telemetry.addLine("Don't see tag of interest :(");
+
+                if(tagOfInterest == null)
+                {
+                    telemetry.addLine("(The tag has never been seen)");
+                }
+                else
+                {
+                    telemetry.addLine("\nBut we HAVE seen the tag before; last seen at:");
+                    tagToTelemetry(tagOfInterest);
+                }
+
+            }
+
             telemetry.update();
-            turretlift.closeClaw();
+            sleep(20);
         }
 
 
@@ -184,18 +259,19 @@ public class NATIONALS_AUTO_RIGHT extends LinearOpMode {
 
         // open cv changes the state at the start depending on cone rotation
         // open cv vision if statements to change variable and display telemetry here
-        if (sleeveDetection.tagOfInterest.id == 1) {
+        if(tagOfInterest == null || tagOfInterest.id == 1) {
             telemetry.addLine("Rotation Left");
             SignalRotation = 1;
-
-        } else if (sleeveDetection.tagOfInterest.id == 3) {
-            telemetry.addLine("Rotation Right");
-            SignalRotation = 3;
-        } else {
+        }
+        else if(tagOfInterest.id == 2) {
             telemetry.addLine("Rotation Centre");
             SignalRotation = 2;
-
         }
+        else {
+            telemetry.addLine("Rotation Right");
+            SignalRotation = 3;
+        }
+
         // runs instantly once
         drive.followTrajectoryAsync(PreloadDrive);
         autoTimer = GlobalTimer.milliseconds(); // reset timer not rly needed here
@@ -402,6 +478,15 @@ public class NATIONALS_AUTO_RIGHT extends LinearOpMode {
             outakeResetReady = false;
             turretlift.liftToInternalPID(350,0.5);
         }
+    }
+    void tagToTelemetry(AprilTagDetection detection) {
+        telemetry.addLine(String.format("\nDetected tag ID=%d", detection.id));
+        telemetry.addLine(String.format("Translation X: %.2f feet", detection.pose.x*FEET_PER_METER));
+        telemetry.addLine(String.format("Translation Y: %.2f feet", detection.pose.y*FEET_PER_METER));
+        telemetry.addLine(String.format("Translation Z: %.2f feet", detection.pose.z*FEET_PER_METER));
+        telemetry.addLine(String.format("Rotation Yaw: %.2f degrees", Math.toDegrees(detection.pose.yaw)));
+        telemetry.addLine(String.format("Rotation Pitch: %.2f degrees", Math.toDegrees(detection.pose.pitch)));
+        telemetry.addLine(String.format("Rotation Roll: %.2f degrees", Math.toDegrees(detection.pose.roll)));
     }
 }
 

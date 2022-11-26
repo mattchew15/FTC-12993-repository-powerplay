@@ -27,9 +27,9 @@ public class TurretLift {  // no constructor for this class
     AnalogInput linkagePosition;
 
     //config variables can be changed/tuned in dashboard
-    public static double ClawOpenPos = 0.45, ClawClosedPos = 0.57, ClawCloseSoftPos = 0.54, ClawOpenHardPos = 0.4;
-    public static double LinkageFullPos = 0.3, LinkageHalfPos = 0.16, LinkageQuarterPos = 0.1, LinkageClosedPos = 0.01, LinkageNearlyOutPos = 0.23;
-    public static double TiltUpPos = 0.3, TiltDownPos = 0.85, TiltHalfPos = 0.48;
+    public static double ClawOpenPos = 0.6, ClawClosedPos = 0.47, ClawCloseSoftPos = 0.54, ClawOpenHardPos = 0.7;
+    public static double LinkageFullPos = 0, LinkageHalfPos = 0.16, LinkageQuarterPos = 0.25, LinkageClosedPos = 0.49, LinkageNearlyOutPos = 0;
+    public static double TiltUpPos = 0.295, TiltDownPos = 0.87, TiltHalfPos = 0.48;
 
     //editable dashboard variables must be public static - PID values for turret and lift that can be tuned
     public static double TurretKp = 0.1, TurretKi = 0.001, TurretKd = 0.05;
@@ -75,8 +75,8 @@ public class TurretLift {  // no constructor for this class
     }
 
     public void liftMotorRawControl(double manualcontrollift){
-        TurretMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        TurretMotor.setPower(manualcontrollift * 0.35);
+        LiftMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        LiftMotor.setPower(manualcontrollift * -0.5);
     }
 
     public void turretMotorRawControl(double manualcontrolturret){
@@ -130,7 +130,7 @@ public class TurretLift {  // no constructor for this class
     }
 
     public boolean intakeTouchPressed() {
-        return sensorTouchClaw.getState();
+        return !sensorTouchClaw.getState();
     }
     // instead of using PID class uses the internal run to position on the motor
 
@@ -215,10 +215,10 @@ public class TurretLift {  // no constructor for this class
     }
 
     public double degreestoTicks(int degrees){
-        return degrees * 9;
+        return degrees * 7.6;
     }
     public double tickstoDegrees(int ticks){
-        return ticks / 9;
+        return ticks / 7.6;
     }
 
 

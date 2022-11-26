@@ -52,8 +52,9 @@ public class DriveBase {  // no constructor for this class
         FL.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
         //reverse correct motors
-        //FL.setDirection(DcMotorSimple.Direction.REVERSE); //DcMotorSimple class?
+        FL.setDirection(DcMotorSimple.Direction.REVERSE); //DcMotorSimple class?
         BL.setDirection(DcMotorSimple.Direction.REVERSE);
+        BR.setDirection(DcMotorSimple.Direction.REVERSE);
         IntakeLMotor.setDirection(DcMotorSimple.Direction.REVERSE); // one intake motor is reversed
     }
 

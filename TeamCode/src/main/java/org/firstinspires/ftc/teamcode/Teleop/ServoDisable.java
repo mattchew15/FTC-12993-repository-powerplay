@@ -10,6 +10,7 @@ public class ServoDisable extends LinearOpMode {
     TurretLift turretLift = new TurretLift();
 
     public void runOpMode(){
+        turretLift.TurretLift_init(hardwareMap);
 
         turretLift.releaseClaw();
         turretLift.linkageRelease();

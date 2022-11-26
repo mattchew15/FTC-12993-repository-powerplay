@@ -98,16 +98,16 @@ public class DuneDrive extends LinearOpMode {
 
     @Override
     public void runOpMode() {
-        while (!isStarted()) {
-            turretlift.releaseClaw();
-        }
+
         rumbleSetup();
 
         // this is basically init, all setup, hardware classes etc get initialized here
         drivebase.Drivebase_init(hardwareMap);
         turretlift.TurretLift_init(hardwareMap);
 
-
+        while (!isStarted()) {
+            turretlift.releaseClaw();
+        }
 
         // waits for user to press start on driverhub
         waitForStart();
@@ -121,6 +121,7 @@ public class DuneDrive extends LinearOpMode {
                 rumble();
                 // Main loop. Run class methods here to do stuff
                 drivebase.Drive(gamepad1.left_stick_y,gamepad1.left_stick_x,gamepad1.right_stick_x);
+                //drivebase.motorDirectionTest(gamepad1.left_stick_y, gamepad1.left_stick_x,gamepad1.right_stick_x,gamepad1.right_stick_y);
                 drivebase.PowerToggle(gamepad1.a);
                 liftSequence();
                 inputs.intakeStackToggleMode(gamepad2.left_stick_button);
@@ -128,13 +129,13 @@ public class DuneDrive extends LinearOpMode {
                 inputs.cycleToggleUp(gamepad2.right_bumper);
                 inputs.cycleToggleDown(gamepad2.left_bumper);
                 //inputs.gamepadRumbleTimer();
-                //drivebase.motorDirectionTest(gamepad1.left_stick_y, gamepad1.left_stick_x, gamepad1.right_stick_x, gamepad1.right_stick_y);
                 telemetry.addData("LiftMotorPosition", turretlift.liftPos());
                 telemetry.addData("turretPosition", turretlift.tickstoDegrees((int)Math.round(turretlift.turretPos())));
                 telemetry.addData("turret raw position", turretlift.turretPos());
                 telemetry.addData("lift motor current draw", turretlift.getLiftVoltage());
                 telemetry.addData("sequence state", outakestate);
                 telemetry.addData("linkageposition:", turretlift.getLinkagePosition());
+                telemetry.addData("INTAKE STACK TOGGLE MODE", inputs.IntakeStackToggleMode);
                 telemetry.update();
 
             }
@@ -188,7 +189,7 @@ public class DuneDrive extends LinearOpMode {
                 if (intaketype == 0){ // normal intake case
                     drivebase.intakeSpin(0.65);
                     drivebase.intakeBarUp();
-                    intakesequencetransition();
+                    intakesequencetransition(); // this is the dpad or limit switch thing
                 }
                 else if (intaketype == 1 || intaketype == 2) { // second intake case
                     drivebase.intakeSpin(0.65);
@@ -199,29 +200,28 @@ public class DuneDrive extends LinearOpMode {
                 break;
 
             case GRAB:
-                if (GlobalTimer.milliseconds() - outakesequencetimer > 0){ // this if statement is not needed at all
-                    drivebase.intakeSpin(0);
-                    turretlift.closeClaw();
-                    drivebase.intakeBarDown();
-                    turretPositionChange(); // allows drivers to change the turret position in this state
-                    if (GlobalTimer.milliseconds() - outakesequencetimer > 300){
-                        turretlift.closeClaw(); // not needed, servo is already going to position?
-                        turretlift.liftToInternalPID(350,1);
-                        turretlift.linkageIn();
-                        turretlift.tiltUpHalf();
-                        if (turretlift.liftTargetReachedInternalPID()){
-                            telemetry.addLine("lift is up");
-                            turretlift.turretSpinInternalPID((int)Math.round(turretpositiontype), 1); //
-                            outakestate = OutakeState.HEIGHT_LINKAGE; // it goes to height linkage thats why the lift goes up by default
-                        }
+                drivebase.intakeSpin(0);
+                turretlift.closeClaw();
+                drivebase.intakeBarDown();
+                turretPositionChange(); // allows drivers to change the turret position in this state
+                if (GlobalTimer.milliseconds() - outakesequencetimer > 200){
+                    telemetry.addLine("past this stageeeeeeeeeeeeeeeeeeeeee");
+                    turretlift.closeClaw(); // not needed, servo is already going to position?
+                    turretlift.liftToInternalPID(300,1);
+                    turretlift.linkageIn();
+                    turretlift.tiltUpHalf();
+                    if (turretlift.liftTargetReachedInternalPID()){
+                        telemetry.addLine("lift is up");
+                        turretlift.turretSpinInternalPID((int)Math.round(turretpositiontype), 1); //
+                        outakestate = OutakeState.HEIGHT_LINKAGE; // it goes to height linkage thats why the lift goes up by default
                     }
-                    else { // linkage in/out depending on if we intake stack
-                        if (inputs.IntakeStackToggleMode){
-                            turretlift.linkageOut();
-                        }
-                        else{
-                            turretlift.linkageIn();
-                        }
+                }
+                else { // linkage in/out depending on if we intake stack
+                    if (inputs.IntakeStackToggleMode){
+                        turretlift.linkageOut();
+                    }
+                    else{
+                        turretlift.linkageIn();
                     }
                 }
                 break;
@@ -301,7 +301,7 @@ public class DuneDrive extends LinearOpMode {
     }
 
     public void intakesequencetransition(){ // simplifies transition from INTAKE state to GRAB state
-        if (gamepad2.dpad_up || turretlift.intakeTouchPressed()){ // this was here dont know why && outakestate != OutakeState.DROP
+        if ((gamepad2.dpad_up || turretlift.intakeTouchPressed()) && outakestate != OutakeState.GRAB && outakestate != OutakeState.HEIGHT_LINKAGE && outakestate != OutakeState.RETURN && outakestate != OutakeState.DROP && outakestate != OutakeState.MANUAL_ENCODER_RESET && outakestate != OutakeState.READY){ // this was here dont know why && outakestate != OutakeState.DROP
             turretpositiontype = turretlift.degreestoTicks(180); // by default it will go 180 if limit switch touched
             outakestate = OutakeState.GRAB;
             outakesequencetimer = GlobalTimer.milliseconds(); //  reset timer
