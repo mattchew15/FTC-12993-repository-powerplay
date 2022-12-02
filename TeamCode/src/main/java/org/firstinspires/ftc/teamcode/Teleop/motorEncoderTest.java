@@ -70,11 +70,16 @@ public class motorEncoderTest extends LinearOpMode {
             while (opModeIsActive()) {
                 // Main loop. Run class methods here to do stuff
                 if(gamepad1.a){
-                    drivebase.runtoPositionTest(1000);
+                    turretlift.liftTo(500, turretlift.liftPos(), 1);
                 }
-                telemetry.addData("FL position", drivebase.getMotorPosition());
+                else if (gamepad1.b){
+                    turretlift.liftTo(100, turretlift.liftPos(), 1);
+                }
+                telemetry.addData("lift position", turretlift.liftPos());
+                telemetry.addData("pid error", turretlift.returnPIDLiftError());
+                telemetry.addData("pid output", turretlift.returnPIDLiftOutput());
+                telemetry.addData("pid integral sum", turretlift.returnIntegralSum());
                 telemetry.update();
-
             }
         }
     }

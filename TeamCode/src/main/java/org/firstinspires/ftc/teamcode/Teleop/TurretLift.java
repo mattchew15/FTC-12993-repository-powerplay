@@ -27,17 +27,17 @@ public class TurretLift {  // no constructor for this class
     AnalogInput linkagePosition;
 
     //config variables can be changed/tuned in dashboard
-    public static double ClawOpenPos = 0.6, ClawClosedPos = 0.47, ClawCloseSoftPos = 0.54, ClawOpenHardPos = 0.7;
-    public static double LinkageFullPos = 0, LinkageHalfPos = 0.16, LinkageQuarterPos = 0.25, LinkageClosedPos = 0.49, LinkageNearlyOutPos = 0;
-    public static double TiltUpPos = 0.295, TiltDownPos = 0.87, TiltHalfPos = 0.48;
+    public static double ClawOpenPos = 0.52, ClawClosedPos = 0.41, ClawCloseSoftPos = 0.45, ClawOpenHardPos = 0.61;
+    public static double LinkageFullPos = 0, LinkageHalfPos = 0.16, LinkageQuarterPos = 0.25, LinkageClosedPos = 0.49, LinkageNearlyOutPos = 0.06;
+    public static double TiltUpPos = 0.3, TiltDownPos = 0.87, TiltHalfPos = 0.48;
 
     //editable dashboard variables must be public static - PID values for turret and lift that can be tuned
-    public static double TurretKp = 0.1, TurretKi = 0.001, TurretKd = 0.05;
-    public static double LiftKp = 0.1, LiftKi = 0.001, LiftKd = 0.05;
+    public static double TurretKp = 0.005, TurretKi = 0.001, TurretKd = 0.05, TurretIntegralSumLimit = 1, TurretFeedforward = 0.3;
+    public static double LiftKp = 0.005, LiftKi = 0.01, LiftKd = 0.05, LiftIntegralSumLimit = 10, LiftKf = 0;
 
     // New instance of PID class with editable variables
-    PID turretPID = new PID(TurretKp,TurretKi,TurretKd);
-    PID liftPID = new PID(LiftKp,LiftKi,LiftKd);
+    PID turretPID = new PID(TurretKp,TurretKi,TurretKd,TurretIntegralSumLimit,TurretFeedforward);
+    PID liftPID = new PID(LiftKp,LiftKi,LiftKd,LiftIntegralSumLimit,LiftKf);
 
     // final variables
     final double turretthresholdDistance = degreestoTicks(8); // should make the threshold less
@@ -85,8 +85,10 @@ public class TurretLift {  // no constructor for this class
     }
 
 
-    public void liftTo(double rotations, double motorPosition, double maxSpeed){
-        double output = liftPID.update(rotations,motorPosition,maxSpeed); //does a lift to with external PID instead of just regular encoders
+    public void liftTo(int rotations, double motorPosition, double maxSpeed){
+        liftTarget = rotations;
+        LiftMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        double output = liftPID.update(liftTarget,motorPosition,maxSpeed); //does a lift to with external PID instead of just regular encoders
         LiftMotor.setPower(output);
     }
 
@@ -221,6 +223,15 @@ public class TurretLift {  // no constructor for this class
         return ticks / 7.6;
     }
 
+    public double returnPIDLiftError(){
+        return liftPID.returnError();
+    }
+    public double returnPIDLiftOutput(){
+        return liftPID.returnOutput();
+    }
+    public double returnIntegralSum(){
+        return liftPID.returnIntegralSum();
+    }
 
     //state machine sequence functions? finite state machine implimentation
 }

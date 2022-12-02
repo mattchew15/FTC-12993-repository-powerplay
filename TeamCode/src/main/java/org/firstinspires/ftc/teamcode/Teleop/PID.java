@@ -7,17 +7,21 @@ public class PID {
     double Kp;
     double Ki;
     double Kd;
-    double integralSumLimit = 0.3; // max integral value, should have its own constructor variable to change
+    double integralSumLimit; // max integral value, should have its own constructor variable to change
     double lastError;
     double integralSum;
     double error;
     double derivative;
+    double output;
+    double Kf;
 
 
-    public PID(double Kp, double Ki, double Kd){
+    public PID(double Kp, double Ki, double Kd, double integralSumLimit, double Kf){
         this.Kp = Kp;
         this.Kd = Kd;
         this.Ki = Ki;
+        this.integralSumLimit = integralSumLimit;
+        this.Kf = Kf;
     }
 
     public double update(double target, double state, double maxOutput) { // parameter of the method is the target,
@@ -32,7 +36,7 @@ public class PID {
         if (integralSum < -integralSumLimit) {
             integralSum = -integralSumLimit;
         }
-        double output = (Kp * error) + (Ki * integralSum) + (Kd * derivative);
+        output = (Kp * error) + (Ki * integralSum) + (Kd * derivative) + (Kf * target);
         if (output > maxOutput){ // basically cuts the PID so the motor can run at the max speed
             output = maxOutput;
         }
@@ -43,6 +47,11 @@ public class PID {
 
     public double returnError(){
         return error;
+    }
+    public double returnOutput () {return output;}
+
+    public double returnIntegralSum() {
+        return integralSum;
     }
 
 }

@@ -136,6 +136,7 @@ public class DuneDrive extends LinearOpMode {
                 telemetry.addData("sequence state", outakestate);
                 telemetry.addData("linkageposition:", turretlift.getLinkagePosition());
                 telemetry.addData("INTAKE STACK TOGGLE MODE", inputs.IntakeStackToggleMode);
+                telemetry.addData("INTAKE TOUCH", turretlift.intakeTouchPressed());
                 telemetry.update();
 
             }
