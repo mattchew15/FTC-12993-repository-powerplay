@@ -10,6 +10,8 @@ import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
+import com.qualcomm.robotcore.hardware.NormalizedColorSensor;
+import com.qualcomm.robotcore.hardware.NormalizedRGBA;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
@@ -88,7 +90,6 @@ public class NATIONALS_AUTO_RIGHT extends LinearOpMode {
         int MIDDLE = 2;
         int RIGHT = 3;
          */
-
 
     AprilTagDetection tagOfInterest = null;
 
