@@ -28,7 +28,7 @@ public class TurretLift {  // no constructor for this class
 
     //config variables can be changed/tuned in dashboard
     public static double ClawOpenPos = 0.52, ClawClosedPos = 0.41, ClawCloseSoftPos = 0.45, ClawOpenHardPos = 0.61;
-    public static double LinkageFullPos = 0, LinkageHalfPos = 0.16, LinkageQuarterPos = 0.25, LinkageClosedPos = 0.49, LinkageNearlyOutPos = 0.06;
+    public static double LinkageFullPos = 0, LinkageHalfPos = 0.16, LinkageQuarterPos = 0.26, LinkageClosedPos = 0.49, LinkageNearlyOutPos = 0.06;
     public static double TiltUpPos = 0.3, TiltDownPos = 0.87, TiltHalfPos = 0.48;
 
     //editable dashboard variables must be public static - PID values for turret and lift that can be tuned

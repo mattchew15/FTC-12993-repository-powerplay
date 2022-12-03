@@ -57,7 +57,7 @@ public class NATIONALS_AUTO_RIGHT extends LinearOpMode {
     int SignalRotation;
     int slowerVelocityConstraint;
     final double outconestackX = 41;
-    final double outconestackY = -5.5;
+    final double outconestackY = -5.8;
     final double outconestackRotation = 0;
 
     // create class instances
@@ -372,7 +372,7 @@ public class NATIONALS_AUTO_RIGHT extends LinearOpMode {
                     break;
 
                 case DRIVE_OUT_STACK:
-                    outakeOutReady(144,1,liftMidPosition, liftMidPosition); // what's faster, driving or outake - balance of both is best
+                    outakeOutReady(143,1,liftMidPosition, liftMidPosition); // what's faster, driving or outake - balance of both is best
                     if (linkageOutReady){
                         turretlift.linkageNearlyOut();
                     }
