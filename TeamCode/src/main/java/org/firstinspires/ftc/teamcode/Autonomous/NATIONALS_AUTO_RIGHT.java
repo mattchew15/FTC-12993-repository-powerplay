@@ -59,8 +59,9 @@ public class NATIONALS_AUTO_RIGHT extends LinearOpMode {
     int SignalRotation;
     int slowerVelocityConstraint;
     final double outconestackX = 41;
-    final double outconestackY = -5.8;
+    final double outconestackY = -6.2;
     final double outconestackRotation = 0;
+
 
     // create class instances
 
@@ -171,7 +172,7 @@ public class NATIONALS_AUTO_RIGHT extends LinearOpMode {
         // trajectories that aren't changing should all be here
 
         Trajectory PreloadDrive = drive.trajectoryBuilder(startPose)
-                .lineToLinearHeading(new Pose2d(38, -19.5, Math.toRadians(outconestackRotation)))
+                .lineToLinearHeading(new Pose2d(38, -20.3, Math.toRadians(outconestackRotation)))
                 //.lineTo(new Vector2d(33, -15))
                 //.splineTo(new Vector2d(35, -40), Math.toRadians(-90)) // spline to spline heading, first angle is target, second angle is target angle during path
                 //.splineToSplineHeading(new Pose2d(35, -12, Math.toRadians(0)), Math.toRadians(-90)) // end effects shape of spline, first angle is the target heading
@@ -183,7 +184,7 @@ public class NATIONALS_AUTO_RIGHT extends LinearOpMode {
 
 
         Trajectory IntoConeStack = drive.trajectoryBuilder(new Pose2d(outconestackX, outconestackY, Math.toRadians(outconestackRotation)), true)
-                .lineToLinearHeading(new Pose2d(55.5, -6, Math.toRadians(0)), SampleMecanumDrive.getVelocityConstraint(slowerVelocityConstraint, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH),
+                .lineToLinearHeading(new Pose2d(55.5, -6.5, Math.toRadians(0)), SampleMecanumDrive.getVelocityConstraint(slowerVelocityConstraint, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH),
                         SampleMecanumDrive.getAccelerationConstraint(DriveConstants.MAX_ACCEL))
                 .build();
 
@@ -315,9 +316,9 @@ public class NATIONALS_AUTO_RIGHT extends LinearOpMode {
                     if (GlobalTimer.milliseconds() - autoTimer > 450){ // wait after claw
                         turretlift.openClaw();
                         //turretlift.liftToInternalPID(liftMidPosition-100,1); // move the lift down when it drops
-                        if (GlobalTimer.milliseconds() - autoTimer > 550){
+                        if (GlobalTimer.milliseconds() - autoTimer > 650){
                             turretlift.linkageIn();
-                            if (GlobalTimer.milliseconds() - autoTimer > 600){ // could be faster
+                            if (GlobalTimer.milliseconds() - autoTimer > 700){ // could be faster
                                 readyOutake();  // linkage goes in
                                 drive.followTrajectoryAsync(IntoConeStackPreload);
                                 currentState = AutoState.PRELOAD_INTO_STACK;
@@ -353,10 +354,10 @@ public class NATIONALS_AUTO_RIGHT extends LinearOpMode {
                     break;
 
                 case WAIT_AFTER_GRAB_STACK: // if it is the linkage extending first before it drives in, then need to do position feedback on the servo to hold at its current position
-                    if (GlobalTimer.milliseconds() - autoTimer > 150){
+                    if (GlobalTimer.milliseconds() - autoTimer > 120){
                         //turretlift.linkageNearlyOut(); because its moving backwards this shoudn't be needed
                         turretlift.liftToInternalPID(liftMidPosition,1);
-                        if (GlobalTimer.milliseconds() - autoTimer > 450){
+                        if (GlobalTimer.milliseconds() - autoTimer > 400){
                             turretlift.linkageIn();
                             if (GlobalTimer.milliseconds() - autoTimer > 460){ // this could be reduced
                                 //Trajectory OutConeStack = drive.trajectoryBuilder(poseEstimate)
@@ -438,6 +439,7 @@ public class NATIONALS_AUTO_RIGHT extends LinearOpMode {
 
                 case IDLE:
                     telemetry.addLine("WWWWWWWWWWW");
+                    turretlift.closeClaw();
                     outakeIdle();
                     break;
 
