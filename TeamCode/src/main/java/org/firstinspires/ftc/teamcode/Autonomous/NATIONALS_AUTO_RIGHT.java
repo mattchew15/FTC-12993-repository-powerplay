@@ -10,6 +10,8 @@ import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
+import com.qualcomm.robotcore.hardware.NormalizedColorSensor;
+import com.qualcomm.robotcore.hardware.NormalizedRGBA;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
@@ -89,7 +91,7 @@ public class NATIONALS_AUTO_RIGHT extends LinearOpMode {
         int RIGHT = 3;
          */
 
-
+    NormalizedColorSensor sensorColor;
     AprilTagDetection tagOfInterest = null;
 
 
@@ -135,6 +137,8 @@ public class NATIONALS_AUTO_RIGHT extends LinearOpMode {
 
     @Override
     public void runOpMode() throws InterruptedException {
+
+        sensorColor = hardwareMap.get(NormalizedColorSensor.class, "sensor_Color");
 
         int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
         camera = OpenCvCameraFactory.getInstance().createWebcam(hardwareMap.get(WebcamName.class, "WebcamLeft"), cameraMonitorViewId);
@@ -282,6 +286,8 @@ public class NATIONALS_AUTO_RIGHT extends LinearOpMode {
         turretlift.closeClaw();
 
         while (opModeIsActive() && !isStopRequested()) {
+
+            NormalizedRGBA colors = sensorColor.getNormalizedColors();
             // Read pose
             Pose2d poseEstimate = drive.getPoseEstimate(); // gets the position of the robot
 

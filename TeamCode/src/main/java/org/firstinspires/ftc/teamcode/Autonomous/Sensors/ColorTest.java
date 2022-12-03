@@ -43,8 +43,8 @@ public class ColorTest extends LinearOpMode {
             NormalizedRGBA colors = sensorColorIntake.getNormalizedColors();
 
             telemetry.addLine()
-                    .addData("Red", "%.3f", colors.red)
-                    .addData("\nBlue", "%.3f", colors.blue);
+                    .addData("Red", "%.6f", colors.red)
+                    .addData("\nBlue", "%.6f", colors.blue);
 
             telemetry.update();
 
