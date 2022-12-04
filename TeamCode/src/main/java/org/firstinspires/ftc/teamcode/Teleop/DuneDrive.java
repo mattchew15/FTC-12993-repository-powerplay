@@ -32,6 +32,7 @@ public class DuneDrive extends LinearOpMode {
     Gamepad.RumbleEffect endgameRumbleEffect;
     Gamepad.RumbleEffect tenRumbleEffect;
     Gamepad.RumbleEffect oneFourthRumbleEffect;
+    Gamepad.RumbleEffect switchRumbleEffect;
 
     //Timing for rumble
     ElapsedTime runtime = new ElapsedTime();
@@ -62,6 +63,7 @@ public class DuneDrive extends LinearOpMode {
     int liftpositiontype;
     double outakesequencetimer; // change these into the class, optimize object oriented code its kinda clunky rn
     int liftHighPosition = 850;
+    int liftMidPosition = 650;
 
     // states for asynchronus sequences
     enum OutakeState {
@@ -75,6 +77,7 @@ public class DuneDrive extends LinearOpMode {
         FINE_ADJUST, // gamepad2 controls fine adjust
         DROP, // gamepad1.rightbumper
         RETURN, // calculate the fastest way for everything to be moving simaltaneously
+        RETURN_PICKUP_STACK,
         MANUAL_ENCODER_RESET // USE VERY CAREFULLY
     }
 
@@ -124,8 +127,8 @@ public class DuneDrive extends LinearOpMode {
                 //drivebase.motorDirectionTest(gamepad1.left_stick_y, gamepad1.left_stick_x,gamepad1.right_stick_x,gamepad1.right_stick_y);
                 drivebase.PowerToggle(gamepad1.a);
                 liftSequence();
-                inputs.intakeStackToggleMode(gamepad2.left_stick_button);
-                inputs.manualResetToggleMode(gamepad2.right_stick_button);
+                inputs.intakeStackToggleMode(gamepad2.right_stick_button);
+                inputs.manualResetToggleMode(gamepad2.left_stick_button);
                 inputs.cycleToggleUp(gamepad2.right_bumper);
                 inputs.cycleToggleDown(gamepad2.left_bumper);
                 //inputs.gamepadRumbleTimer();
@@ -172,11 +175,14 @@ public class DuneDrive extends LinearOpMode {
             case PICKUP_STACK:
                 drivebase.intakeBarDown();
                 turretlift.turretSpinInternalPID(0, 1);
-                turretlift.liftToInternalPID(145 - inputs.IntakeHeightState * 22,0.8); // 20 controls imcrement amount
+                turretlift.liftTo(185 - inputs.IntakeHeightState * 35,turretlift.liftPos(), 1); // 20 controls imcrement amount
                 if (turretlift.liftPos() > 80){ // greater then the height it hits the bar
-                    turretlift.linkageOut(); // should be driving to touch tthe cone, not extending to touch the cone
+                    turretlift.linkageOutHalf(); // should be driving to touch tthe cone, not extending to touch the cone
                     turretlift.openClawHard(); // makes alligning easier
                     intakesequencetransition(); // limit switch might be annoying
+                    /*if (!inputs.IntakeStackToggleMode){
+
+                    } */
                 }
                 else{
                     turretlift.linkageIn();
@@ -209,7 +215,7 @@ public class DuneDrive extends LinearOpMode {
                     telemetry.addLine("past this stageeeeeeeeeeeeeeeeeeeeee");
                     turretlift.closeClaw(); // not needed, servo is already going to position?
                     turretlift.liftToInternalPID(300,1);
-                    turretlift.linkageIn();
+                    //turretlift.linkageIn(); // this should make it so that the linkage doesnt go in when we are picking up from stack
                     turretlift.tiltUpHalf();
                     if (turretlift.liftTargetReachedInternalPID()){
                         telemetry.addLine("lift is up");
@@ -248,18 +254,17 @@ public class DuneDrive extends LinearOpMode {
                         turretlift.openClaw();
                         turretlift.linkageIn();
                         outakesequencetimer = GlobalTimer.milliseconds(); //  reset timer
-                        turretlift.liftToInternalPID(liftpositiontype - 200,1); // makes the lift drop before it returns
                         outakestate = OutakeState.RETURN;
                     }
                 }
                 break;
 
             case RETURN: // could add it so it goes straight to linkage out for intaking stack
-                if (GlobalTimer.milliseconds() - outakesequencetimer > 300){ // make faster
+                if (GlobalTimer.milliseconds() - outakesequencetimer > 300){ // make faster wait for drop
                     turretlift.turretSpinInternalPID(0, 1);
                     turretlift.tiltReset();
                     turretlift.linkageIn();
-                    turretlift.closeClaw();
+                    turretlift.closeClawHard();
                     drivebase.intakeSpin(-0.5);
                     if (turretlift.turretTargetReachedInteralPID()){
                         //telemetry.addData("turret return target reached?", true);
@@ -274,16 +279,41 @@ public class DuneDrive extends LinearOpMode {
                     }
                 }
                 else {
+                    //turretlift.liftToInternalPID(350,1); // could be faster
+                }
+                break;
+
+            case RETURN_PICKUP_STACK: // could add it so it goes straight to linkage out for intaking stack
+                if (GlobalTimer.milliseconds() - outakesequencetimer > 300){ // make faster
+                    turretlift.turretSpinInternalPID(0, 1);
+                    turretlift.tiltReset();
+                    turretlift.closeClawHard();
+                    drivebase.intakeSpin(-0.5);
+                    if (turretlift.turretTargetReachedInteralPID()){
+                        //telemetry.addData("turret return target reached?", true);
+                        telemetry.addLine("turret return target reached");
+                        turretlift.liftToInternalPID(230,1); // slower so nothing breaks
+                        if (turretlift.liftPos() > 170){ //turretlift.liftTargetReachedInternalPID()
+                            turretlift.linkageIn();
+                            outakestate = OutakeState.RETURN;
+                            inputs.IntakeStackToggleMode = false;
+                            outakesequencetimer = GlobalTimer.milliseconds();
+                        }
+                    } else {
+                        turretlift.liftToInternalPID(350,1); // going down while turning
+                    }
+                }
+                else {
                     turretlift.liftToInternalPID(350,1); // could be faster
                 }
                 break;
 
             case MANUAL_ENCODER_RESET: // manual reset in case anything happens
-                turretlift.liftMotorRawControl(gamepad2.right_stick_y);
+                turretlift.liftMotorRawControl(gamepad2.left_stick_y);
                 turretlift.turretMotorRawControl(gamepad2.left_stick_x);
                 turretlift.tiltReset();
                 turretlift.linkageIn();
-                turretlift.closeClaw();
+                turretlift.closeClawHard();
                 if (gamepad2.right_bumper){
                     turretlift.encodersReset();
                     outakestate = OutakeState.READY;
@@ -291,13 +321,24 @@ public class DuneDrive extends LinearOpMode {
                 break;
 
         }
-        if (gamepad2.b && outakestate != OutakeState.READY || gamepad1.b && outakestate != OutakeState.READY){
-            outakestate = OutakeState.RETURN; // return to ready state no matter what state the system is in
+        if ((gamepad2.b && outakestate != OutakeState.READY) || (gamepad1.b && outakestate != OutakeState.READY)){
+            if (inputs.IntakeStackToggleMode){
+                outakestate = OutakeState.RETURN_PICKUP_STACK; // return to ready state no matter what state the system is in
+            }
+            else{
+                outakestate = OutakeState.RETURN; // return to ready state no matter what state the system is in
+            }
+
+           // inputs.IntakeStackToggleMode = false;
         }
         intakesequencetransition(); // not sure this works, but at any stage if you press dpad it will go back to the grab phase and you can rotate the turret
         liftPositionChangenostatechange();
         if (inputs.ManualResetToggleMode){
             outakestate = OutakeState.MANUAL_ENCODER_RESET;
+            if (gamepad2.right_stick_button){
+                gamepad2.runRumbleEffect(switchRumbleEffect);
+                gamepad1.runRumbleEffect(switchRumbleEffect);
+            }
         }
     }
 
@@ -354,7 +395,7 @@ public class DuneDrive extends LinearOpMode {
             outakesequencetimer = GlobalTimer.milliseconds(); //  reset timer
         }
         else if (gamepad2.x){
-            liftpositiontype = 700;
+            liftpositiontype = liftMidPosition;
             outakestate = OutakeState.DROP;
             turretlift.tiltUpHalf();
             turretlift.linkageOutHalf();
@@ -380,21 +421,25 @@ public class DuneDrive extends LinearOpMode {
     public void rumble(){
         if(runtime.seconds() > oneFourth && one){
             gamepad1.runRumbleEffect(oneFourthRumbleEffect);
+            gamepad2.runRumbleEffect(oneFourthRumbleEffect);
             one = false;
             two = true;
         }
         if(runtime.seconds() > halfTime && two){
             gamepad1.runRumbleEffect(halfRumbleEffect);
+            gamepad2.runRumbleEffect(halfRumbleEffect);
             two = false;
             three = true;
         }
         if(runtime.seconds() > endgame && three){
             gamepad1.runRumbleEffect(endgameRumbleEffect);
+            gamepad2.runRumbleEffect(endgameRumbleEffect);
             three = false;
             four = true;
         }
         if(runtime.seconds() > tenTime && four) {
             gamepad1.runRumbleEffect(tenRumbleEffect);
+            gamepad2.runRumbleEffect(tenRumbleEffect);
             four = false;
         }
     }
@@ -426,6 +471,10 @@ public class DuneDrive extends LinearOpMode {
 
         tenRumbleEffect = new Gamepad.RumbleEffect.Builder()
                 .addStep(1.0, 1.0, 1000)
+                .build();
+
+        switchRumbleEffect = new Gamepad.RumbleEffect.Builder()
+                .addStep(0.5, 0.5, 500)
                 .build();
     }
 }

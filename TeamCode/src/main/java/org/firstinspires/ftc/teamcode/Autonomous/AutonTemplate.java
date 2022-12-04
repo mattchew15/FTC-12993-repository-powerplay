@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.Autonomous;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
@@ -15,7 +16,7 @@ import java.util.ArrayList;
 
 
 @Autonomous(name = "AprilVision", group = "vision")
-
+@Disabled
 public class AutonTemplate extends LinearOpMode
 {
     //INTRODUCE VARIABLES HERE
