@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.Autonomous;
+package org.firstinspires.ftc.teamcode.Autonomous.RegionalsStuff;
 
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.geometry.Vector2d;
@@ -16,6 +16,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
+import org.firstinspires.ftc.teamcode.Autonomous.AprilTagDetectionPipeline;
 import org.firstinspires.ftc.teamcode.Teleop.DriveBase;
 import org.firstinspires.ftc.teamcode.Teleop.DuneDrive;
 import org.firstinspires.ftc.teamcode.Teleop.Inputs;
@@ -43,6 +44,7 @@ import java.util.Vector;
 @Disabled
 
 @Autonomous(name = "Auto Right High", group = "Autonomous")
+@Disabled
 public class National_Auto_Right_High extends LinearOpMode {
 
     // class members
