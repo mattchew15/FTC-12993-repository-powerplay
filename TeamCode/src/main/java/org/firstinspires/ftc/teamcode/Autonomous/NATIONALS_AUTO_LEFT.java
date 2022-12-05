@@ -1,51 +1,23 @@
-package org.firstinspires.ftc.teamcode.Autonomous.RegionalsStuff;
-
+package org.firstinspires.ftc.teamcode.Autonomous;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.geometry.Vector2d;
 import com.acmerobotics.roadrunner.trajectory.Trajectory;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.hardware.CRServo;
-import com.qualcomm.robotcore.hardware.ColorSensor;
-import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.DistanceSensor;
-import com.qualcomm.robotcore.hardware.HardwareMap;
-import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
-
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
-import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
-import org.firstinspires.ftc.teamcode.Autonomous.AprilTagDetectionPipeline;
-import org.firstinspires.ftc.teamcode.Teleop.DriveBase;
-import org.firstinspires.ftc.teamcode.Teleop.DuneDrive;
-import org.firstinspires.ftc.teamcode.Teleop.Inputs;
 import org.firstinspires.ftc.teamcode.Teleop.TurretLift;
 import org.firstinspires.ftc.teamcode.drive.DriveConstants;
 import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
-import org.firstinspires.ftc.teamcode.trajectorysequence.TrajectorySequence;
-import org.opencv.core.Core;
-import org.opencv.core.Mat;
-import org.opencv.core.Rect;
-import org.opencv.core.Scalar;
-import org.opencv.imgproc.Imgproc;
 import org.openftc.apriltag.AprilTagDetection;
 import org.openftc.easyopencv.OpenCvCamera;
 import org.openftc.easyopencv.OpenCvCameraFactory;
 import org.openftc.easyopencv.OpenCvCameraRotation;
-import org.openftc.easyopencv.OpenCvPipeline;
-import org.openftc.easyopencv.OpenCvWebcam;
-
 import java.util.ArrayList;
-import java.util.Queue;
-import java.util.Vector;
 
 
-
-
-@Autonomous(name = "Auto Right High", group = "Autonomous")
-@Disabled
-public class National_Auto_Right_High extends LinearOpMode {
+@Autonomous(name = "NATIONALS_AUTO_LEFT", group = "Autonomous")
+public class NATIONALS_AUTO_LEFT extends LinearOpMode {
 
     // class members
     ElapsedTime GlobalTimer;
@@ -59,15 +31,30 @@ public class National_Auto_Right_High extends LinearOpMode {
     int numCycles;
     int SignalRotation;
     int slowerVelocityConstraint;
-    final double outconestackX = 41;
-    final double outconestackY = -5.5;
-    final double outconestackRotation = 0;
+
+    final double outconestackX = -41.3;
+    final double outconestackY = -6.2;
+    final double outconestackRotation = 180;
+
+    // VARIABLES CHANGED FROM RIGHT SIDE AUTO: x values, rotation values and turret value
+    /*
+    outconestackx
+    outconestackrotation
+    startingx
+    startingrotation
+    preloaddrivex
+    intoconestackx
+    intoconestackrotation
+    park right, left, centre x values
+
+    turret outake preload value
+    turret outake normal value
+
+     */
 
     // create class instances
 
-    //DriveBase drivebase = new DriveBase(); // hardware classes
     TurretLift turretlift = new TurretLift();
-    //Inputs inputs = new Inputs();
     OpenCvCamera camera;
     AprilTagDetectionPipeline aprilTagDetectionPipeline;
 
@@ -84,14 +71,6 @@ public class National_Auto_Right_High extends LinearOpMode {
 
     // UNITS ARE METERS
     double tagsize = 0.166;
-
-    // Tag ID 1,2,3 from the 36h11 family
-        /*
-        int LEFT = 1;
-        int MIDDLE = 2;
-        int RIGHT = 3;
-         */
-
 
     AprilTagDetection tagOfInterest = null;
 
@@ -134,13 +113,13 @@ public class National_Auto_Right_High extends LinearOpMode {
         slowerVelocityConstraint = 12;
     }
     // Define our start pose
-    Pose2d startPose = new Pose2d(38, -69, Math.toRadians(0));
+    Pose2d startPose = new Pose2d(-38, -69, Math.toRadians(180));
 
     @Override
     public void runOpMode() throws InterruptedException {
 
         int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
-        camera = OpenCvCameraFactory.getInstance().createWebcam(hardwareMap.get(WebcamName.class, "WebcamLeft"), cameraMonitorViewId);
+        camera = OpenCvCameraFactory.getInstance().createWebcam(hardwareMap.get(WebcamName.class, "WebcamRight"), cameraMonitorViewId);
         aprilTagDetectionPipeline = new AprilTagDetectionPipeline(tagsize, fx, fy, cx, cy);
 
         camera.setPipeline(aprilTagDetectionPipeline);
@@ -161,11 +140,10 @@ public class National_Auto_Right_High extends LinearOpMode {
 
 
         // initialize hardware
-        //drivebase.Drivebase_init(hardwareMap);
         turretlift.TurretLift_init(hardwareMap);
         SampleMecanumDrive drive = new SampleMecanumDrive(hardwareMap); // road drive class
 
-        // functions runs on startz
+        // functions runs on start
         Setup();
         // Set inital pose
         drive.setPoseEstimate(startPose);
@@ -173,7 +151,7 @@ public class National_Auto_Right_High extends LinearOpMode {
         // trajectories that aren't changing should all be here
 
         Trajectory PreloadDrive = drive.trajectoryBuilder(startPose)
-                .lineToLinearHeading(new Pose2d(38, -19.5, Math.toRadians(outconestackRotation)))
+                .lineToLinearHeading(new Pose2d(-38, -20.3, Math.toRadians(outconestackRotation)))
                 //.lineTo(new Vector2d(33, -15))
                 //.splineTo(new Vector2d(35, -40), Math.toRadians(-90)) // spline to spline heading, first angle is target, second angle is target angle during path
                 //.splineToSplineHeading(new Pose2d(35, -12, Math.toRadians(0)), Math.toRadians(-90)) // end effects shape of spline, first angle is the target heading
@@ -185,20 +163,20 @@ public class National_Auto_Right_High extends LinearOpMode {
 
 
         Trajectory IntoConeStack = drive.trajectoryBuilder(new Pose2d(outconestackX, outconestackY, Math.toRadians(outconestackRotation)), true)
-                .lineToLinearHeading(new Pose2d(55.5, -6, Math.toRadians(0)), SampleMecanumDrive.getVelocityConstraint(slowerVelocityConstraint, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH),
+                .lineToLinearHeading(new Pose2d(-55.5, -6.5, Math.toRadians(180)), SampleMecanumDrive.getVelocityConstraint(slowerVelocityConstraint, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH),
                         SampleMecanumDrive.getAccelerationConstraint(DriveConstants.MAX_ACCEL))
                 .build();
 
         Trajectory ParkRight = drive.trajectoryBuilder(new Pose2d(outconestackX, outconestackY, Math.toRadians(outconestackRotation)))
-                .lineTo(new Vector2d(64,outconestackY))
+                .lineTo(new Vector2d(-64,outconestackY))
                 .build();
 
         Trajectory ParkLeft = drive.trajectoryBuilder(new Pose2d(outconestackX, outconestackY, Math.toRadians(outconestackRotation)))
-                .lineTo(new Vector2d(8,outconestackY))
+                .lineTo(new Vector2d(-8,outconestackY))
                 .build();
 
         Trajectory ParkCentre = drive.trajectoryBuilder(new Pose2d(outconestackX, outconestackY, Math.toRadians(outconestackRotation)))
-                .lineTo(new Vector2d(35,outconestackY))
+                .lineTo(new Vector2d(-35,outconestackY))
                 .build();
 
         while (!isStarted()) {
@@ -302,7 +280,7 @@ public class National_Auto_Right_High extends LinearOpMode {
             switch (currentState) {
                 case PRELOAD_DRIVE:
                     turretlift.closeClaw();
-                    outakeOutReady(180,1,350, liftMidPosition); // get outake ready - do timer to make it later, putt hsi in a function
+                    outakeOutReady(-180,1,350, liftMidPosition); // get outake ready - do timer to make it later, putt hsi in a function
                     if (linkageOutReady){
                         turretlift.linkageOutQuarter();
                     }
@@ -317,9 +295,9 @@ public class National_Auto_Right_High extends LinearOpMode {
                     if (GlobalTimer.milliseconds() - autoTimer > 450){ // wait after claw
                         turretlift.openClaw();
                         //turretlift.liftToInternalPID(liftMidPosition-100,1); // move the lift down when it drops
-                        if (GlobalTimer.milliseconds() - autoTimer > 550){
+                        if (GlobalTimer.milliseconds() - autoTimer > 650){
                             turretlift.linkageIn();
-                            if (GlobalTimer.milliseconds() - autoTimer > 600){ // could be faster
+                            if (GlobalTimer.milliseconds() - autoTimer > 700){ // could be faster
                                 readyOutake();  // linkage goes in
                                 drive.followTrajectoryAsync(IntoConeStackPreload);
                                 currentState = AutoState.PRELOAD_INTO_STACK;
@@ -355,10 +333,10 @@ public class National_Auto_Right_High extends LinearOpMode {
                     break;
 
                 case WAIT_AFTER_GRAB_STACK: // if it is the linkage extending first before it drives in, then need to do position feedback on the servo to hold at its current position
-                    if (GlobalTimer.milliseconds() - autoTimer > 150){
+                    if (GlobalTimer.milliseconds() - autoTimer > 120){
                         //turretlift.linkageNearlyOut(); because its moving backwards this shoudn't be needed
                         turretlift.liftToInternalPID(liftMidPosition,1);
-                        if (GlobalTimer.milliseconds() - autoTimer > 450){
+                        if (GlobalTimer.milliseconds() - autoTimer > 400){
                             turretlift.linkageIn();
                             if (GlobalTimer.milliseconds() - autoTimer > 460){ // this could be reduced
                                 //Trajectory OutConeStack = drive.trajectoryBuilder(poseEstimate)
@@ -375,7 +353,7 @@ public class National_Auto_Right_High extends LinearOpMode {
                     break;
 
                 case DRIVE_OUT_STACK:
-                    outakeOutReady(144,1,liftMidPosition, liftMidPosition); // what's faster, driving or outake - balance of both is best
+                    outakeOutReady(-143,1,liftMidPosition, liftMidPosition); // what's faster, driving or outake - balance of both is best
                     if (linkageOutReady){
                         turretlift.linkageNearlyOut();
                     }
@@ -500,7 +478,9 @@ public class National_Auto_Right_High extends LinearOpMode {
     }
     public void outakeIdle(){
         turretlift.turretSpinInternalPID(0, 1);
-        turretlift.readyServos();
+        turretlift.linkageIn();
+        turretlift.tiltReset();
+        turretlift.closeClaw();
         if (turretlift.liftPos() < 400){
             turretlift.liftToInternalPID(0,0.6); // could be faster
             turretlift.closeClaw();
@@ -523,4 +503,5 @@ public class National_Auto_Right_High extends LinearOpMode {
         telemetry.addLine(String.format("Rotation Roll: %.2f degrees", Math.toDegrees(detection.pose.roll)));
     }
 }
+
 

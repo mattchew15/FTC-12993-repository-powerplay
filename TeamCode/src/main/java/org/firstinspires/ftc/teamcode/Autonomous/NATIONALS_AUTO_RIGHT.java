@@ -1,46 +1,19 @@
 package org.firstinspires.ftc.teamcode.Autonomous;
-
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.geometry.Vector2d;
 import com.acmerobotics.roadrunner.trajectory.Trajectory;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.hardware.CRServo;
-import com.qualcomm.robotcore.hardware.ColorSensor;
-import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.DistanceSensor;
-import com.qualcomm.robotcore.hardware.HardwareMap;
-import com.qualcomm.robotcore.hardware.NormalizedColorSensor;
-import com.qualcomm.robotcore.hardware.NormalizedRGBA;
-import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
-
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
-import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
-import org.firstinspires.ftc.teamcode.Teleop.DriveBase;
-import org.firstinspires.ftc.teamcode.Teleop.DuneDrive;
-import org.firstinspires.ftc.teamcode.Teleop.Inputs;
 import org.firstinspires.ftc.teamcode.Teleop.TurretLift;
 import org.firstinspires.ftc.teamcode.drive.DriveConstants;
 import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
-import org.firstinspires.ftc.teamcode.trajectorysequence.TrajectorySequence;
-import org.opencv.core.Core;
-import org.opencv.core.Mat;
-import org.opencv.core.Rect;
-import org.opencv.core.Scalar;
-import org.opencv.imgproc.Imgproc;
 import org.openftc.apriltag.AprilTagDetection;
 import org.openftc.easyopencv.OpenCvCamera;
 import org.openftc.easyopencv.OpenCvCameraFactory;
 import org.openftc.easyopencv.OpenCvCameraRotation;
-import org.openftc.easyopencv.OpenCvPipeline;
-import org.openftc.easyopencv.OpenCvWebcam;
-
 import java.util.ArrayList;
-import java.util.Queue;
-import java.util.Vector;
-
-
 
 
 @Autonomous(name = "NATIONALS_AUTO_RIGHT", group = "Autonomous")
@@ -58,16 +31,15 @@ public class NATIONALS_AUTO_RIGHT extends LinearOpMode {
     int numCycles;
     int SignalRotation;
     int slowerVelocityConstraint;
-    final double outconestackX = 41;
+
+    final double outconestackX = 41.3;
     final double outconestackY = -6.2;
     final double outconestackRotation = 0;
 
 
     // create class instances
 
-    //DriveBase drivebase = new DriveBase(); // hardware classes
     TurretLift turretlift = new TurretLift();
-    //Inputs inputs = new Inputs();
     OpenCvCamera camera;
     AprilTagDetectionPipeline aprilTagDetectionPipeline;
 
@@ -84,13 +56,6 @@ public class NATIONALS_AUTO_RIGHT extends LinearOpMode {
 
     // UNITS ARE METERS
     double tagsize = 0.166;
-
-    // Tag ID 1,2,3 from the 36h11 family
-        /*
-        int LEFT = 1;
-        int MIDDLE = 2;
-        int RIGHT = 3;
-         */
 
     AprilTagDetection tagOfInterest = null;
 
@@ -160,11 +125,10 @@ public class NATIONALS_AUTO_RIGHT extends LinearOpMode {
 
 
         // initialize hardware
-        //drivebase.Drivebase_init(hardwareMap);
         turretlift.TurretLift_init(hardwareMap);
         SampleMecanumDrive drive = new SampleMecanumDrive(hardwareMap); // road drive class
 
-        // functions runs on startz
+        // functions runs on start
         Setup();
         // Set inital pose
         drive.setPoseEstimate(startPose);
@@ -439,7 +403,6 @@ public class NATIONALS_AUTO_RIGHT extends LinearOpMode {
 
                 case IDLE:
                     telemetry.addLine("WWWWWWWWWWW");
-                    turretlift.closeClaw();
                     outakeIdle();
                     break;
 
@@ -500,7 +463,9 @@ public class NATIONALS_AUTO_RIGHT extends LinearOpMode {
     }
     public void outakeIdle(){
         turretlift.turretSpinInternalPID(0, 1);
-        turretlift.readyServos();
+        turretlift.linkageIn();
+        turretlift.tiltReset();
+        turretlift.closeClaw();
         if (turretlift.liftPos() < 400){
             turretlift.liftToInternalPID(0,0.6); // could be faster
             turretlift.closeClaw();

@@ -93,7 +93,6 @@ public class DuneDrive extends LinearOpMode {
         turretlift.motorsSetup();
         inputs.inputsSetup(); // sets toggle variables to false
         outakestate = OutakeState.READY;
-
         outakesequencetimer = 0;
         liftpositiontype = 350;
     }
@@ -140,6 +139,7 @@ public class DuneDrive extends LinearOpMode {
                 telemetry.addData("linkageposition:", turretlift.getLinkagePosition());
                 telemetry.addData("INTAKE STACK TOGGLE MODE", inputs.IntakeStackToggleMode);
                 telemetry.addData("INTAKE TOUCH", turretlift.intakeTouchPressed());
+               // telemetry.addData("")
                 telemetry.update();
 
             }
@@ -153,6 +153,7 @@ public class DuneDrive extends LinearOpMode {
                 turretlift.liftToInternalPID(0,1);
                 turretlift.turretSpinInternalPID(0, 1);
                 turretlift.readyServos();
+                drivebase.intakeBarUp();
                 if (gamepad2.right_bumper && !inputs.IntakeStackToggleMode) { // not statement to ensure it stays in toggle if you press gamepad
                     outakestate = OutakeState.INTAKE;
                     intaketype = 0; // normal orientated cone
@@ -214,10 +215,11 @@ public class DuneDrive extends LinearOpMode {
                 if (GlobalTimer.milliseconds() - outakesequencetimer > 200){
                     telemetry.addLine("past this stageeeeeeeeeeeeeeeeeeeeee");
                     turretlift.closeClaw(); // not needed, servo is already going to position?
-                    turretlift.liftToInternalPID(300,1);
+                    turretlift.liftToInternalPID(350,1);
                     //turretlift.linkageIn(); // this should make it so that the linkage doesnt go in when we are picking up from stack
                     turretlift.tiltUpHalf();
                     if (turretlift.liftTargetReachedInternalPID()){
+                        turretlift.linkageIn();
                         telemetry.addLine("lift is up");
                         turretlift.turretSpinInternalPID((int)Math.round(turretpositiontype), 1); //
                         outakestate = OutakeState.HEIGHT_LINKAGE; // it goes to height linkage thats why the lift goes up by default
@@ -225,7 +227,7 @@ public class DuneDrive extends LinearOpMode {
                 }
                 else { // linkage in/out depending on if we intake stack
                     if (inputs.IntakeStackToggleMode){
-                        turretlift.linkageOut();
+                        turretlift.linkageNearlyOutHalf();
                     }
                     else{
                         turretlift.linkageIn();
@@ -252,7 +254,6 @@ public class DuneDrive extends LinearOpMode {
                 if (GlobalTimer.milliseconds() - outakesequencetimer > 300){
                     if (gamepad1.right_bumper){ //
                         turretlift.openClaw();
-                        turretlift.linkageIn();
                         outakesequencetimer = GlobalTimer.milliseconds(); //  reset timer
                         outakestate = OutakeState.RETURN;
                     }
@@ -260,26 +261,26 @@ public class DuneDrive extends LinearOpMode {
                 break;
 
             case RETURN: // could add it so it goes straight to linkage out for intaking stack
-                if (GlobalTimer.milliseconds() - outakesequencetimer > 300){ // make faster wait for drop
-                    turretlift.turretSpinInternalPID(0, 1);
-                    turretlift.tiltReset();
+                if (GlobalTimer.milliseconds() - outakesequencetimer > 100){
                     turretlift.linkageIn();
-                    turretlift.closeClawHard();
-                    drivebase.intakeSpin(-0.5);
-                    if (turretlift.turretTargetReachedInteralPID()){
-                        //telemetry.addData("turret return target reached?", true);
-                        telemetry.addLine("turret return target reached");
-                        turretlift.liftToInternalPID(0,0.8); // slower so nothing breaks
-                        if (turretlift.liftTargetReachedInternalPID()){
-                            turretlift.openClaw();
-                            outakestate = OutakeState.READY;
+                    if (GlobalTimer.milliseconds() - outakesequencetimer > 300){ // make faster wait for drop
+                        turretlift.turretSpinInternalPID(0, 1);
+                        turretlift.tiltReset();
+                        turretlift.linkageIn();
+                        turretlift.closeClawHard();
+                        drivebase.intakeSpin(-0.5);
+                        if (turretlift.turretTargetReachedInteralPID()){
+                            //telemetry.addData("turret return target reached?", true);
+                            telemetry.addLine("turret return target reached");
+                            turretlift.liftToInternalPID(0,0.8); // slower so nothing breaks
+                            if (turretlift.liftPos() < 30){
+                                turretlift.openClaw();
+                                outakestate = OutakeState.READY;
+                            }
+                        } else {
+                            turretlift.liftToInternalPID(350,1); // going down while turning
                         }
-                    } else {
-                        turretlift.liftToInternalPID(350,1); // going down while turning
                     }
-                }
-                else {
-                    //turretlift.liftToInternalPID(350,1); // could be faster
                 }
                 break;
 
@@ -343,7 +344,7 @@ public class DuneDrive extends LinearOpMode {
     }
 
     public void intakesequencetransition(){ // simplifies transition from INTAKE state to GRAB state
-        if ((gamepad2.dpad_up || turretlift.intakeTouchPressed()) && outakestate != OutakeState.GRAB && outakestate != OutakeState.HEIGHT_LINKAGE && outakestate != OutakeState.RETURN && outakestate != OutakeState.DROP && outakestate != OutakeState.MANUAL_ENCODER_RESET && outakestate != OutakeState.READY){ // this was here dont know why && outakestate != OutakeState.DROP
+        if ((gamepad2.dpad_up || turretlift.intakeTouchPressed()) && outakestate != OutakeState.GRAB && outakestate != OutakeState.HEIGHT_LINKAGE && outakestate != OutakeState.RETURN && outakestate != OutakeState.DROP && outakestate != OutakeState.MANUAL_ENCODER_RESET && outakestate != OutakeState.READY && gamepad2.right_trigger < 0.6 && gamepad2.left_trigger < 0.6){ // this was here dont know why && outakestate != OutakeState.DROP
             turretpositiontype = turretlift.degreestoTicks(180); // by default it will go 180 if limit switch touched
             outakestate = OutakeState.GRAB;
             outakesequencetimer = GlobalTimer.milliseconds(); //  reset timer
