@@ -83,7 +83,7 @@ public class Inputs {
         if (cyclebtnup) {
             if (!IntakeHeightCycleUp) {
                 IntakeHeightCycleUp = true;
-                IntakeHeightState = (IntakeHeightState - 1) % 5;
+                IntakeHeightState = (IntakeHeightState - 1) % 4;
             }
         }
         else {
@@ -94,7 +94,7 @@ public class Inputs {
         if (cyclebtndown) {
             if (!IntakeHeightCycleDown) {
                 IntakeHeightCycleDown = true;
-                IntakeHeightState = (IntakeHeightState + 1) % 5;
+                IntakeHeightState = (IntakeHeightState + 1) % 4;
             }
         }
         else {
