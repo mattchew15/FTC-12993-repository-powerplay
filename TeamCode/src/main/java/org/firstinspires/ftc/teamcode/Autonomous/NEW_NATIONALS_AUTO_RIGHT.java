@@ -3,6 +3,7 @@ import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.geometry.Vector2d;
 import com.acmerobotics.roadrunner.trajectory.Trajectory;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
@@ -15,9 +16,9 @@ import org.openftc.easyopencv.OpenCvCameraFactory;
 import org.openftc.easyopencv.OpenCvCameraRotation;
 import java.util.ArrayList;
 
-
-@Autonomous(name = "NATIONALS_AUTO_RIGHT", group = "Autonomous")
-public class NATIONALS_AUTO_RIGHT extends LinearOpMode {
+@Disabled
+@Autonomous(name = "NEW_NATIONALS_AUTO_RIGHT", group = "Autonomous")
+public class NEW_NATIONALS_AUTO_RIGHT extends LinearOpMode {
 
     // class members
     ElapsedTime GlobalTimer;
@@ -94,7 +95,7 @@ public class NATIONALS_AUTO_RIGHT extends LinearOpMode {
         outakeOutReady = false;
         linkageOutReady = false;
         numCycles = 0;
-        heightChange = 188; // starting cone stack height
+        heightChange = 185; // starting cone stack height
         slowerVelocityConstraint = 12;
     }
     // Define our start pose
@@ -252,8 +253,8 @@ public class NATIONALS_AUTO_RIGHT extends LinearOpMode {
             Pose2d poseEstimate = drive.getPoseEstimate(); // gets the position of the robot
 
             // Print pose to telemetry
-           // telemetry.addData("x", poseEstimate.getX());
-           // telemetry.addData("y", poseEstimate.getY());
+            // telemetry.addData("x", poseEstimate.getX());
+            // telemetry.addData("y", poseEstimate.getY());
             telemetry.addData("STACK PICK UP HEIGHT", heightChange);
             telemetry.addData("lift position", turretlift.liftPos());
             telemetry.addData("autostate", currentState);
@@ -272,8 +273,8 @@ public class NATIONALS_AUTO_RIGHT extends LinearOpMode {
                     if (!drive.isBusy() && outakeOutReady) { //
                         autoTimer = GlobalTimer.milliseconds();
                         currentState = AutoState.WAIT_AFTER_DUMP_PREDLOAD;
-                        }
-                     // this timer goes off at the start of the code
+                    }
+                    // this timer goes off at the start of the code
                     break;
 
                 case WAIT_AFTER_DUMP_PREDLOAD:
@@ -338,7 +339,7 @@ public class NATIONALS_AUTO_RIGHT extends LinearOpMode {
                     break;
 
                 case DRIVE_OUT_STACK:
-                    outakeOutReady(144,1,liftMidPosition, liftMidPosition); // what's faster, driving or outake - balance of both is best
+                    outakeOutReady(143,1,liftMidPosition, liftMidPosition); // what's faster, driving or outake - balance of both is best
                     if (linkageOutReady){
                         turretlift.linkageNearlyOut();
                     }
@@ -376,28 +377,28 @@ public class NATIONALS_AUTO_RIGHT extends LinearOpMode {
                     break;
 
                 case WAIT_BEFORE_PARK:
-                    if (GlobalTimer.milliseconds() - autoTimer > 600){
+                    if (GlobalTimer.milliseconds() - autoTimer > 200){
                         turretlift.openClaw(); // last drop may be different
-                        if (GlobalTimer.milliseconds() - autoTimer > 850){
+                        if (GlobalTimer.milliseconds() - autoTimer > 400){
                             currentState = AutoState.PARK;
                         }
                     }
                     break;
 
                 case PARK:
-                        readyOutake();
-                        if (SignalRotation == 1){
-                            drive.followTrajectoryAsync(ParkLeft);
-                            currentState = AutoState.IDLE;
-                        }
-                        else if (SignalRotation == 3){
-                            drive.followTrajectoryAsync(ParkRight);
-                            currentState = AutoState.IDLE;
-                        }
-                        else{
-                            drive.followTrajectoryAsync(ParkCentre);
-                            currentState = AutoState.IDLE; // doesn't have to drive anywhere, already in position hopefully
-                        }
+                    readyOutake();
+                    if (SignalRotation == 1){
+                        drive.followTrajectoryAsync(ParkLeft);
+                        currentState = AutoState.IDLE;
+                    }
+                    else if (SignalRotation == 3){
+                        drive.followTrajectoryAsync(ParkRight);
+                        currentState = AutoState.IDLE;
+                    }
+                    else{
+                        drive.followTrajectoryAsync(ParkCentre);
+                        currentState = AutoState.IDLE; // doesn't have to drive anywhere, already in position hopefully
+                    }
 
                     break;
 
@@ -437,10 +438,11 @@ public class NATIONALS_AUTO_RIGHT extends LinearOpMode {
     public void outakeOutReady(int turretPosition, int liftSpeed, int liftposition, int liftposition2){ // way to use timers here
         if (turretlift.liftPos() > 300){
             turretlift.turretSpinInternalPID((int)Math.round(turretlift.degreestoTicks(turretPosition)), 1); //
-            if (turretlift.turretTargetReachedInteralPID()) {
+            if (turretlift.turretTargetReachedInteralPID()) { //
                 turretlift.liftToInternalPID(liftposition2, 1);
-                //turretlift.tiltUp();
-                linkageOutReady = true;
+                if (turretlift.turretTargetReachedInteralPIDNewThreshold()){
+                    linkageOutReady = true;
+                }
                 if (turretlift.liftPos() > liftposition2 - 100) { // change this to get rid of stupid timer
                     outakeOutReady = true;
                     telemetry.addLine("lift is up");
@@ -465,10 +467,10 @@ public class NATIONALS_AUTO_RIGHT extends LinearOpMode {
         turretlift.turretSpinInternalPID(0, 1);
         turretlift.linkageIn();
         turretlift.tiltReset();
-        turretlift.closeClawHard();
+        turretlift.closeClaw();
         if (turretlift.liftPos() < 400){
             turretlift.liftToInternalPID(0,0.6); // could be faster
-            turretlift.closeClawHard();
+            turretlift.closeClaw();
             turretlift.linkageIn();
             if (turretlift.liftTargetReachedInternalPID()){
                 outakeResetReady = true; // need a false here if (tusrretlift.liftTargetReachedInternalPID())

@@ -23,7 +23,7 @@ public class NATIONALS_AUTO_LEFT extends LinearOpMode {
     ElapsedTime GlobalTimer;
     double autoTimer;
     final int liftHighPosition = 850;
-    final int liftMidPosition = 825;
+    final int liftMidPosition = 815;
     int heightChange;
     boolean outakeResetReady;
     boolean outakeOutReady;
@@ -109,7 +109,7 @@ public class NATIONALS_AUTO_LEFT extends LinearOpMode {
         outakeOutReady = false;
         linkageOutReady = false;
         numCycles = 0;
-        heightChange = 185; // starting cone stack height
+        heightChange = 188; // starting cone stack height
         slowerVelocityConstraint = 12;
     }
     // Define our start pose
@@ -151,7 +151,7 @@ public class NATIONALS_AUTO_LEFT extends LinearOpMode {
         // trajectories that aren't changing should all be here
 
         Trajectory PreloadDrive = drive.trajectoryBuilder(startPose)
-                .lineToLinearHeading(new Pose2d(-38, -20.3, Math.toRadians(outconestackRotation)))
+                .lineToLinearHeading(new Pose2d(-38, -19, Math.toRadians(outconestackRotation)))
                 //.lineTo(new Vector2d(33, -15))
                 //.splineTo(new Vector2d(35, -40), Math.toRadians(-90)) // spline to spline heading, first angle is target, second angle is target angle during path
                 //.splineToSplineHeading(new Pose2d(35, -12, Math.toRadians(0)), Math.toRadians(-90)) // end effects shape of spline, first angle is the target heading
@@ -353,7 +353,7 @@ public class NATIONALS_AUTO_LEFT extends LinearOpMode {
                     break;
 
                 case DRIVE_OUT_STACK:
-                    outakeOutReady(-143,1,liftMidPosition, liftMidPosition); // what's faster, driving or outake - balance of both is best
+                    outakeOutReady(-144,1,liftMidPosition, liftMidPosition); // what's faster, driving or outake - balance of both is best
                     if (linkageOutReady){
                         turretlift.linkageNearlyOut();
                     }
@@ -391,9 +391,9 @@ public class NATIONALS_AUTO_LEFT extends LinearOpMode {
                     break;
 
                 case WAIT_BEFORE_PARK:
-                    if (GlobalTimer.milliseconds() - autoTimer > 200){
+                    if (GlobalTimer.milliseconds() - autoTimer > 600){
                         turretlift.openClaw(); // last drop may be different
-                        if (GlobalTimer.milliseconds() - autoTimer > 400){
+                        if (GlobalTimer.milliseconds() - autoTimer > 850){
                             currentState = AutoState.PARK;
                         }
                     }
@@ -480,7 +480,7 @@ public class NATIONALS_AUTO_LEFT extends LinearOpMode {
         turretlift.turretSpinInternalPID(0, 1);
         turretlift.linkageIn();
         turretlift.tiltReset();
-        turretlift.closeClaw();
+        turretlift.closeClawHard();
         if (turretlift.liftPos() < 400){
             turretlift.liftToInternalPID(0,0.6); // could be faster
             turretlift.closeClaw();
