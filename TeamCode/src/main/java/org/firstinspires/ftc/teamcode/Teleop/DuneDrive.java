@@ -313,11 +313,15 @@ public class DuneDrive extends LinearOpMode {
                 turretlift.liftMotorRawControl(gamepad2.left_stick_y);
                 turretlift.turretMotorRawControl(gamepad2.left_stick_x);
                 turretlift.tiltReset();
-                turretlift.linkageIn();
                 turretlift.closeClawHard();
                 if (gamepad2.right_bumper){
                     turretlift.encodersReset();
                     outakestate = OutakeState.READY;
+                }
+                if (gamepad2.left_bumper){
+                    turretlift.linkageOut();
+                } else {
+                    turretlift.linkageIn();
                 }
                 break;
 
