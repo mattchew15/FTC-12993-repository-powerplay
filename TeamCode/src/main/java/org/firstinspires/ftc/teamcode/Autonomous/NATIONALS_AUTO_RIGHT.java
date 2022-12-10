@@ -94,7 +94,7 @@ public class NATIONALS_AUTO_RIGHT extends LinearOpMode {
         outakeOutReady = false;
         linkageOutReady = false;
         numCycles = 0;
-        heightChange = 188; // starting cone stack height
+        heightChange = 190; // starting cone stack height
         slowerVelocityConstraint = 12;
     }
     // Define our start pose
@@ -136,7 +136,7 @@ public class NATIONALS_AUTO_RIGHT extends LinearOpMode {
         // trajectories that aren't changing should all be here
 
         Trajectory PreloadDrive = drive.trajectoryBuilder(startPose)
-                .lineToLinearHeading(new Pose2d(38, -19, Math.toRadians(outconestackRotation)))
+                .lineToLinearHeading(new Pose2d(38, -18.5, Math.toRadians(outconestackRotation)))
                 //.lineTo(new Vector2d(33, -15))
                 //.splineTo(new Vector2d(35, -40), Math.toRadians(-90)) // spline to spline heading, first angle is target, second angle is target angle during path
                 //.splineToSplineHeading(new Pose2d(35, -12, Math.toRadians(0)), Math.toRadians(-90)) // end effects shape of spline, first angle is the target heading
@@ -338,7 +338,7 @@ public class NATIONALS_AUTO_RIGHT extends LinearOpMode {
                     break;
 
                 case DRIVE_OUT_STACK:
-                    outakeOutReady(144,1,liftMidPosition, liftMidPosition); // what's faster, driving or outake - balance of both is best
+                    outakeOutReady(146,1,liftMidPosition, liftMidPosition); // what's faster, driving or outake - balance of both is best
                     if (linkageOutReady){
                         turretlift.linkageNearlyOut();
                     }
