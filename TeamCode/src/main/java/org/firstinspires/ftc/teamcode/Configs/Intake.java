@@ -19,12 +19,12 @@ public class Intake {
     private DigitalChannel IntakeLimitSwitch;
 
     //Servo position tune
-    public static double ClawOpenPos =, ClawClosePos =, ClawOpenFullPos =, ClawCloseFullPos =;
-    public static double TiltPickupPos =, TiltDepositPos =, TiltHoldPos =;
-    public static double HeightUpPos =, HeightMidPos =, HeightDownPos =;
+    public static double ClawOpenPos = 0, ClawClosePos = 0, ClawOpenFullPos = 0, ClawCloseFullPos = 0;
+    public static double TiltPickupPos = 0, TiltDepositPos = 0, TiltHoldPos = 0;
+    public static double HeightUpPos = 0, HeightMidPos = 0, HeightDownPos = 0;
 
     //motor PID tune
-    public static double IntakeSlideKp =, IntakeSlideKi =, IntakeSlideKd =, IntakeSlideIntegralSumLimit =, IntakeSlideFeedforward =;
+    public static double IntakeSlideKp = 0, IntakeSlideKi = 0, IntakeSlideKd = 0, IntakeSlideIntegralSumLimit = 0, IntakeSlideFeedforward = 0;
 
     //PID variables
     PID outakeSlidePID = new PID(IntakeSlideKp, IntakeSlideKi, IntakeSlideKd, IntakeSlideIntegralSumLimit, IntakeSlideFeedforward);
@@ -42,6 +42,10 @@ public class Intake {
         IntakeLimitSwitch = hwMap.get(DigitalChannel.class, "IntakeLimitSwitch");
         IntakeLimitSwitch.setMode(DigitalChannel.Mode.INPUT);
 
+    }
+
+    public boolean intakeTouchPressed() {
+        return !IntakeLimitSwitch.getState();
     }
 
 }

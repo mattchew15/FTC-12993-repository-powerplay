@@ -19,14 +19,14 @@ public class Outake {
     private DigitalChannel OutakeLimitSwitch;
 
     //Servo position tune
-    public static double ClawOpenPos =, ClawClosePos =, ClawOpenFullPos =, ClawCloseFullPos =;
-    public static double TiltPickupPos =, TiltDepositPos =, TiltHoldPos =;
-    public static double BraceUpPos =, BraceDownPos =;
-    public static double AxelLowPos =, AxelMidPos =, AxelHighPos =, AxelFullHighPos;
+    public static double ClawOpenPos = 0, ClawClosePos = 0, ClawOpenFullPos = 0, ClawCloseFullPos = 0;
+    public static double TiltPickupPos = 0, TiltDepositPos = 0, TiltHoldPos = 0;
+    public static double BraceUpPos = 0, BraceDownPos = 0;
+    public static double AxelLowPos = 0, AxelMidPos = 0, AxelHighPos = 0, AxelFullHighPos = 0;
 
     //motor PID tune
-    public static double OutakeSlideKp =, OutakeSlideKi =, OutakeSlideKd =, OutakeSlideIntegralSumLimit =, OutakeSlideFeedforward =;
-    public static double TurretKp =, TurretKi =, TurretKd =, TurretIntegralSumLimit =, TurretSlideFeedForward =;
+    public static double OutakeSlideKp = 0, OutakeSlideKi = 0, OutakeSlideKd = 0, OutakeSlideIntegralSumLimit = 0, OutakeSlideFeedforward = 0;
+    public static double TurretKp = 0, TurretKi = 0, TurretKd = 0, TurretIntegralSumLimit = 0, TurretSlideFeedForward = 0;
 
     //PID variables
     PID outakeSlidePID = new PID(OutakeSlideKp, OutakeSlideKi, OutakeSlideKd, OutakeSlideIntegralSumLimit, OutakeSlideFeedforward);
@@ -46,6 +46,10 @@ public class Outake {
         OutakeLimitSwitch = hwMap.get(DigitalChannel.class, "OutakeLimitSwitch");
         OutakeLimitSwitch.setMode(DigitalChannel.Mode.INPUT);
 
+    }
+
+    public boolean outakeTouchPressed() {
+        return !OutakeLimitSwitch.getState();
     }
 
 }
