@@ -14,7 +14,7 @@ public class Intake {
     private ServoImplEx IntakeClawS;
     private ServoImplEx IntakeTiltS;
     private Servo IntakeHeightS;
-    private DcMotorEx IntakeSpinM;
+    private DcMotor IntakeSpinM;
     private DcMotorEx IntakeSlidesM;
     private DigitalChannel IntakeLimitSwitch;
 
@@ -53,12 +53,17 @@ public class Intake {
 
     public void motorsSetup(){
 
-        IntakeSpinM.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         IntakeSlidesM.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER); // run without encoder is if using external PID
 
-        IntakeSpinM.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         IntakeSlidesM.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER); // reset encoders for start
 
     }
+
+    public void encodersReset(){
+
+        IntakeSlidesM.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+
+    }
+
 
 }

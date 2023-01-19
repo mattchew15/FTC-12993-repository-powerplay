@@ -9,17 +9,17 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 @Config
 public class DriveBase {
 
-    private DcMotorEx DBLM;
-    private DcMotorEx DBRM;
-    private DcMotorEx DFLM;
-    private DcMotorEx DFRM;
+    private DcMotor DBLM;
+    private DcMotor DBRM;
+    private DcMotor DFLM;
+    private DcMotor DFRM;
 
     public void Drivebase_init(HardwareMap hwMap){
 
-        DBLM = hwMap.get(DcMotorEx.class, "BL");
-        DBRM = hwMap.get(DcMotorEx.class, "BR");
-        DFLM = hwMap.get(DcMotorEx.class, "FL");
-        DFRM = hwMap.get(DcMotorEx.class, "FR");
+        DBLM = hwMap.get(DcMotor.class, "BL");
+        DBRM = hwMap.get(DcMotor.class, "BR");
+        DFLM = hwMap.get(DcMotor.class, "FL");
+        DFRM = hwMap.get(DcMotor.class, "FR");
 
     }
 

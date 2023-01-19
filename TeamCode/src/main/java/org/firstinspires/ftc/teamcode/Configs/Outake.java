@@ -63,4 +63,11 @@ public class Outake {
 
     }
 
+    public void encodersReset(){
+
+        TurretM.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        OutakeSlidesM.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+
+    }
+
 }
