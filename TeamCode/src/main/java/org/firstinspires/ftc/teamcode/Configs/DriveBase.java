@@ -9,17 +9,17 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 @Config
 public class DriveBase {
 
-    private DcMotor DBLM;
-    private DcMotor DBRM;
-    private DcMotor DFLM;
-    private DcMotor DFRM;
+    private DcMotorEx DBLM;
+    private DcMotorEx DBRM;
+    private DcMotorEx DFLM;
+    private DcMotorEx DFRM;
 
     public void Drivebase_init(HardwareMap hwMap){
 
-        DBLM = hwMap.get(DcMotor.class, "BL");
-        DBRM = hwMap.get(DcMotor.class, "BR");
-        DFLM = hwMap.get(DcMotor.class, "FL");
-        DFRM = hwMap.get(DcMotor.class, "FR");
+        DBLM = hwMap.get(DcMotorEx.class, "BL");
+        DBRM = hwMap.get(DcMotorEx.class, "BR");
+        DFLM = hwMap.get(DcMotorEx.class, "FL");
+        DFRM = hwMap.get(DcMotorEx.class, "FR");
 
     }
 
@@ -30,8 +30,8 @@ public class DriveBase {
         DBLM.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         DFLM.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
-        //reverse correct motors
-        DFLM.setDirection(DcMotorSimple.Direction.REVERSE); //DcMotorSimple class?
+        //reverse correct motors (reversing cause of motor/wheels might need to adjust)
+        DFLM.setDirection(DcMotorSimple.Direction.REVERSE);
         DBLM.setDirection(DcMotorSimple.Direction.REVERSE);
         DBRM.setDirection(DcMotorSimple.Direction.REVERSE);
     }

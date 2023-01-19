@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.Configs;
 
 import com.acmerobotics.dashboard.config.Config;
+import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DigitalChannel;
 import com.qualcomm.robotcore.hardware.HardwareMap;
@@ -50,6 +51,16 @@ public class Outake {
 
     public boolean outakeTouchPressed() {
         return !OutakeLimitSwitch.getState();
+    }
+
+    public void motorsSetup(){
+
+        TurretM.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        OutakeSlidesM.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER); // run without encoder is if using external PID
+
+        TurretM.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        OutakeSlidesM.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);// reset encoders for start
+
     }
 
 }

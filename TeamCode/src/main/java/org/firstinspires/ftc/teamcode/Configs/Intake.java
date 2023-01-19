@@ -14,7 +14,7 @@ public class Intake {
     private ServoImplEx IntakeClawS;
     private ServoImplEx IntakeTiltS;
     private Servo IntakeHeightS;
-    private DcMotor IntakeSpinM;
+    private DcMotorEx IntakeSpinM;
     private DcMotorEx IntakeSlidesM;
     private DigitalChannel IntakeLimitSwitch;
 
@@ -36,7 +36,7 @@ public class Intake {
 
         IntakeHeightS = hwMap.get(Servo.class, "IntakeHeightS");
 
-        IntakeSpinM = hwMap.get(DcMotor.class, "IntakeSpinM");
+        IntakeSpinM = hwMap.get(DcMotorEx.class, "IntakeSpinM");
         IntakeSlidesM = hwMap.get(DcMotorEx.class, "IntakeSlideM");
 
         IntakeLimitSwitch = hwMap.get(DigitalChannel.class, "IntakeLimitSwitch");
@@ -45,7 +45,20 @@ public class Intake {
     }
 
     public boolean intakeTouchPressed() {
+
         return !IntakeLimitSwitch.getState();
+
+    }
+
+
+    public void motorsSetup(){
+
+        IntakeSpinM.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        IntakeSlidesM.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER); // run without encoder is if using external PID
+
+        IntakeSpinM.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        IntakeSlidesM.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER); // reset encoders for start
+
     }
 
 }
