@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode.Configs;
 import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DigitalChannel;
+import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.ServoImplEx;
 
@@ -30,5 +31,21 @@ public class Outake {
     //PID variables
     PID outakeSlidePID = new PID(OutakeSlideKp, OutakeSlideKi, OutakeSlideKd, OutakeSlideIntegralSumLimit, OutakeSlideFeedforward);
     PID turretPID = new PID(TurretKp, TurretKi, TurretKd, TurretIntegralSumLimit, TurretSlideFeedForward);
+
+    public void Outake_init(HardwareMap hwMap){
+
+        OutakeClawS = hwMap.get(ServoImplEx.class, "OutakeClawS");
+        OutakeTiltS = hwMap.get(ServoImplEx.class, "OutakeTiltS");
+
+        OutakeBraceS = hwMap.get(Servo.class, "OutakeBraceS");
+        OutakeAxelS = hwMap.get(Servo.class, "OutakeAxelS");
+
+        OutakeSlidesM = hwMap.get(DcMotorEx.class, "OutakeSlideM");
+        TurretM = hwMap.get(DcMotorEx.class, "TurretM");
+
+        OutakeLimitSwitch = hwMap.get(DigitalChannel.class, "OutakeLimitSwitch");
+        OutakeLimitSwitch.setMode(DigitalChannel.Mode.INPUT);
+
+    }
 
 }
