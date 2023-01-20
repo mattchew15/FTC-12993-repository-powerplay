@@ -84,4 +84,19 @@ public class Outake {
     public void outClawOpenFull(){OutakeClawS.setPosition(ClawOpenFullPos);}
     public void outClawDisable(){OutakeClawS.setPwmDisable();}
 
+    public void outTiltDepo(){OutakeTiltS.setPosition(TiltDepositPos);}
+    public void outTiltHold(){OutakeTiltS.setPosition(TiltHoldPos);}
+    public void outTiltPick(){OutakeTiltS.setPosition(TiltPickupPos);}
+    public void outTiltDisable(){OutakeTiltS.setPwmDisable();}
+
+    public void outBraceDown(){OutakeBraceS.setPosition(BraceDownPos);}
+    public void outBraceUp(){OutakeBraceS.setPosition(BraceUpPos);}
+    public void outBraceDisable(){OutakeBraceS.setPwmDisable();}
+
+    public void outAxelFullHigh(){OutakeAxelS.setPosition(AxelFullHighPos);}
+    public void outAxelHigh(){OutakeAxelS.setPosition(AxelHighPos);}
+    public void outAxelLow(){OutakeAxelS.setPosition(AxelLowPos);}
+    public void outAxelMid(){OutakeAxelS.setPosition(AxelMidPos);}
+    public void outAxelDisable(){OutakeAxelS.setPwmDisable();}
+
 }
