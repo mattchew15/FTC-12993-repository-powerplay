@@ -13,11 +13,13 @@ public class Outake {
 
     private ServoImplEx OutakeClawS;
     private ServoImplEx OutakeTiltS;
-    private Servo OutakeBraceS;
-    private Servo OutakeAxelS;
+    private ServoImplEx OutakeBraceS;
+    private ServoImplEx OutakeAxelS;
     private DcMotorEx OutakeSlidesM;
     private DcMotorEx TurretM;
     private DigitalChannel OutakeLimitSwitch;
+    int outSlideTarget;
+    int turretTarget;
 
     //Servo position tune
     public static double ClawOpenPos = 0, ClawClosePos = 0, ClawOpenFullPos = 0, ClawCloseFullPos = 0;
@@ -26,20 +28,19 @@ public class Outake {
     public static double AxelLowPos = 0, AxelMidPos = 0, AxelHighPos = 0, AxelFullHighPos = 0;
 
     //motor PID tune
-    public static double OutakeSlideKp = 0, OutakeSlideKi = 0, OutakeSlideKd = 0, OutakeSlideIntegralSumLimit = 0, OutakeSlideFeedforward = 0;
-    public static double TurretKp = 0, TurretKi = 0, TurretKd = 0, TurretIntegralSumLimit = 0, TurretSlideFeedForward = 0;
+    public static double OutakeSlideKp = 0, OutakeSlideKi = 0, OutakeSlideKd = 0, OutakeSlideIntegralSumLimit = 0, OutakeSlideKf = 0;
+    public static double TurretKp = 0, TurretKi = 0, TurretKd = 0, TurretIntegralSumLimit = 0, TurretSlideKf = 0;
 
     //PID variables
-    PID outakeSlidePID = new PID(OutakeSlideKp, OutakeSlideKi, OutakeSlideKd, OutakeSlideIntegralSumLimit, OutakeSlideFeedforward);
-    PID turretPID = new PID(TurretKp, TurretKi, TurretKd, TurretIntegralSumLimit, TurretSlideFeedForward);
+    PID outakeSlidePID = new PID(OutakeSlideKp, OutakeSlideKi, OutakeSlideKd, OutakeSlideIntegralSumLimit, OutakeSlideKf);
+    PID turretPID = new PID(TurretKp, TurretKi, TurretKd, TurretIntegralSumLimit, TurretSlideKf);
 
     public void Outake_init(HardwareMap hwMap){
 
         OutakeClawS = hwMap.get(ServoImplEx.class, "OutakeClawS");
         OutakeTiltS = hwMap.get(ServoImplEx.class, "OutakeTiltS");
-
-        OutakeBraceS = hwMap.get(Servo.class, "OutakeBraceS");
-        OutakeAxelS = hwMap.get(Servo.class, "OutakeAxelS");
+        OutakeBraceS = hwMap.get(ServoImplEx.class, "OutakeBraceS");
+        OutakeAxelS = hwMap.get(ServoImplEx.class, "OutakeAxelS");
 
         OutakeSlidesM = hwMap.get(DcMotorEx.class, "OutakeSlideM");
         TurretM = hwMap.get(DcMotorEx.class, "TurretM");
@@ -69,5 +70,18 @@ public class Outake {
         OutakeSlidesM.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
     }
+
+    public void outakeSlidesTo(int rotations, double motorPosition, double maxSpeed){
+        outSlideTarget = rotations;
+        OutakeSlidesM.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        double output = outakeSlidePID.update(outSlideTarget,motorPosition,maxSpeed); //does a lift to x with external PID instead of just regular encoders
+        OutakeSlidesM.setPower(output);
+    }
+
+    public void outClawClose(){OutakeClawS.setPosition(ClawClosePos);}
+    public void outClawOpen(){OutakeClawS.setPosition(ClawOpenPos);}
+    public void outClawCloseFull(){OutakeClawS.setPosition(ClawCloseFullPos);}
+    public void outClawOpenFull(){OutakeClawS.setPosition(ClawOpenFullPos);}
+    public void outClawDisable(){OutakeClawS.setPwmDisable();}
 
 }

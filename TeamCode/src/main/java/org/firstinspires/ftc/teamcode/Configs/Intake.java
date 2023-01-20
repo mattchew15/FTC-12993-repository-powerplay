@@ -13,10 +13,11 @@ public class Intake {
 
     private ServoImplEx IntakeClawS;
     private ServoImplEx IntakeTiltS;
-    private Servo IntakeHeightS;
+    private ServoImplEx IntakeHeightS;
     private DcMotor IntakeSpinM;
     private DcMotorEx IntakeSlidesM;
     private DigitalChannel IntakeLimitSwitch;
+    int inSlidesTarget;
 
     //Servo position tune
     public static double ClawOpenPos = 0, ClawClosePos = 0, ClawOpenFullPos = 0, ClawCloseFullPos = 0;
@@ -24,17 +25,16 @@ public class Intake {
     public static double HeightUpPos = 0, HeightMidPos = 0, HeightDownPos = 0;
 
     //motor PID tune
-    public static double IntakeSlideKp = 0, IntakeSlideKi = 0, IntakeSlideKd = 0, IntakeSlideIntegralSumLimit = 0, IntakeSlideFeedforward = 0;
+    public static double IntakeSlideKp = 0, IntakeSlideKi = 0, IntakeSlideKd = 0, IntakeSlideIntegralSumLimit = 0, IntakeSlideKf = 0;
 
     //PID variables
-    PID intakeSlidePID = new PID(IntakeSlideKp, IntakeSlideKi, IntakeSlideKd, IntakeSlideIntegralSumLimit, IntakeSlideFeedforward);
+    PID intakeSlidePID = new PID(IntakeSlideKp, IntakeSlideKi, IntakeSlideKd, IntakeSlideIntegralSumLimit, IntakeSlideKf);
 
     public void Intake_init(HardwareMap hwMap){
 
         IntakeClawS = hwMap.get(ServoImplEx.class, "IntakeClawS");
         IntakeTiltS = hwMap.get(ServoImplEx.class, "IntakeTiltS");
-
-        IntakeHeightS = hwMap.get(Servo.class, "IntakeHeightS");
+        IntakeHeightS = hwMap.get(ServoImplEx.class, "IntakeHeightS");
 
         IntakeSpinM = hwMap.get(DcMotorEx.class, "IntakeSpinM");
         IntakeSlidesM = hwMap.get(DcMotorEx.class, "IntakeSlideM");
@@ -65,5 +65,27 @@ public class Intake {
 
     }
 
+    public void outakeSlidesTo(int rotations, double motorPosition, double maxSpeed){
+        inSlidesTarget = rotations;
+        IntakeSlidesM.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        double output = intakeSlidePID.update(inSlidesTarget,motorPosition,maxSpeed); //does a lift to x with external PID instead of just regular encoders
+        IntakeSlidesM.setPower(output);
+    }
+
+    public void inClawOpen(){IntakeClawS.setPosition(ClawOpenPos);}
+    public void inClawClose(){IntakeClawS.setPosition(ClawClosePos);}
+    public void inClawOpenFull(){IntakeClawS.setPosition(ClawOpenFullPos);}
+    public void inClawCloseFull(){IntakeClawS.setPosition(ClawCloseFullPos);}
+    public void inClawDisable(){IntakeClawS.setPwmDisable();}
+
+    public void inTiltPick(){IntakeTiltS.setPosition(TiltPickupPos);}
+    public void inTiltDepo(){IntakeTiltS.setPosition(TiltDepositPos);}
+    public void inTiltHold(){IntakeTiltS.setPosition(TiltHoldPos);}
+    public void inTiltDisable(){IntakeTiltS.setPwmDisable();}
+
+    public void inHeightDown(){IntakeHeightS.setPosition(HeightDownPos);}
+    public void inHeightUp(){IntakeHeightS.setPosition(HeightUpPos);}
+    public void inHeightMid(){IntakeHeightS.setPosition(HeightMidPos);}
+    public void inHeightDisable(){IntakeHeightS.setPwmDisable();}
 
 }
