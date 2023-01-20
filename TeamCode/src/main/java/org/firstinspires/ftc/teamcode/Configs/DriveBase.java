@@ -14,6 +14,11 @@ public class DriveBase {
     private DcMotor DFLM;
     private DcMotor DFRM;
 
+    boolean PowerToggled;
+    double PowerBase;
+    double PowerBaseTurn;
+    double PowerStrafe;
+
     public void Drivebase_init(HardwareMap hwMap){
 
         DBLM = hwMap.get(DcMotor.class, "BL");
@@ -35,5 +40,41 @@ public class DriveBase {
         DBLM.setDirection(DcMotorSimple.Direction.REVERSE);
         DBRM.setDirection(DcMotorSimple.Direction.REVERSE);
     }
+
+    public void Drive(double LY, double LX, double RX) {
+        double denominator = Math.max(Math.abs(LY) + Math.abs(LX) + Math.abs(RX), 1);
+        double frontLeftPower = (LY * PowerBase - LX * PowerStrafe + RX * PowerBaseTurn) / denominator;
+        double backLeftPower = (LY * PowerBase + LX * PowerStrafe + RX * PowerBaseTurn) / denominator;
+        double frontRightPower = (LY * PowerBase + LX * PowerStrafe - RX * PowerBaseTurn) / denominator;
+        double backRightPower = (LY * PowerBase - LX * PowerStrafe - RX * PowerBaseTurn) / denominator;
+
+        DFLM.setPower(frontLeftPower);
+        DBLM.setPower(backLeftPower);
+        DFRM.setPower(frontRightPower);
+        DBRM.setPower(backRightPower);
+    }
+
+    public void PowerToggle(boolean toggle) { // toggle code for a slow drive mode for fine adjustment
+        if (toggle) {
+            if (!PowerToggled) {
+                if (PowerBase == 1) {
+                    PowerBase = 0.33;
+                    PowerBaseTurn = 0.3;
+                    PowerStrafe = 0.36;
+                } else {
+                    //edit these values to change drivecode
+                    PowerBase = 1;
+                    PowerBaseTurn = 0.65;
+                    PowerStrafe = 1.05;
+                }
+                PowerToggled = true;
+            }
+        }
+        else {
+            PowerToggled = false;
+        }
+    }
+
+
 
 }

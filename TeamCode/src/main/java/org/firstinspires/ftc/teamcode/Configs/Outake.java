@@ -8,6 +8,8 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.ServoImplEx;
 
+import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
+
 @Config
 public class Outake {
 
@@ -18,6 +20,11 @@ public class Outake {
     private DcMotorEx OutakeSlidesM;
     private DcMotorEx TurretM;
     private DigitalChannel OutakeLimitSwitch;
+
+    // final variables
+    final double turretthresholdDistance = degreestoTicks(8); // should make the threshold less
+    final double turretthresholdDistanceTwo = degreestoTicks(2);
+    final double liftthresholdDistance = 60;
     int outSlideTarget;
     int turretTarget;
 
@@ -71,6 +78,44 @@ public class Outake {
 
     }
 
+    public double turretPos(){
+        return TurretM.getCurrentPosition(); //loop times reading encoder?
+    }
+
+    public void turretSpinInternalPID(int rotations, double maxSpeed){
+        turretTarget = rotations; // variable is public to this class?
+        TurretM.setTargetPosition(turretTarget);
+        TurretM.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        TurretM.setPower(maxSpeed);
+    }
+
+    public boolean turretTargetReachedInteralPID(){
+        if (turretPos() < (turretTarget + turretthresholdDistance) && turretPos() > (turretTarget-turretthresholdDistance)){
+            return true;
+        }
+        else{
+            return false;
+        }
+    }
+
+    public boolean turretTargetReachedInteralPIDNewThreshold(){
+        if (turretPos() < (turretTarget + turretthresholdDistanceTwo) && turretPos() > (turretTarget-turretthresholdDistanceTwo)){
+            return true;
+        }
+        else{
+            return false;
+        }
+    }
+
+    public boolean liftTargetReached(){
+        if (turretPID.returnError() < liftthresholdDistance){
+            return true;
+        }
+        else{
+            return false;
+        }
+    }
+
     public void outakeSlidesTo(int rotations, double motorPosition, double maxSpeed){
         outSlideTarget = rotations;
         OutakeSlidesM.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
@@ -98,5 +143,20 @@ public class Outake {
     public void outAxelLow(){OutakeAxelS.setPosition(AxelLowPos);}
     public void outAxelMid(){OutakeAxelS.setPosition(AxelMidPos);}
     public void outAxelDisable(){OutakeAxelS.setPwmDisable();}
+
+    public double degreestoTicks(int degrees){
+        return degrees * 7.6;
+    }
+    public double tickstoDegrees(int ticks){
+        return ticks / 7.6;
+    }
+
+    public double returnPIDLiftError(){return outakeSlidePID.returnError();}
+    public double returnPIDLiftOutput(){
+        return outakeSlidePID.returnOutput();
+    }
+    public double returnIntegralSum(){
+        return outakeSlidePID.returnIntegralSum();
+    }
 
 }

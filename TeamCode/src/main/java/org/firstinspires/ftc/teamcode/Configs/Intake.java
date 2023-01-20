@@ -45,24 +45,18 @@ public class Intake {
     }
 
     public boolean intakeTouchPressed() {
-
         return !IntakeLimitSwitch.getState();
-
     }
 
 
     public void motorsSetup(){
-
         IntakeSlidesM.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER); // run without encoder is if using external PID
 
         IntakeSlidesM.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER); // reset encoders for start
-
     }
 
     public void encodersReset(){
-
         IntakeSlidesM.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-
     }
 
     public void outakeSlidesTo(int rotations, double motorPosition, double maxSpeed){
@@ -70,6 +64,10 @@ public class Intake {
         IntakeSlidesM.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         double output = intakeSlidePID.update(inSlidesTarget,motorPosition,maxSpeed); //does a lift to x with external PID instead of just regular encoders
         IntakeSlidesM.setPower(output);
+    }
+
+    public void intakeSpin(double speedDirection){
+        IntakeSpinM.setPower(speedDirection);
     }
 
     public void inClawOpen(){IntakeClawS.setPosition(ClawOpenPos);}
