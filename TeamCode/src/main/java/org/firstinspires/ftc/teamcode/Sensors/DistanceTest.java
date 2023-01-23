@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.Autonomous.Sensors;
+package org.firstinspires.ftc.teamcode.Sensors;
 import com.qualcomm.hardware.rev.Rev2mDistanceSensor;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
