@@ -59,7 +59,7 @@ public class Intake {
         IntakeSlidesM.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
     }
 
-    public void outakeSlidesTo(int rotations, double motorPosition, double maxSpeed){
+    public void intakeSlidesTo(int rotations, double motorPosition, double maxSpeed){
         inSlidesTarget = rotations;
         IntakeSlidesM.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         double output = intakeSlidePID.update(inSlidesTarget,motorPosition,maxSpeed); //does a lift to x with external PID instead of just regular encoders
