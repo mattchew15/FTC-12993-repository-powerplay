@@ -1,8 +1,7 @@
-package org.firstinspires.ftc.teamcode.Teleop;
+package org.firstinspires.ftc.teamcode.Sandstorm;
 
 import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
@@ -95,7 +94,7 @@ public class DriveBase {  // no constructor for this class
                 } else {
                     //edit these values to change drivecode
                     PowerBase = 1;
-                    PowerBaseTurn = 0.65;
+                    PowerBaseTurn = 0.8;
                     PowerStrafe = 1.05;
                 }
                 PowerToggled = true;

@@ -1,25 +1,11 @@
-package org.firstinspires.ftc.teamcode.Teleop;
+package org.firstinspires.ftc.teamcode.Dune;
 
 // Old imports, some not needed
-import com.acmerobotics.dashboard.config.Config;
-import com.acmerobotics.roadrunner.drive.Drive;
-import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import com.qualcomm.robotcore.hardware.CRServo;
-import com.qualcomm.robotcore.hardware.ColorSensor;
-import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
-import com.qualcomm.robotcore.hardware.DigitalChannel;
-import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.hardware.Gamepad;
-import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
-import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
-import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
-import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
-import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 
 
@@ -154,7 +140,7 @@ public class DuneDrive extends LinearOpMode {
                 turretlift.turretSpinInternalPID(0, 1);
                 turretlift.readyServos();
                 drivebase.intakeBarUp();
-                if (gamepad2.right_bumper && !inputs.IntakeStackToggleMode) { // not statement to ensure it stays in toggle if you press gamepad
+                if ((gamepad2.right_bumper || gamepad1.left_bumper) && !inputs.IntakeStackToggleMode) { // not statement to ensure it stays in toggle if you press gamepad
                     outakestate = OutakeState.INTAKE;
                     intaketype = 0; // normal orientated cone
                 }
@@ -239,25 +225,26 @@ public class DuneDrive extends LinearOpMode {
                 turretlift.closeClaw();
                 turretlift.liftToInternalPID(liftpositiontype,1);
                 turretlift.turretSpinInternalPID((int)Math.round(turretpositiontype), 1);
-                if (turretlift.liftTargetReached() && liftpositiontype == liftHighPosition){
-                    turretlift.tiltUp();
+                if (turretlift.turretTargetReachedInteralPID()){ //  && liftpositiontype == liftHighPosition
+                    outakesequencetimer = GlobalTimer.milliseconds(); //  reset timer
+                    outakestate = OutakeState.DROP;
+                    liftservoPositionChange();
                 }
                 else{
                     turretlift.tiltUpHalf();
                 }
-                liftPositionChange(); // change this to transition state for fine adjust!!! if you dont want fine adjust then dont do it
                 break;
 
             case DROP:
                 turretlift.liftToInternalPID(liftpositiontype,1); // makes the lift drop before it returns
                 turretlift.turretSpinInternalPID((int)Math.round(turretpositiontype), 1);
-                if (GlobalTimer.milliseconds() - outakesequencetimer > 300){
-                    if (gamepad1.right_bumper){ //
-                        turretlift.openClaw();
-                        outakesequencetimer = GlobalTimer.milliseconds(); //  reset timer
-                        outakestate = OutakeState.RETURN;
-                    }
+                liftservoPositionChange();
+                if (gamepad1.right_bumper){ //
+                    turretlift.openClaw();
+                    outakesequencetimer = GlobalTimer.milliseconds(); //  reset timer
+                    outakestate = OutakeState.RETURN;
                 }
+
                 break;
 
             case RETURN: // could add it so it goes straight to linkage out for intaking stack
@@ -336,8 +323,7 @@ public class DuneDrive extends LinearOpMode {
 
            // inputs.IntakeStackToggleMode = false;
         }
-        intakesequencetransition(); // not sure this works, but at any stage if you press dpad it will go back to the grab phase and you can rotate the turret
-        liftPositionChangenostatechange();
+        justliftPositionChange();
         if (inputs.ManualResetToggleMode){
             outakestate = OutakeState.MANUAL_ENCODER_RESET;
             if (gamepad2.right_stick_button){
@@ -348,58 +334,58 @@ public class DuneDrive extends LinearOpMode {
     }
 
     public void intakesequencetransition(){ // simplifies transition from INTAKE state to GRAB state
-        if ((gamepad2.dpad_up || turretlift.intakeTouchPressed()) && outakestate != OutakeState.GRAB && outakestate != OutakeState.HEIGHT_LINKAGE && outakestate != OutakeState.RETURN && outakestate != OutakeState.DROP && outakestate != OutakeState.MANUAL_ENCODER_RESET && outakestate != OutakeState.READY && gamepad2.right_trigger < 0.6 && gamepad2.left_trigger < 0.6){ // this was here dont know why && outakestate != OutakeState.DROP
+        if ((gamepad2.dpad_up || gamepad1.dpad_up || turretlift.intakeTouchPressed()) && outakestate != OutakeState.GRAB && outakestate != OutakeState.HEIGHT_LINKAGE && outakestate != OutakeState.RETURN && outakestate != OutakeState.DROP && outakestate != OutakeState.MANUAL_ENCODER_RESET && outakestate != OutakeState.READY && gamepad2.right_trigger < 0.6 && gamepad2.left_trigger < 0.6){ // this was here dont know why && outakestate != OutakeState.DROP
             turretpositiontype = turretlift.degreestoTicks(180); // by default it will go 180 if limit switch touched
             outakestate = OutakeState.GRAB;
             outakesequencetimer = GlobalTimer.milliseconds(); //  reset timer
         }
-        else if (gamepad2.dpad_left){
+        else if (gamepad2.dpad_left || gamepad1.dpad_left){
             turretpositiontype = turretlift.degreestoTicks(90);
             outakestate = OutakeState.GRAB;
             outakesequencetimer = GlobalTimer.milliseconds(); //  reset timer
         }
-        else if (gamepad2.dpad_right){
+        else if (gamepad2.dpad_right || gamepad1.dpad_right){
             turretpositiontype = turretlift.degreestoTicks(-90);
             outakestate = OutakeState.GRAB;
             outakesequencetimer = GlobalTimer.milliseconds(); //  reset timer
         }
-        else if (gamepad2.dpad_down){
+        else if (gamepad2.dpad_down || gamepad1.dpad_down){
             outakestate = OutakeState.GRAB;
             outakesequencetimer = GlobalTimer.milliseconds(); //  reset timer
         }
     }
 
     public void turretPositionChange(){
-        if (gamepad2.dpad_up){
+        if (gamepad2.dpad_up || gamepad1.dpad_up){
             turretpositiontype = turretlift.degreestoTicks(180);
         }
-        else if (gamepad2.dpad_left){
+        else if (gamepad2.dpad_left || gamepad1.dpad_left){
             turretpositiontype = turretlift.degreestoTicks(90);
         }
-        else if (gamepad2.dpad_right){
+        else if (gamepad2.dpad_right || gamepad1.dpad_right){
             turretpositiontype = turretlift.degreestoTicks(-90);
         }
-        else if (gamepad2.dpad_down){
+        else if (gamepad2.dpad_down || gamepad1.dpad_down){
             turretpositiontype = 0;
         }
     }
 
     public void liftPositionChange(){
-        if (gamepad2.y){
+        if (gamepad2.y || gamepad1.y){
             liftpositiontype = liftHighPosition;
-            outakestate = OutakeState.DROP;
             turretlift.tiltUp();
             turretlift.linkageOutHalf();
             outakesequencetimer = GlobalTimer.milliseconds(); //  reset timer
+            outakestate = OutakeState.DROP;
         }
-        else if (gamepad2.a){
+        else if (gamepad2.a || gamepad1.a){
             liftpositiontype = 450;
             turretlift.tiltReset();
             turretlift.linkageOutQuarter();
             outakestate = OutakeState.DROP;
             outakesequencetimer = GlobalTimer.milliseconds(); //  reset timer
         }
-        else if (gamepad2.x){
+        else if (gamepad2.x || gamepad1.x){
             liftpositiontype = liftMidPosition;
             outakestate = OutakeState.DROP;
             turretlift.tiltUpHalf();
@@ -409,17 +395,34 @@ public class DuneDrive extends LinearOpMode {
 
 
     }
-    public void liftPositionChangenostatechange(){
-        if (gamepad2.y){
-            liftpositiontype = liftHighPosition;
-        }
-        else if (gamepad2.a){
-            liftpositiontype = 450;
-            turretlift.tiltReset();
+    public void liftservoPositionChange(){
+        if (liftpositiontype == liftHighPosition){
+            turretlift.tiltUp();
+            turretlift.linkageOutHalf();
 
         }
-        else if (gamepad2.x){
-            liftpositiontype = 630;
+        else if (liftpositiontype == 450){
+          //  liftpositiontype = 450;
+            turretlift.tiltReset();
+            turretlift.linkageOutQuarter();
+
+        }
+        else if (liftpositiontype == liftMidPosition){
+           // liftpositiontype = liftMidPosition;
+            turretlift.tiltUpHalf();
+            turretlift.linkageOutHalf();
+        }
+    }
+
+    public void justliftPositionChange(){
+        if (gamepad2.y || gamepad1.y){
+            liftpositiontype = liftHighPosition;
+        }
+        else if (gamepad2.a || gamepad1.a){
+            liftpositiontype = 450;
+        }
+        else if (gamepad2.x || gamepad1.x){
+            liftpositiontype = liftMidPosition;
         }
     }
 
