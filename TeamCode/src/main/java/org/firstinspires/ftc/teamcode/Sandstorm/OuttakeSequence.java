@@ -11,6 +11,11 @@ public class OuttakeSequence {
 
     // creating instances of each class
     ElapsedTime GlobalTimer;
+    double OuttakeTimer;
+    double ConeDepositTimer;
+    double FlipConeTimer;
+    double OuttakePickupTimer;
+
     DriveBase drivebase = new DriveBase();
     Inputs inputs = new Inputs();
     Outtake outtake = new Outtake();
@@ -27,19 +32,29 @@ public class OuttakeSequence {
     enum ConeDepositState {
         CONE_DROP,
         BRACE_RETRACT,
-        ARM_RESET
+        ARM_RESET,
+        IDLE
     }
     enum FlipConesState {
         OUTTAKE_FLIP_READY, // should be able to transition between up and down on cone
         DROP_DOWN_ON_CONE,
-        PICKUP_CONE_READY
+        PICKUP_CONE_READY,
+        IDLE
     }
     enum OuttakePickupState {
         OUTTAKE_PICKUP_READY,
         GRAB_OUTTAKE,
         HEIGHT_OUTTAKE,
-        RETURN
+        RETURN,
+        IDLE
     }
+
+    // instance of enum
+    OuttakeState outtakeState = OuttakeState.READY;
+    ConeDepositState coneDepositState = ConeDepositState.IDLE;
+    FlipConesState flipConesState = FlipConesState.IDLE;
+    OuttakePickupState outtakePickupState = OuttakePickupState.IDLE;
+
     // runs on init (not setup function)
     public void OuttakeHardware(){
         drivebase.Drivebase_init(hardwareMap);
@@ -48,8 +63,11 @@ public class OuttakeSequence {
 
     // this functions runs in the setup function of the opmode (runs once instantly)
     public void OuttakeSetup(){
+        // seperate timers for each state machine so no interfering (asynchronous)
         GlobalTimer = new ElapsedTime(System.nanoTime());
         GlobalTimer.reset();
+
+        OuttakeTimer = 0; // this variable is just a normal double however it is stored as the global timer
 
         // hardware setup
         drivebase.motorsSetup();
@@ -57,9 +75,26 @@ public class OuttakeSequence {
         inputs.inputsSetup(); // this needs to be chnaged - changes toggle variables and stuff to false
 
         // sets the first case for the fsm to be in
-        OuttakeState outtakeState = OuttakeState.READY;
-        ConeDepositState coneDepositState = ConeDepositState.CONE_DROP;
-        FlipConesState flipConesState = FlipConesState.OUTTAKE_FLIP_READY;
-        OuttakePickupState outtakePickupState = OuttakePickupState.OUTTAKE_PICKUP_READY;
+        outtakeState = OuttakeState.READY;
+        coneDepositState = ConeDepositState.IDLE;
+        flipConesState = FlipConesState.IDLE;
+        outtakePickupState = OuttakePickupState.IDLE;
+    }
+
+    public void ConeDepositSequence(){
+        switch (coneDepositState) {
+            case CONE_DROP:
+
+                break;
+            case CONE_DROP:
+
+                break;
+        }
+    }
+    public void FlipConeSequence(){
+
+    }
+    public void OuttakePickupSequence(){
+
     }
 }
