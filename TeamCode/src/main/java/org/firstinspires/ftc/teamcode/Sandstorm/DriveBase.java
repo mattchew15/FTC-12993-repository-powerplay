@@ -5,6 +5,7 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
+import com.arcrobotics.ftclib.command.SubsystemBase;
 
 @Config // Allows dashboard to tune
 public class DriveBase {  // no constructor for this class

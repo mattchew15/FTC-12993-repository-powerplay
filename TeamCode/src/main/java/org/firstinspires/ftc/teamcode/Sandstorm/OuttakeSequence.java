@@ -86,9 +86,6 @@ public class OuttakeSequence {
             case CONE_DROP:
 
                 break;
-            case CONE_DROP:
-
-                break;
         }
     }
     public void FlipConeSequence(){
