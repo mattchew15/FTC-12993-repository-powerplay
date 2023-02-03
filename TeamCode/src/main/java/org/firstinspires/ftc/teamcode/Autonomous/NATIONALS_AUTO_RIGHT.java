@@ -6,7 +6,7 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
-import org.firstinspires.ftc.teamcode.Teleop.TurretLift;
+import org.firstinspires.ftc.teamcode.Dune.TurretLift;
 import org.firstinspires.ftc.teamcode.drive.DriveConstants;
 import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
 import org.openftc.apriltag.AprilTagDetection;
@@ -32,8 +32,8 @@ public class NATIONALS_AUTO_RIGHT extends LinearOpMode {
     int SignalRotation;
     int slowerVelocityConstraint;
 
-    final double outconestackX = 41.3;
-    final double outconestackY = -6.2;
+    final double outconestackX = 40;
+    final double outconestackY = -6.1;
     final double outconestackRotation = 0;
 
 
@@ -136,7 +136,7 @@ public class NATIONALS_AUTO_RIGHT extends LinearOpMode {
         // trajectories that aren't changing should all be here
 
         Trajectory PreloadDrive = drive.trajectoryBuilder(startPose)
-                .lineToLinearHeading(new Pose2d(38, -18.5, Math.toRadians(outconestackRotation)))
+                .lineToLinearHeading(new Pose2d(38, -18.8, Math.toRadians(outconestackRotation)))
                 //.lineTo(new Vector2d(33, -15))
                 //.splineTo(new Vector2d(35, -40), Math.toRadians(-90)) // spline to spline heading, first angle is target, second angle is target angle during path
                 //.splineToSplineHeading(new Pose2d(35, -12, Math.toRadians(0)), Math.toRadians(-90)) // end effects shape of spline, first angle is the target heading
@@ -221,6 +221,7 @@ public class NATIONALS_AUTO_RIGHT extends LinearOpMode {
             telemetry.update();
             sleep(20);
             turretlift.closeClaw();
+            turretlift.linkageIn();
         }
 
 
@@ -338,7 +339,7 @@ public class NATIONALS_AUTO_RIGHT extends LinearOpMode {
                     break;
 
                 case DRIVE_OUT_STACK:
-                    outakeOutReady(146,1,liftMidPosition, liftMidPosition); // what's faster, driving or outake - balance of both is best
+                    outakeOutReady(144,1,liftMidPosition, liftMidPosition); // what's faster, driving or outake - balance of both is best
                     if (linkageOutReady){
                         turretlift.linkageNearlyOut();
                     }

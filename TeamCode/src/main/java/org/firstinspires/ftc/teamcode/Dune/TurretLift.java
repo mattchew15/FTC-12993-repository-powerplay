@@ -1,17 +1,13 @@
-package org.firstinspires.ftc.teamcode.Teleop;
-
-import static org.firstinspires.ftc.robotcore.external.BlocksOpModeCompanion.telemetry;
+package org.firstinspires.ftc.teamcode.Dune;
 
 import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.robotcore.hardware.AnalogInput;
-import com.qualcomm.robotcore.hardware.CRServoImpl;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DigitalChannel;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.ServoImplEx;
-import com.qualcomm.robotcore.hardware.VoltageSensor;
 
 import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
 
@@ -28,7 +24,7 @@ public class TurretLift {  // no constructor for this class
 
     //config variables can be changed/tuned in dashboard
     public static double ClawOpenPos = 0.52, ClawClosedPos = 0.405, ClawCloseSoftPos = 0.45, ClawOpenHardPos = 0.61, ClawCloseHardPos = 0.38;
-    public static double LinkageFullPos = 0, LinkageHalfPos = 0.16, LinkageQuarterPos = 0.26, LinkageClosedPos = 0.49, LinkageNearlyOutPos = 0.09, LinkageNearlyOutHalfPos = 0.2;
+    public static double LinkageFullPos = 0, LinkageHalfPos = 0.16, LinkageQuarterPos = 0.26, LinkageClosedPos = 0.49, LinkageNearlyOutPos = 0.08, LinkageNearlyOutHalfPos = 0.2;
     public static double TiltUpPos = 0.31, TiltDownPos = 0.87, TiltHalfPos = 0.48;
 
     //editable dashboard variables must be public static - PID values for turret and lift that can be tuned
@@ -123,14 +119,6 @@ public class TurretLift {  // no constructor for this class
         return TurretMotor.getCurrentPosition(); //loop times reading encoder?
     }
 
-    public boolean turretTargetReached(){
-        if (turretPID.returnError() < turretthresholdDistance){
-            return true;
-        }
-        else{
-            return false;
-        }
-    }
 
     public boolean intakeTouchPressed() {
         return !sensorTouchClaw.getState();
