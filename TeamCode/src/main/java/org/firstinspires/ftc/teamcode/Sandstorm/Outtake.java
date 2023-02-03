@@ -33,14 +33,14 @@ public class Outtake {  // no constructor for this class
 
     //Servo Positions for outtake
     public static double OuttakeClawOpenPos = 0.52, OuttakeClawClosedPos = 0.405, OuttakeClawOpenHardPos = 0.61;
-    public static double OuttakeArmReadyPos = 0, OuttakeArmDepositPos = 0, OuttakeArmPickupPos = 0;
+    public static double OuttakeArmReadyPos = 0, OuttakeArmDepositPos = 0, OuttakeArmPickupPos = 0, OuttakeArmScorePos, OuttakeArmSlightlyTiltedUpPos;
     public static double BraceReadyPos = 0, BraceActivePos = 0, BraceTuckedPos = 0, BraceFlipConePos = 0;
-    public static double OuttakeSlideReadyPos = 0, OuttakeSlideScorePos = 0, OuttakeSlideScoreDropPos = 0, OuttakeSlideGroundPos = 0, OuttakeSlideConeFlipPos = 0;
+    public static double OuttakeSlideReadyPos = 0, OuttakeSlideScorePos = 0, OuttakeSlideScoreDropPos = 0, OuttakeSlideGroundPos = 0, OuttakeSlideConeFlipPos = 0, OuttakeSlideAboveConePos = 0;
 
     //Servo Positions for Intake
     public static double IntakeClawOpenPos = 0.52, IntakeClawClosedPos = 0.405, IntakeClawOpenHardPos = 0.61;
-    public static double IntakeArmReadyPos = 0, IntakeArmDepositPos = 0, IntakeArmPickupPos = 0;
-    public static double IntakeSlideReadyPos = 0, IntakeSlideTransferPos = 0;
+    public static double IntakeArmReadyPos = 0, IntakeArmTransferPos = 0, IntakeArmPickupPos = 0;
+    public static double IntakeLiftReadyPos = 0, IntakeLiftTransferPos = 0;
 
     //Servo Positions for Stack Height
     public static double IntakeHeight5 = 0, IntakeHeight4 = 0, IntakeHeight3 = 0, IntakeHeight2 = 0, IntakeHeight1 = 0;
@@ -201,19 +201,19 @@ public class Outtake {  // no constructor for this class
         IntakeClawServo.setPosition(IntakeClawOpenHardPos);
     }
 
-    public void IntakeArmReady(){IntakeClawServo.setPosition(IntakeClawOpenPos);}
+    public void IntakeArmReady(){IntakeClawServo.setPosition(IntakeArmReadyPos);}
     public void IntakeArmTransfer(){
-        IntakeClawServo.setPosition(IntakeClawClosedPos);
+        IntakeClawServo.setPosition(IntakeArmTransferPos);
     }
 
-    public void IntakeSlideReady(){IntakeClawServo.setPosition(IntakeClawOpenHardPos);}
-    public void IntakeSlideTransfer(){IntakeClawServo.setPosition(IntakeClawOpenHardPos);}
+    public void IntakeLiftReady(){IntakeClawServo.setPosition(IntakeLiftReadyPos);}
+    public void IntakeLiftTransfer(){IntakeClawServo.setPosition(IntakeLiftTransferPos);}
 
-    public void IntakeSlide5(){IntakeClawServo.setPosition(IntakeHeight5);}
-    public void IntakeSlide4(){IntakeClawServo.setPosition(IntakeHeight4);}
-    public void IntakeSlide3(){IntakeClawServo.setPosition(IntakeHeight3);}
-    public void IntakeSlide2(){IntakeClawServo.setPosition(IntakeHeight2);}
-    public void IntakeSlide1(){IntakeClawServo.setPosition(IntakeHeight1);}
+    public void IntakeLift5(){IntakeClawServo.setPosition(IntakeHeight5);}
+    public void IntakeLift4(){IntakeClawServo.setPosition(IntakeHeight4);}
+    public void IntakeLift3(){IntakeClawServo.setPosition(IntakeHeight3);}
+    public void IntakeLift2(){IntakeClawServo.setPosition(IntakeHeight2);}
+    public void IntakeLift1(){IntakeClawServo.setPosition(IntakeHeight1);}
 
     public void OuttakeClawOpen(){
         OuttakeClawServo.setPosition(OuttakeClawOpenPos);
@@ -226,6 +226,8 @@ public class Outtake {  // no constructor for this class
     public void OuttakeArmReady(){OuttakeArmServo.setPosition(OuttakeArmReadyPos);}
     public void OuttakeArmDeposit(){OuttakeArmServo.setPosition(OuttakeArmDepositPos);}
     public void OuttakeArmPickup(){OuttakeArmServo.setPosition(OuttakeArmPickupPos);}
+    public void OuttakeArmScore(){OuttakeArmServo.setPosition(OuttakeArmScorePos);}
+    public void OuttakeArmTiltUpSlightly(){OuttakeArmServo.setPosition(OuttakeArmSlightlyTiltedUpPos);}
 
     public void BraceReady(){OuttakeBraceServo.setPosition(BraceReadyPos);}
     public void BraceActive(){OuttakeBraceServo.setPosition(BraceActivePos);}
@@ -235,8 +237,9 @@ public class Outtake {  // no constructor for this class
     public void OuttakeSlideReady(){OuttakeSlideServo.setPosition(OuttakeSlideReadyPos);}
     public void OuttakeSlideScore(){OuttakeSlideServo.setPosition(OuttakeSlideScorePos);}
     public void OuttakeSlideScoreDrop(){OuttakeSlideServo.setPosition(OuttakeSlideScoreDropPos);}
-    public void OuttakeSlideGround(){OuttakeSlideServo.setPosition(OuttakeSlideReadyPos);}
+    public void OuttakeSlideGround(){OuttakeSlideServo.setPosition(OuttakeSlideGroundPos);}
     public void OuttakeSlidePickupCones(){OuttakeSlideServo.setPosition(OuttakeSlideConeFlipPos);}
+    public void OuttakeSlideAboveCones(){OuttakeSlideServo.setPosition(OuttakeSlideAboveConePos);}
 
 
     public double degreestoTicks(int degrees){

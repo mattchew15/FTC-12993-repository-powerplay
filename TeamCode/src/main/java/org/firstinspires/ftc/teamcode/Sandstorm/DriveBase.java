@@ -13,20 +13,13 @@ public class DriveBase {  // no constructor for this class
     private DcMotor BR;
     private DcMotor BL;
     private DcMotor FL;
-    private DcMotor IntakeRMotor;
-    private DcMotor IntakeLMotor;
-    private Servo IntakeRightServo;
-    private Servo IntakeLeftServo;
+    private DcMotor IntakeMotor;
 
     //variable for the drivebase speed toggle;
     boolean PowerToggled;
     double PowerBase;
     double PowerBaseTurn;
     double PowerStrafe;
-
-    // config servo position variables
-    public static double IntakeRSRaisedPos = 0.765, IntakeLSRaisedPos = 0.145;
-    public static double IntakeRSLoweredPos = 0.875, IntakeLSLoweredPos = 0.025;
 
     public void Drivebase_init(HardwareMap hwMap) {
 
@@ -35,12 +28,7 @@ public class DriveBase {  // no constructor for this class
         BL = hwMap.get(DcMotor.class, "BL");
         FL = hwMap.get(DcMotor.class, "FL");
 
-        IntakeRMotor = hwMap.get(DcMotor.class, "IntakeR");
-        IntakeLMotor = hwMap.get(DcMotor.class, "IntakeL");
-
-        IntakeRightServo = hwMap.get(Servo.class, "IntakeRightS");
-        IntakeLeftServo = hwMap.get(Servo.class, "IntakeLeftS");
-
+        IntakeMotor = hwMap.get(DcMotor.class, "IntakeMotor");
     }
 
     public void motorsSetup(){
@@ -54,7 +42,7 @@ public class DriveBase {  // no constructor for this class
         FL.setDirection(DcMotorSimple.Direction.REVERSE); //DcMotorSimple class?
         BL.setDirection(DcMotorSimple.Direction.REVERSE);
         BR.setDirection(DcMotorSimple.Direction.REVERSE);
-        IntakeLMotor.setDirection(DcMotorSimple.Direction.REVERSE); // one intake motor is reversed
+        IntakeMotor.setDirection(DcMotorSimple.Direction.REVERSE); // one intake motor is reversed
     }
 
     public void Drive(double LY, double LX, double RX) {
@@ -105,17 +93,8 @@ public class DriveBase {  // no constructor for this class
         }
     }
 
-    public void intakeBarUp(){
-        IntakeLeftServo.setPosition(IntakeLSRaisedPos);
-        IntakeRightServo.setPosition(IntakeRSRaisedPos);
-    }
-    public void intakeBarDown(){
-        IntakeLeftServo.setPosition(IntakeLSLoweredPos);
-        IntakeRightServo.setPosition(IntakeRSLoweredPos);
-    }
     public void intakeSpin(double speedDirection){
-        IntakeRMotor.setPower(speedDirection);
-        IntakeLMotor.setPower(speedDirection);
+        IntakeMotor.setPower(speedDirection);
     }
 
 }

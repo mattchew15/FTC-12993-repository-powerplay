@@ -13,12 +13,18 @@ public class Inputs {
     final double TEN_TO_ENDGAME = 80.0;
     final double ENDGAME = 90.0;
     public boolean Toggled;
-    public boolean ToggledManualReset;
+
+    public boolean ToggledFlipConeHeight;
+    public int FlipConeHeightState;
+    public boolean AboveConeHeight;
+
+    public boolean FlipConeToggleMode;
+    public boolean FlipConeToggled;
+
     public boolean IntakeStackToggleMode;
-    public boolean ManualResetToggleMode;
     public boolean IntakeHeightCycleUp;
-    public boolean IntakeHeightCycleDown;
-    public int IntakeHeightState;
+    public boolean IntakeToggleOut;
+    public int IntakeToggleOutState;
 
     public void resetMatchTimer(){matchTimer.reset();}
 
@@ -26,10 +32,16 @@ public class Inputs {
         Toggled = false;
         IntakeStackToggleMode = false;
         IntakeHeightCycleUp = false;
-        IntakeHeightCycleDown = false;
-        IntakeHeightState = 0; // for fifth cone stack we have 0 height change
-        ToggledManualReset = false;
-        ManualResetToggleMode = false;
+
+        IntakeToggleOut = false;
+        IntakeToggleOutState = 0; // for fifth cone stack we have 0 height change
+
+        FlipConeToggled = false;
+        FlipConeToggleMode = false;
+
+        ToggledFlipConeHeight = false;
+        FlipConeHeightState = 0;
+        AboveConeHeight = false;
     }
 
     public void gamepadRumbleTimer (){
@@ -46,59 +58,62 @@ public class Inputs {
             }
         }
     }
-    public void intakeStackToggleMode(boolean togglebtn) {
-        if (togglebtn) {
-            if (!Toggled) { // the first time you first press it it will change stuff, then won't go past this if statement
-                if (IntakeStackToggleMode) {
-                    IntakeStackToggleMode = false; // will have to access this variable in dune drive
-                } else {
-                    IntakeStackToggleMode = true;
-                }
-                Toggled = true;
-            }
-        }
-        else {
-            Toggled = false;
 
-        }
-    }
-
-    public void manualResetToggleMode(boolean togglebtn) {
-        if (togglebtn) {
-            if (!ToggledManualReset) { // the first time you first press it it will change stuff, then won't go past this if statement
-                if (ManualResetToggleMode) {
-                    ManualResetToggleMode = false; // will have to access this variable in dune drive
-                } else {
-                    ManualResetToggleMode = true;
-                }
-                ToggledManualReset = true;
-            }
-        }
-        else {
-            ToggledManualReset = false;
-        }
-    }
-
-    public void cycleToggleUp(boolean cyclebtnup){
+    public void SlidesToggleUp(boolean cyclebtnup){
         if (cyclebtnup) {
-            if (!IntakeHeightCycleUp) {
-                IntakeHeightCycleUp = true;
-                IntakeHeightState = (IntakeHeightState - 1) % 4;
+            if (!IntakeToggleOut) {
+                IntakeToggleOut = true;
+                IntakeToggleOutState  = (IntakeToggleOutState  - 1) % 3;
             }
         }
         else {
-            IntakeHeightCycleUp = false;
+            IntakeToggleOut = false;
         }
     }
-    public void cycleToggleDown (boolean cyclebtndown){
-        if (cyclebtndown) {
-            if (!IntakeHeightCycleDown) {
-                IntakeHeightCycleDown = true;
-                IntakeHeightState = (IntakeHeightState + 1) % 4;
+    public void IntakeToggleOut (boolean intaketogglebtn){
+        if (intaketogglebtn) {
+            if (!IntakeToggleOut) {
+                IntakeToggleOut = true;
+                IntakeToggleOutState  = (IntakeToggleOutState  + 1) % 4;
             }
         }
         else {
-            IntakeHeightCycleDown = false;
+            IntakeToggleOut = false;
         }
     }
+    public void coneFlipOuttakeDownToggle(boolean togglebtn, boolean heightupbtn) {
+        if (togglebtn) {
+            if (!ToggledFlipConeHeight) {
+                ToggledFlipConeHeight = true;
+                FlipConeHeightState  = (FlipConeHeightState + 1) % 3; // as of right now the only states are go above cone, cone down on cone, and get ready for pickup
+                if (AboveConeHeight){
+                    FlipConeHeightState = 1; // back to down on cone
+                    AboveConeHeight = false; // makes it so that it doesn't go to above cone again
+                }
+            }
+        }
+        else {
+            ToggledFlipConeHeight = false;
+        }
+        if (heightupbtn) { // at any point in the flipconeheightstate, if right bumper is pressed then it will go to here
+            AboveConeHeight = true;
+        }
+    }
+
+    public void flipConeToggleMode(boolean togglebtn) {
+        if (togglebtn) {
+            if (!FlipConeToggled) { // the first time you first press it it will change stuff, then won't go past this if statement
+                if (FlipConeToggleMode) {
+                    FlipConeToggleMode = false; // will have to access this variable in dune drive
+                } else {
+                    FlipConeToggleMode = true;
+                }
+                FlipConeToggled = true;
+            }
+        }
+        else {
+            FlipConeToggled = false;
+        }
+    }
+
 }
