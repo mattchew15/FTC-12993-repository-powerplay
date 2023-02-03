@@ -7,17 +7,17 @@ import com.arcrobotics.ftclib.hardware.motors.MotorEx;
 
 public class DriveSubSystem extends SubsystemBase {
     private MecanumDrive drive;
-    private Motor FR, BR, FL, BL;
+    private MotorEx FR, BR, FL, BL;
 
-    public DriveSubSystem(MotorEx frontR, MotorEx backR, MotorEx frontL, MotorEx backL){
+    public DriveSubSystem(MotorEx frontL, MotorEx frontR, MotorEx backL, MotorEx backR){
         FR = frontR;
         BR = backR;
         FL = frontL;
         BL = backL;
-        drive = new MecanumDrive(FR, BR, FL, BL);
+        drive = new MecanumDrive(FL, FR, BL, BR);
     }
-    public void drive(double strafeSpeed, double forwardSpeed, double turnSpeed){
-        drive.driveRobotCentric(strafeSpeed, forwardSpeed, turnSpeed);
+    public void drive(double strafeSpeed, double forwardSpeed, double turnSpeed){//: )
+        drive.driveRobotCentric(-1 * strafeSpeed, forwardSpeed, turnSpeed);
     }
 
 }

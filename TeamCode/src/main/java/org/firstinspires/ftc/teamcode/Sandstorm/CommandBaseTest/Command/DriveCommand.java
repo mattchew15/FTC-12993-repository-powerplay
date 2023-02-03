@@ -6,7 +6,7 @@ import org.firstinspires.ftc.teamcode.Sandstorm.CommandBaseTest.SubSystem.DriveS
 
 import java.util.function.DoubleSupplier;
 
-public class DriveCommand extends CommandBase { //command is a rigid state machine that controlls a subsystem and makes bindings
+public class DriveCommand extends CommandBase { //command is a rigid state machine that controlls a subsystem and makes bindings :)
     private DriveSubSystem driveSubSystem;
     private DoubleSupplier strafe, forward, turn;
 
@@ -20,6 +20,6 @@ public class DriveCommand extends CommandBase { //command is a rigid state machi
     }
     @Override
     public void execute(){
-        driveSubSystem.drive(strafe.getAsDouble(), forward.getAsDouble(), turn.getAsDouble());
+        driveSubSystem.drive(forward.getAsDouble(), turn.getAsDouble(), strafe.getAsDouble());
     }
 }
