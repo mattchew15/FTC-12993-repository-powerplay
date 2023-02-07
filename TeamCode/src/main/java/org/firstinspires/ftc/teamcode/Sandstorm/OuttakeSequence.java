@@ -35,9 +35,6 @@ public class OuttakeSequence {
 
     boolean IntakeReady; // might not need this - it just goes true when the intake is ready
 
-    int FlipConeSequenceStartingState;
-    int OuttakePickupStartingState;
-
     // these variables are for the target positions for the lift and stuff, they may change throughout the program sequence
     int liftTargetPosition;
     int turretTargetPosition;
@@ -129,8 +126,7 @@ public class OuttakeSequence {
         liftTargetPosition = 50; // if no height is specified, then the lift needs to go out a bit for the transfer
         intakeSlideTargetPosition = 0;
 
-        OuttakePickupStartingState = 0;
-        FlipConeSequenceStartingState = 0;
+
     }
 
     public void outtakeSequence(){ // make sure to go back and add when each statemachine command should be run
@@ -159,7 +155,7 @@ public class OuttakeSequence {
                 drivebase.intakeSpin(1); // spin the intake
                 resetAllMotors();
                 // no need to put ready stuff on because there will be nothing conflicting with it
-                if (outtake.intakeClawTouchPressed()){
+                if (outtake.intakeClawTouchPressed() || gamepad2.right_bumper){
                     outtakeState = OuttakeState.LIFT_CONE;
                     OuttakeTimer = GlobalTimer.milliseconds(); // reset timer
                     outtake.IntakeClawClose();
@@ -280,6 +276,7 @@ public class OuttakeSequence {
                 break;
             case INTAKE_SHOOT_OUT:
                 outtake.IntakeSlideTo(IntakeSlideOutTicks, outtake.IntakeSlidePos(), 1);
+                drivebase.intakeSpin(0.4); // helps the slides go out
                 if (outtake.IntakeSlidePos() > 100) {
                     outtake.IntakeClawOpenHard();
                     outtake.IntakeLiftReady();
@@ -319,6 +316,7 @@ public class OuttakeSequence {
                         else{
                             outtake.IntakeLiftTransfer(); // when slide is coming in make sure servos are up
                             outtake.IntakeArmReady();
+                            drivebase.intakeSpin(-0.4); // spin in when its coming in
                         }
                     } else{
                         outtake.IntakeLiftTransfer();
@@ -478,6 +476,7 @@ public class OuttakeSequence {
             outtake.IntakeLiftTransfer();
             outtake.IntakeArmTransfer();
             outtake.IntakeSlideTo(0, outtake.IntakeSlidePos(), 1);
+            drivebase.intakeSpin(-0.4);
         } else {
             IntakeReady = true;
         }

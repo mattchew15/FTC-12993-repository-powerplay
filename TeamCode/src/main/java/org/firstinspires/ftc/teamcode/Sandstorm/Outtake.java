@@ -77,7 +77,7 @@ public class Outtake {  // no constructor for this class
         OuttakeSlideServo = hwMap.get(ServoImplEx.class, "OutSlideS");
         OuttakeBraceServo = hwMap.get(ServoImplEx.class, "OutBraceS");
         IntakeArmServo = hwMap.get(ServoImplEx.class, "InArmS");
-        IntakeSlideServo = hwMap.get(ServoImplEx.class, "InSlideS");
+        IntakeSlideServo = hwMap.get(ServoImplEx.class, "InLiftS");
         IntakeClawServo = hwMap.get(ServoImplEx.class, "InClawS");
 
         IntakeClawTouch = hwMap.get(DigitalChannel.class, "IntakeTouch");

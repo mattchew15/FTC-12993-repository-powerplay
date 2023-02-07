@@ -51,14 +51,15 @@ public class StormDrive extends LinearOpMode {
 
                 drivebase.Drive(gamepad1.left_stick_y,gamepad1.left_stick_x,gamepad1.right_stick_x);
                 //drivebase.motorDirectionTest(gamepad1.left_stick_y, gamepad1.left_stick_x,gamepad1.right_stick_x,gamepad1.right_stick_y);
-                drivebase.PowerToggle(gamepad1.a);
+                drivebase.PowerToggle(gamepad1.x);
                 //inputs.gamepadRumbleTimer();
                 telemetry.addData("LiftMotorPosition", outtake.liftPos());
                // telemetry.addData("turretPosition", outtake.tickstoDegrees((int)Math.round(outtake.turretPos()))); // might be in the wrong degrees/other
                 telemetry.addData("turret raw position", outtake.turretPos());
                 telemetry.addData("lift motor current draw", outtake.getLiftVoltage());
+                telemetry.addData("intakeSlideMotor", outtake.IntakeSlidePos());
 
-                outtakeSequence.outtakeSequence();
+                outtakeSequence.outtakeSequence(); // if gamepad things don't work here then need to pass them in as parameters of this function
 
                 telemetry.addData("Main Outtake State", outtakeSequence.outtakeState);
                 telemetry.addData("Intake Out State", outtakeSequence.outtakeState);
