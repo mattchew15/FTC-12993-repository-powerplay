@@ -3,6 +3,9 @@ package org.firstinspires.ftc.teamcode.Sandstorm;
 import static org.firstinspires.ftc.robotcore.external.BlocksOpModeCompanion.gamepad1;
 import static org.firstinspires.ftc.robotcore.external.BlocksOpModeCompanion.gamepad2;
 import static org.firstinspires.ftc.robotcore.external.BlocksOpModeCompanion.hardwareMap;
+import static org.firstinspires.ftc.teamcode.Sandstorm.Outtake.OuttakeClawOpenPos;
+
+import android.provider.Settings;
 
 import com.qualcomm.robotcore.util.ElapsedTime;
 
@@ -15,6 +18,13 @@ public class OuttakeSequence {
 
     final double IntakeSlideOutTicks = 500;
 
+    final int LiftHighPosition = 800;
+    final int LiftMidPosition = 400;
+    final int LiftLowPosition = 0;
+
+    final int TurretLeftPosition = -30;
+    final int TurretRightposition = 30;
+
     // creating instances of each class
     ElapsedTime GlobalTimer;
     double OuttakeTimer;
@@ -22,14 +32,6 @@ public class OuttakeSequence {
     double FlipConeTimer;
     double OuttakePickupTimer;
     double IntakeOutTimer;
-
-    boolean DepositReady;
-    boolean FlipConeReady;
-    boolean OuttakePickupReady;
-
-    boolean DepositIdle;
-    boolean FlipConeIdle;
-    boolean OuttakePickupIdle;
 
     boolean IntakeReady; // might not need this - it just goes true when the intake is ready
 
@@ -43,13 +45,16 @@ public class OuttakeSequence {
     Outtake outtake = new Outtake();
 
     enum OuttakeState { // main outtake state - other fsm's will do smaller actions
-        READY,
-        PICKUP_EXTENDED,
+        READY, // this is the state that everything will return to when b is pressed.
+        PICKUP_EXTENDED, // add the functions for the other state machines (intake out etc) in these cases later
         INTAKE,
         LIFT_CONE,
         CLAW_GRIP_TRANSFER,
-        OUTTAKE_DEPOSIT,
-        RETURN
+        HEIGHT_CHANGE_OUTTAKE_DEPOSIT,
+        DROP,
+        SUBSYSTEMS_SET_RETURN,
+        RETURN,
+        IDLE
     }
     enum ConeDepositState {
         READY,
@@ -76,16 +81,17 @@ public class OuttakeSequence {
         INTAKE_INITIAL_LIFT,
         INTAKE_SHOOT_OUT,
         INTAKE_TO_TRANSFER,
+        RETURN_SET_TIMER,
         RETURN,
         IDLE
     }
 
     // instance of enum
-    OuttakeState outtakeState = OuttakeState.READY;
-    ConeDepositState coneDepositState = ConeDepositState.IDLE;
-    FlipConesState flipConesState = FlipConesState.IDLE;
-    OuttakePickupState outtakePickupState = OuttakePickupState.IDLE;
-    IntakeOut intakeout = IntakeOut.IDLE;
+    OuttakeState outtakeState; // do i have to set a state here to idle or something?
+    ConeDepositState coneDepositState;
+    FlipConesState flipConesState;
+    OuttakePickupState outtakePickupState;
+    IntakeOut intakeout;
 
     // runs on init (not setup function)
     public void OuttakeHardware(){
@@ -110,22 +116,151 @@ public class OuttakeSequence {
         inputs.inputsSetup(); // this needs to be chnaged - changes toggle variables and stuff to false
 
         // sets the first case for the fsm to be in
-        outtakeState = OuttakeState.READY;
+        outtakeState = OuttakeState.SUBSYSTEMS_SET_RETURN; // tghis is return so all the other states start in the right thing
         coneDepositState = ConeDepositState.IDLE;
         flipConesState = FlipConesState.IDLE;
         outtakePickupState = OuttakePickupState.IDLE;
         intakeout = IntakeOut.READY;
 
         turretTargetPosition = 0;
-        liftTargetPosition = 0;
+        liftTargetPosition = 50; // if no height is specified, then the lift needs to go out a bit for the transfer
         intakeSlideTargetPosition = 0;
+
+
     }
 
+    public void outtakeSequence(){ // make sure to go back and add when each statemachine command should be run
+        switch (outtakeState) {
+            case READY:
+                outtake.IntakeClawOpen();
+                outtake.IntakeArmReady();
+                outtake.IntakeLiftReady();
+
+                resetAllMotors(); // might break something
+
+                outtake.OuttakeSlideReady();
+                outtake.OuttakeClawOpen();
+                outtake.OuttakeArmReady();
+                outtake.BraceReady();
+
+                if (gamepad2.right_bumper || gamepad1.right_bumper){
+                    outtakeState = OuttakeState.INTAKE;
+                }
+                IntakeShootOut();
+                OuttakePickupSequence();
+                FlipConeSequence();
+
+                break;
+            case INTAKE:
+                drivebase.intakeSpin(1); // spin the intake
+                resetAllMotors();
+                // no need to put ready stuff on because there will be nothing conflicting with it
+                if (outtake.intakeClawTouchPressed() || gamepad2.right_bumper){
+                    outtakeState = OuttakeState.LIFT_CONE;
+                    OuttakeTimer = GlobalTimer.milliseconds(); // reset timer
+                    outtake.IntakeClawClose();
+                }
+                break;
+            case LIFT_CONE:
+                outtake.IntakeClawClose();
+                resetAllMotors();
+                if (GlobalTimer.milliseconds() - OuttakeTimer > 200){
+                    outtake.IntakeLiftTransfer();
+                    if (GlobalTimer.milliseconds() - OuttakeTimer > 400){
+                        outtake.IntakeArmTransfer();
+                        if ((GlobalTimer.milliseconds() - OuttakeTimer > 650) ||outtake.outtakeClawTouchPressed()){
+                            outtakeState = OuttakeState.CLAW_GRIP_TRANSFER;
+                            OuttakeTimer = GlobalTimer.milliseconds(); // reset timer
+                        }
+                    }
+                }
+                break;
+            case CLAW_GRIP_TRANSFER:
+                resetAllMotors();
+                if (outtake.liftTargetReached()){ // make sure that the lift arm is down before doing the whole transfer thing
+                    outtake.OuttakeClawClose();
+                    if (GlobalTimer.milliseconds() - OuttakeTimer > 150){
+                        outtake.IntakeClawOpen();
+                        if (GlobalTimer.milliseconds() - OuttakeTimer > 200){
+                            outtake.liftTo(50, outtake.liftPos(), 1);
+                            outtake.OuttakeArmScore();
+                            if (GlobalTimer.milliseconds()-OuttakeTimer > 230){
+                                outtake.BraceActive(); // this should happen at the same time as the outtake arm is going out so that its always parrallel to the ground
+                                outtake.IntakeArmReady();
+                                if (GlobalTimer.milliseconds()-OuttakeTimer > 300){
+                                    outtake.IntakeLiftReady();
+                                }
+                            }
+                        }
+                    }
+                }
+                break;
+            case HEIGHT_CHANGE_OUTTAKE_DEPOSIT:
+                outtake.turretSpin(turretTargetPosition,outtake.turretPos(),1);
+                outtake.liftTo(liftTargetPosition, outtake.liftPos(),1);
+                if (gamepad1.right_bumper){
+                    outtakeState = OuttakeState.DROP;
+                    coneDepositState = ConeDepositState.CONE_DROP; // should run the whole drop sequence here
+                    OuttakeTimer = GlobalTimer.milliseconds(); // reset timer
+                }
+                break;
+            case DROP:
+                ConeDepositSequence(); // this runs constantly to make it happen
+                // run the intake shoot out
+                IntakeShootOut();
+                if (coneDepositState == ConeDepositState.IDLE){ // if the whole sequence has finished
+                    outtakeState = OuttakeState.SUBSYSTEMS_SET_RETURN;
+                    OuttakeTimer = GlobalTimer.milliseconds(); // reset timer
+                }
+                break;
+            case SUBSYSTEMS_SET_RETURN: // set the cases for return
+                IntakeShootOut();
+                intakeout = IntakeOut.RETURN_SET_TIMER;// sets the intake to return state - will return no matter its state
+                outtakeState = OuttakeState.RETURN;
+                OuttakeTimer = GlobalTimer.milliseconds(); // reset timer
+
+                // makes all the subsystems states go back to default
+                inputs.FlipConeHeightState = 0; // makes the flip cone state go back to zero so it goes to the first state in the modulo rather than a random stage of picking up cones
+                flipConesState = FlipConesState.OUTTAKE_FLIP_CONE_EXECUTE;
+                 // puts it back to ready so we can use it in ready state of the main state machine
+                outtakePickupState = OuttakePickupState.READY;
+
+                break;
+            case RETURN:
+                // make sure to go to arm reset state for all subsystems
+                outtake.liftTo(0, outtake.liftPos(),1);
+                outtake.turretSpin(0,outtake.turretPos(),1);
+                IntakeShootOut(); // runs the return case for this
+                if (IntakeReady) { // outtake lift target reached might be needed but the whole point is so that we can use the intake while the outtake is resetting
+                    outtakeState = OuttakeState.READY; // need the arm to reset as well
+
+                }
+                outtake.OuttakeSlideReady();
+                outtake.OuttakeClawOpen();
+                if (GlobalTimer.milliseconds() - OuttakeTimer > 200){ // this might not return if b is pressed when its picking up cones or something - need to test
+                    outtake.BraceReady();
+                    if (GlobalTimer.milliseconds() - OuttakeTimer > 300){
+                        outtake.OuttakeArmReady();
+                    }
+                }
+                break;
+            case IDLE:
+                // puts the state into idle when other actions are happening
+                break;
+        }
+        if ((gamepad2.b && outtakeState != OuttakeState.READY) || (gamepad1.b && outtakeState != OuttakeState.READY)){
+            outtakeState = OuttakeState.SUBSYSTEMS_SET_RETURN; // if b is pressed at any state then return to ready
+        }
+
+        turretPositionChange();
+        liftPositionChange();
+    }
     public void IntakeShootOut() {
         switch (intakeout) {
             case READY:
                 outtake.IntakeArmReady();
                 outtake.IntakeLiftReady();
+                IntakeReady = true; // use this variable somewhere else
                 if (gamepad1.a || inputs.IntakeToggleOutState == 2) { // make sure this function isn't called in a case that it start unintentially
                     intakeout = IntakeOut.INTAKE_INITIAL_LIFT; // this will start the timer and the inputs function will also go to 2 at the same time
                     IntakeOutTimer = GlobalTimer.milliseconds();
@@ -141,6 +276,7 @@ public class OuttakeSequence {
                 break;
             case INTAKE_SHOOT_OUT:
                 outtake.IntakeSlideTo(IntakeSlideOutTicks, outtake.IntakeSlidePos(), 1);
+                drivebase.intakeSpin(0.4); // helps the slides go out
                 if (outtake.IntakeSlidePos() > 100) {
                     outtake.IntakeClawOpenHard();
                     outtake.IntakeLiftReady();
@@ -164,15 +300,44 @@ public class OuttakeSequence {
             case IDLE:
                 // nothing happens - when other processes are in use put to idle
                 break;
+            case RETURN_SET_TIMER: //this runs a timer to set for the return state
+                intakeout = IntakeOut.RETURN;
+                IntakeOutTimer = GlobalTimer.milliseconds();
+                break;
+            case RETURN:
+                if (outtake.IntakeSlidePos() > 100){
+                    if (GlobalTimer.milliseconds() - IntakeOutTimer > 350){
+                        outtake.IntakeSlideTo(0, outtake.IntakeSlidePos(),1);
+                        if (outtake.intakeSlideTargetReached()){
+                            outtake.IntakeLiftReady();
+                            intakeout = IntakeOut.READY;
+                            inputs.IntakeToggleOutState = 0;
+                        }
+                        else{
+                            outtake.IntakeLiftTransfer(); // when slide is coming in make sure servos are up
+                            outtake.IntakeArmReady();
+                            drivebase.intakeSpin(-0.4); // spin in when its coming in
+                        }
+                    } else{
+                        outtake.IntakeLiftTransfer();
+                        outtake.IntakeArmReady();
+                    }
+                } else {
+                    outtake.IntakeLiftReady();
+                    outtake.IntakeArmReady();
+                    intakeout = IntakeOut.READY;
+                    inputs.IntakeToggleOutState = 0; // makes sure when it goes back to ready it won't autonomatically go back to previous state
+                }
+                break;
 
         }
         inputs.IntakeToggleOut(gamepad1.left_bumper); // ONLY RUN THIS FUNCTION IN PLACES WHERE YOU WANT BUTTON SPAM, DO NOT RUN THIS FUNCTION OTHERWISE INTAKE THING WILL CHANGE STATES WITH BUTTON SPAMS
         // PUT TO IDLE WHEN SWITCHING STATES so the code runs once and this function doesn't re-run with a different intake toggleoutstate
         // put the inputs Toggle out state back to 0 in a function
-        if (inputs.IntakeToggleOutState == 0 && intakeout != IntakeOut.IDLE){ // can break if you spam button fix
-            intakeout = IntakeOut.READY;
+        if (inputs.IntakeToggleOutState == 0 && intakeout != IntakeOut.IDLE && intakeout != IntakeOut.RETURN&& intakeout != IntakeOut.RETURN_SET_TIMER){ // can break if you spam button fix
+            intakeout = IntakeOut.READY; // make sure these inputs don't count when this is happening
         }
-        else if (inputs.IntakeToggleOutState == 1 && intakeout != IntakeOut.IDLE){
+        else if (inputs.IntakeToggleOutState == 1 && intakeout != IntakeOut.IDLE && intakeout != IntakeOut.RETURN&& intakeout != IntakeOut.RETURN_SET_TIMER){
             intakeout = IntakeOut.INTAKE_INITIAL_LIFT;
         }
         // 4/3 is zero remainder 3, therefore it goes from 0 to 3
@@ -180,7 +345,6 @@ public class OuttakeSequence {
 
 
     public void ConeDepositSequence(){
-
         switch (coneDepositState) {
             case READY: // not being used at the moment
 
@@ -191,23 +355,30 @@ public class OuttakeSequence {
                 break;
 
             case BRACE_RETRACT:
-                outtake.OuttakeSlideScore();
+                outtake.OuttakeSlideScore(); // drops down on pole a bit
                 if (GlobalTimer.milliseconds() - ConeDepositTimer > 200){
                     outtake.BraceReady(); // might need a new position for this
                     outtake.OuttakeArmScore();
                     if (GlobalTimer.milliseconds() - ConeDepositTimer > 250){
                         outtake.OuttakeClawOpenHard();
-                        if (GlobalTimer.milliseconds() - ConeDepositTimer > 300){
-                            coneDepositState = ConeDepositState.ARM_RESET;
+                        if (GlobalTimer.milliseconds() - ConeDepositTimer > 350){
+                            outtake.liftTo(0, outtake.liftPos(), 1);
+                            outtake.turretSpin(0, outtake.turretPos(),1);
+                            if (GlobalTimer.milliseconds() - ConeDepositTimer > 450){
+                                coneDepositState = ConeDepositState.ARM_RESET;
+                            }
                         }
                     }
                 }
                 break;
             case ARM_RESET:
+                outtake.liftTo(0, outtake.liftPos(), 1);
+                outtake.turretSpin(0, outtake.turretPos(),1);
                 outtake.BraceReady();
                 outtake.OuttakeClawOpen();
                 outtake.OuttakeArmReady();
                 outtake.OuttakeSlideReady();
+                coneDepositState = ConeDepositState.IDLE; // goes to idle to make sure it only runs once when we want it
                 break;
 
             case IDLE:
@@ -258,11 +429,13 @@ public class OuttakeSequence {
         }
 
     }
-    public void OuttakePickupSequence(){
+    public void OuttakePickupSequence(){ // this basically uses the dual intake to pickup
         switch (outtakePickupState) {
-            case READY: // not being used at the moment
-                outtakePickupState = OuttakePickupState.READY_TO_OUTTAKE; // basically when it goes into cone drop it instantly goes to next state to start the timer
-                OuttakePickupTimer = GlobalTimer.milliseconds(); // reset timer
+            case READY:
+                if (gamepad1.dpad_up || gamepad2.dpad_up){
+                    outtakePickupState = OuttakePickupState.READY_TO_OUTTAKE;
+                    OuttakePickupTimer = GlobalTimer.milliseconds(); // reset timer
+                }
                 break;
             case READY_TO_OUTTAKE:
                 outtake.OuttakeArmPickup();
@@ -276,7 +449,7 @@ public class OuttakeSequence {
                 }
                 break;
             case GRAB_OUTTAKE:
-                if (gamepad1.left_bumper){
+                if (gamepad1.left_bumper || gamepad2.left_bumper){
                     outtake.OuttakeClawClose();
                     OuttakePickupTimer = GlobalTimer.milliseconds(); // reset timer
                 }
@@ -288,7 +461,7 @@ public class OuttakeSequence {
                         outtake.OuttakeArmTiltUpSlightly();
                         outtake.BraceActive();
                         outtakePickupState = OuttakePickupState.IDLE;
-                        outtakeState = OuttakeState.OUTTAKE_DEPOSIT;
+                        outtakeState = OuttakeState.HEIGHT_CHANGE_OUTTAKE_DEPOSIT; // this goes to the deposit stage of the main state machine
                     }
                 }
                 break;
@@ -303,8 +476,32 @@ public class OuttakeSequence {
             outtake.IntakeLiftTransfer();
             outtake.IntakeArmTransfer();
             outtake.IntakeSlideTo(0, outtake.IntakeSlidePos(), 1);
+            drivebase.intakeSpin(-0.4);
         } else {
             IntakeReady = true;
         }
+    }
+    public void liftPositionChange(){ // if gamepad inputs don't work in this class then pass them through as parameters in the function
+        if (gamepad1.y || gamepad2.y){
+            liftTargetPosition = LiftHighPosition; // add servo change here if its different for each height
+        } else if (gamepad1.x || gamepad2.x){
+            liftTargetPosition = LiftHighPosition;
+        } else if (gamepad1.a || gamepad2.a){
+            liftTargetPosition = LiftLowPosition;
+        }
+    }
+    public void turretPositionChange(){
+        if (gamepad1.dpad_up || gamepad2.dpad_up){
+            turretTargetPosition = 0;
+        } else if (gamepad1.dpad_right || gamepad2.dpad_right){
+            turretTargetPosition = TurretRightposition;
+        } else if (gamepad1.dpad_left || gamepad2.dpad_left){
+            turretTargetPosition = TurretLeftPosition;
+        }
+    }
+    public void resetAllMotors(){
+        outtake.IntakeSlideTo(0, outtake.IntakeSlidePos(),1); // might break something
+        outtake.liftTo(0, outtake.liftPos(),1);
+        outtake.turretSpin(0,outtake.turretPos(),1);
     }
 }

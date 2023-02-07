@@ -77,7 +77,7 @@ public class Outtake {  // no constructor for this class
         OuttakeSlideServo = hwMap.get(ServoImplEx.class, "OutSlideS");
         OuttakeBraceServo = hwMap.get(ServoImplEx.class, "OutBraceS");
         IntakeArmServo = hwMap.get(ServoImplEx.class, "InArmS");
-        IntakeSlideServo = hwMap.get(ServoImplEx.class, "InSlideS");
+        IntakeSlideServo = hwMap.get(ServoImplEx.class, "InLiftS");
         IntakeClawServo = hwMap.get(ServoImplEx.class, "InClawS");
 
         IntakeClawTouch = hwMap.get(DigitalChannel.class, "IntakeTouch");
@@ -118,7 +118,7 @@ public class Outtake {  // no constructor for this class
 
     public void liftTo(int rotations, double motorPosition, double maxSpeed){
         liftTarget = rotations;
-        LiftMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        LiftMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER); // idk why i added this, will it increase loop time?
         double output = liftPID.update(liftTarget,motorPosition,maxSpeed); //does a lift to with external PID instead of just regular encoders
         LiftMotor.setPower(output);
     }
@@ -228,6 +228,7 @@ public class Outtake {  // no constructor for this class
     public void OuttakeArmPickup(){OuttakeArmServo.setPosition(OuttakeArmPickupPos);}
     public void OuttakeArmScore(){OuttakeArmServo.setPosition(OuttakeArmScorePos);}
     public void OuttakeArmTiltUpSlightly(){OuttakeArmServo.setPosition(OuttakeArmSlightlyTiltedUpPos);}
+    public void GetOuttakeArmPosition(){OuttakeArmServo.getPosition();}
 
     public void BraceReady(){OuttakeBraceServo.setPosition(BraceReadyPos);}
     public void BraceActive(){OuttakeBraceServo.setPosition(BraceActivePos);}
@@ -240,6 +241,7 @@ public class Outtake {  // no constructor for this class
     public void OuttakeSlideGround(){OuttakeSlideServo.setPosition(OuttakeSlideGroundPos);}
     public void OuttakeSlidePickupCones(){OuttakeSlideServo.setPosition(OuttakeSlideConeFlipPos);}
     public void OuttakeSlideAboveCones(){OuttakeSlideServo.setPosition(OuttakeSlideAboveConePos);}
+    public void GetOuttakeSlidePosition(){OuttakeSlideServo.getPosition();}
 
 
     public double degreestoTicks(int degrees){
@@ -268,7 +270,7 @@ public class Outtake {  // no constructor for this class
         LiftMotor.setPower(maxSpeed);
     }
     public void turretSpinInternalPID(int rotations, double maxSpeed){
-        turretTarget = rotations; // variable is public to this class?
+        turretTarget = (int)Math.round(degreestoTicks(rotations)); // rounds whatever the double is to a whole number to make it an int
         TurretMotor.setTargetPosition(turretTarget);
         TurretMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         TurretMotor.setPower(maxSpeed);
