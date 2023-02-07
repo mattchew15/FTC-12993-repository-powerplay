@@ -32,15 +32,15 @@ public class Outtake {  // no constructor for this class
     AnalogInput IntakeArmPosition;
 
     //Servo Positions for outtake
-    public static double OuttakeClawOpenPos = 0.52, OuttakeClawClosedPos = 0.405, OuttakeClawOpenHardPos = 0.61;
-    public static double OuttakeArmReadyPos = 0, OuttakeArmDepositPos = 0, OuttakeArmPickupPos = 0, OuttakeArmScorePos, OuttakeArmSlightlyTiltedUpPos;
-    public static double BraceReadyPos = 0, BraceActivePos = 0, BraceTuckedPos = 0, BraceFlipConePos = 0;
+    public static double OuttakeClawOpenPos = 0.81, OuttakeClawClosedPos = 0.93, OuttakeClawOpenHardPos = 0.64;
+    public static double OuttakeArmReadyPos = 0.22, OuttakeArmDepositPos = 0.8, OuttakeArmPickupPos = 0.87, OuttakeArmScorePos = 0.75, OuttakeArmSlightlyTiltedUpPos = 0.7;
+    public static double BraceReadyPos = 0.3, BraceActivePos = 0.69, BraceTuckedPos = 0.05, BraceFlipConePos = 0.7;
     public static double OuttakeSlideReadyPos = 0, OuttakeSlideScorePos = 0, OuttakeSlideScoreDropPos = 0, OuttakeSlideGroundPos = 0, OuttakeSlideConeFlipPos = 0, OuttakeSlideAboveConePos = 0;
 
     //Servo Positions for Intake
     public static double IntakeClawOpenPos = 0.52, IntakeClawClosedPos = 0.405, IntakeClawOpenHardPos = 0.61;
-    public static double IntakeArmReadyPos = 0, IntakeArmTransferPos = 0, IntakeArmPickupPos = 0;
-    public static double IntakeLiftReadyPos = 0, IntakeLiftTransferPos = 0;
+    public static double IntakeArmReadyPos = 0.81, IntakeArmTransferPos = 0.36, IntakeArmPickupPos = 0;
+    public static double IntakeLiftReadyPos = 0.575, IntakeLiftTransferPos = 0;
 
     //Servo Positions for Stack Height
     public static double IntakeHeight5 = 0, IntakeHeight4 = 0, IntakeHeight3 = 0, IntakeHeight2 = 0, IntakeHeight1 = 0;
