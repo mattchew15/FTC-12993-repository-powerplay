@@ -83,7 +83,7 @@ public class Outtake {  // no constructor for this class
         IntakeClawTouch = hwMap.get(DigitalChannel.class, "IntakeTouch");
         OuttakeClawTouch = hwMap.get(DigitalChannel.class, "OuttakeTouch");
 
-        IntakeArmPosition = hwMap.get(AnalogInput.class, "linkageEncoder");
+        IntakeArmPosition = hwMap.get(AnalogInput.class, "IntakeServoEncoder");
     }
 
 
@@ -251,9 +251,7 @@ public class Outtake {  // no constructor for this class
         return ticks / 7.6;
     }
 
-    public double returnPIDLiftOutput(){
-        return liftPID.returnOutput();
-    }
+    public double returnPIDLiftOutput(){return liftPID.returnOutput();}
     public double returnPIDIntakeSlideOutput(){
         return intakeSlidePID.returnOutput();
     }
