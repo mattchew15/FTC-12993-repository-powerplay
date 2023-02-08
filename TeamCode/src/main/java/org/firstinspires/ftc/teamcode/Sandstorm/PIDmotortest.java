@@ -14,7 +14,7 @@ public class PIDmotortest extends LinearOpMode {
 
     //create new instances of class
     DriveBase drivebase = new DriveBase();
-    OuttakeSequence outtakeSequence = new OuttakeSequence();
+    //OuttakeSequence outtakeSequence = new OuttakeSequence();
     Inputs inputs = new Inputs();
     Outtake outtake = new Outtake();
     //Inputs inputs = new Inputs();
@@ -29,7 +29,7 @@ public class PIDmotortest extends LinearOpMode {
         drivebase.motorsSetup();
         outtake.hardwareSetup();
         inputs.inputsSetup();
-        outtakeSequence.OuttakeSetup();
+        //outtakeSequence.OuttakeSetup();
     }
 
 
@@ -39,7 +39,7 @@ public class PIDmotortest extends LinearOpMode {
         // this is basically init, all setup, hardware classes etc get initialized here
         drivebase.Drivebase_init(hardwareMap);
         outtake.Outtake_init(hardwareMap); // this might be clashing with initializing 2 of the same thing at once
-        outtakeSequence.OuttakeHardware();
+       // outtakeSequence.OuttakeHardware();
 
         // waits for user to press start on driverhub
         waitForStart();
