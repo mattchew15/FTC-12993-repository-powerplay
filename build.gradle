@@ -4,9 +4,12 @@
  * It is extraordinarily rare that you will ever need to edit this file.
  */
 
+repositories {
+    mavenCentral()
+}
+
 buildscript {
     repositories {
-        mavenCentral()
         google()
     }
     dependencies {
