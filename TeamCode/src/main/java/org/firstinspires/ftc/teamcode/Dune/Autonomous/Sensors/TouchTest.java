@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.Autonomous.Sensors;
+package org.firstinspires.ftc.teamcode.Dune.Autonomous.Sensors;
 
 import android.text.method.Touch;
 

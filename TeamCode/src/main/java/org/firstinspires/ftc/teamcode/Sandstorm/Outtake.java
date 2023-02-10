@@ -48,7 +48,7 @@ public class Outtake {  // no constructor for this class
     //editable dashboard variables must be public static - PID values for turret and lift that can be tuned
     public static double TurretKp = 0.005, TurretKi = 0.001, TurretKd = 0.05, TurretIntegralSumLimit = 1, TurretFeedforward = 0.3;
     public static double LiftKp = 0.005, LiftKi = 0.01, LiftKd = 0.05, LiftIntegralSumLimit = 10, LiftKf = 0;
-    public static double intakeSlideKp = 0.005, intakeSlideKi = 0.01, intakeSlideKd = 0.05, intakeSlideIntegralSumLimit = 10, intakeSlideKf = 0;
+    public static double intakeSlideKp = 0.016, intakeSlideKi = 0.01, intakeSlideKd = 0.4, intakeSlideIntegralSumLimit = 10, intakeSlideKf = 0;
 
     // New instance of PID class with editable variables
     PID turretPID = new PID(TurretKp,TurretKi,TurretKd,TurretIntegralSumLimit,TurretFeedforward);

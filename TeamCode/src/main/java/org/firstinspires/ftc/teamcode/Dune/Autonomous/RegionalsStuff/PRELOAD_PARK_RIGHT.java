@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.Autonomous.RegionalsStuff;
+package org.firstinspires.ftc.teamcode.Dune.Autonomous.RegionalsStuff;
 
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.geometry.Vector2d;
@@ -17,9 +17,9 @@ import org.openftc.easyopencv.OpenCvCameraFactory;
 import org.openftc.easyopencv.OpenCvCameraRotation;
 
 
-@Autonomous(name = "RED_AUTO_RIGHT")
+@Autonomous(name = "PRELOAD_PARK_RIGHT", group = "Autonomous")
 @Disabled
-public class RED_AUTO_RIGHT extends LinearOpMode {
+public class PRELOAD_PARK_RIGHT extends LinearOpMode {
 
     // class members
     ElapsedTime GlobalTimer;
@@ -32,9 +32,6 @@ public class RED_AUTO_RIGHT extends LinearOpMode {
     int numCycles;
     int SignalRotation;
     int slowerVelocityConstraint;
-    final double outconestackX = 27;
-    final double outconestackY = -9.5;
-    final double outconestackRotation = 1;
 
     // create class instances
 
@@ -123,7 +120,7 @@ public class RED_AUTO_RIGHT extends LinearOpMode {
 
 
         Trajectory PreloadDrive = drive.trajectoryBuilder(InitialTurn.end(), true)
-                .lineToLinearHeading(new Pose2d(30, -15.5, Math.toRadians(outconestackRotation)))
+                .lineToLinearHeading(new Pose2d(31, -15.5, Math.toRadians(1)))
                 //.lineTo(new Vector2d(33, -15))
                 //.splineTo(new Vector2d(35, -40), Math.toRadians(-90)) // spline to spline heading, first angle is target, second angle is target angle during path
                 //.splineToSplineHeading(new Pose2d(35, -12, Math.toRadians(0)), Math.toRadians(-90)) // end effects shape of spline, first angle is the target heading
@@ -134,21 +131,31 @@ public class RED_AUTO_RIGHT extends LinearOpMode {
                         SampleMecanumDrive.getAccelerationConstraint(DriveConstants.MAX_ACCEL))
                 .build();
 
+        Trajectory OutConeStackAfterPreload = drive.trajectoryBuilder(IntoConeStackPreload.end())
+                .lineTo(new Vector2d(33,-5), SampleMecanumDrive.getVelocityConstraint(slowerVelocityConstraint, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH),
+                        SampleMecanumDrive.getAccelerationConstraint(DriveConstants.MAX_ACCEL))
+                .build();
 
-        Trajectory IntoConeStack = drive.trajectoryBuilder(new Pose2d(outconestackX, outconestackY, Math.toRadians(outconestackRotation)))
+
+        Trajectory OutConeStack = drive.trajectoryBuilder(IntoConeStackPreload.end())
+                .lineTo(new Vector2d(28,-9.5), SampleMecanumDrive.getVelocityConstraint(slowerVelocityConstraint, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH),
+                        SampleMecanumDrive.getAccelerationConstraint(DriveConstants.MAX_ACCEL))
+                .build();
+
+        Trajectory IntoConeStack = drive.trajectoryBuilder(OutConeStack.end())
                 .lineToLinearHeading(new Pose2d(48.5, -9.2, Math.toRadians(0)), SampleMecanumDrive.getVelocityConstraint(slowerVelocityConstraint, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH),
                         SampleMecanumDrive.getAccelerationConstraint(DriveConstants.MAX_ACCEL))
                 .build();
 
-        Trajectory ParkRight = drive.trajectoryBuilder(new Pose2d(outconestackX, outconestackY, Math.toRadians(outconestackRotation)))
+        Trajectory ParkRight = drive.trajectoryBuilder(OutConeStack.end())
                 .lineTo(new Vector2d(62,-9))
                 .build();
 
-        Trajectory ParkLeft = drive.trajectoryBuilder(new Pose2d(outconestackX, outconestackY, Math.toRadians(outconestackRotation)))
+        Trajectory ParkLeft = drive.trajectoryBuilder(OutConeStack.end())
                 .lineTo(new Vector2d(-1,-9))
                 .build();
 
-        Trajectory ParkCentre = drive.trajectoryBuilder(new Pose2d(outconestackX, outconestackY, Math.toRadians(outconestackRotation)))
+        Trajectory ParkCentre = drive.trajectoryBuilder(OutConeStack.end())
                 .lineTo(new Vector2d(28,-9))
                 .build();
 
@@ -212,24 +219,23 @@ public class RED_AUTO_RIGHT extends LinearOpMode {
 
                 case PRELOAD_DRIVE:
                     turretlift.closeClaw();
-                    outakeOutReady(-130,1,350, liftHighPosition); // get outake ready - do timer to make it later, putt hsi in a function
-                    if (!drive.isBusy() && outakeOutReady) { //
+                    //outakeOutReady(-130,1,350, liftHighPosition); // get outake ready - do timer to make it later, putt hsi in a function
+                    if (!drive.isBusy()) { //
                         if (GlobalTimer.milliseconds() - autoTimer > 2500){
-                            turretlift.openClaw(); // preload drop
+                            //turretlift.openClaw(); // preload drop
                             telemetry.addLine("PRELOAD DROP!!");
                             autoTimer = GlobalTimer.milliseconds();
-                            drive.followTrajectoryAsync(IntoConeStackPreload);
-                            currentState = AutoState.PRELOAD_DROP;
-                            }
-                        } // this timer goes off at the start of the code
+                            currentState = AutoState.PARK;
+                        }
+                    } // this timer goes off at the start of the code
                     break;
 
                 case PRELOAD_DROP:
                     if (GlobalTimer.milliseconds() - autoTimer > 200){
                         readyOutake();  // linkage goes in
-                        if (!drive.isBusy() || turretlift.intakeTouchPressed()){ // could change to ((!drive.isBusy() || turretlift.intakeTouchPressed()) || turretlift.intakeTouchPressed())
+                        if (!drive.isBusy()){
                             telemetry.addLine("drive is finished first stack intake ready");
-                            if (GlobalTimer.milliseconds() - autoTimer > 0) { // changed timer to 0
+                            if (GlobalTimer.milliseconds() - autoTimer > 800) {
                                 telemetry.addLine("grab");
                                 turretlift.closeClaw();
                                 autoTimer = GlobalTimer.milliseconds(); // ready to grab stack
@@ -249,30 +255,19 @@ public class RED_AUTO_RIGHT extends LinearOpMode {
                         if (GlobalTimer.milliseconds() - autoTimer > 800){
                             turretlift.linkageIn();
                             if (GlobalTimer.milliseconds() - autoTimer > 1300){ // timer to let the linkage extend
-                                if (numCycles == 0){ // legit not needed lol
-                                    Trajectory OutConeStack = drive.trajectoryBuilder(poseEstimate)
-                                            .lineTo(new Vector2d(outconestackX,outconestackY), SampleMecanumDrive.getVelocityConstraint(slowerVelocityConstraint, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH),
-                                                    SampleMecanumDrive.getAccelerationConstraint(DriveConstants.MAX_ACCEL))
-                                            .build();
-
-                                    drive.followTrajectoryAsync(OutConeStack);
+                                if (numCycles == 0){
+                                    drive.followTrajectoryAsync(OutConeStackAfterPreload);
                                     currentState = AutoState.DRIVE_OUT_STACK;
                                     autoTimer = GlobalTimer.milliseconds(); // reset timer
                                 }
                                 else{
-                                    Trajectory OutConeStack = drive.trajectoryBuilder(poseEstimate)
-                                            .lineTo(new Vector2d(outconestackX,outconestackY), SampleMecanumDrive.getVelocityConstraint(slowerVelocityConstraint, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH),
-                                                    SampleMecanumDrive.getAccelerationConstraint(DriveConstants.MAX_ACCEL))
-                                            .build();
-
                                     drive.followTrajectoryAsync(OutConeStack);
-
                                     currentState = AutoState.DRIVE_OUT_STACK;
                                     autoTimer = GlobalTimer.milliseconds(); // reset timer
                                 }
                             }
-                            }
                         }
+                    }
                     break;
 
                 case DRIVE_OUT_STACK:
@@ -307,19 +302,19 @@ public class RED_AUTO_RIGHT extends LinearOpMode {
                     break;
 
                 case DRIVE_INTO_STACK:
-                        readyOutake();
-                        if (!drive.isBusy() && outakeResetReady){
-                            if (GlobalTimer.milliseconds() - autoTimer > 2000) {
-                                telemetry.addLine("grab");
-                                turretlift.closeClaw();
-                                currentState = AutoState.WAIT_AFTER_GRAB_STACK;
-                                autoTimer = GlobalTimer.milliseconds(); // ready to grab stack
-                            }
+                    readyOutake();
+                    if (!drive.isBusy() && outakeResetReady){
+                        if (GlobalTimer.milliseconds() - autoTimer > 2000) {
+                            telemetry.addLine("grab");
+                            turretlift.closeClaw();
+                            currentState = AutoState.WAIT_AFTER_GRAB_STACK;
+                            autoTimer = GlobalTimer.milliseconds(); // ready to grab stack
                         }
+                    }
                     break;
 
                 case PARK:
-                    if (GlobalTimer.milliseconds() - autoTimer > 200){
+                    if (GlobalTimer.milliseconds() - autoTimer > 400){
                         readyOutake();
                         if (SignalRotation == 1){
                             drive.followTrajectoryAsync(ParkLeft);
@@ -337,7 +332,7 @@ public class RED_AUTO_RIGHT extends LinearOpMode {
                     break;
 
                 case IDLE:
-                    telemetry.addLine("WWWWWWWWWWW");
+                    telemetry.addLine("idle");
                     outakeIdle();
                     break;
 

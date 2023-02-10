@@ -59,7 +59,7 @@ public class PIDmotortest extends LinearOpMode {
                 if (gamepad1.x){
                     outtake.IntakeSlideTo(0, outtake.IntakeSlidePos(), 1);
                 } else if (gamepad1.y){
-                    outtake.IntakeSlideTo(500, outtake.IntakeSlidePos(), 1);
+                    outtake.IntakeSlideTo(-100, outtake.IntakeSlidePos(), 1);
                 }
                 if (gamepad1.dpad_up){
                     outtake.turretSpin(0, outtake.turretPos(), 1);
@@ -70,10 +70,13 @@ public class PIDmotortest extends LinearOpMode {
                 }
                 telemetry.addData("lift position", outtake.liftPos());
                 telemetry.addData("lift pid output", outtake.returnPIDLiftOutput());
+                telemetry.addData("lift-reached-target?", outtake.liftTargetReached());
                 telemetry.addData("intake slide position", outtake.IntakeSlidePos());
                 telemetry.addData("intake slide pid output", outtake.returnPIDIntakeSlideOutput());
+                telemetry.addData("intake-slide-reached-target?", outtake.intakeSlideTargetReached());
                 telemetry.addData("turret position", outtake.turretPos());
                 telemetry.addData("turret pid output", outtake.returnPIDTurretOutput());
+                telemetry.addData("turret-target-reached?", outtake.turretTargetReached());
                 telemetry.update();
             }
         }
