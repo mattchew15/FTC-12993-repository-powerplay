@@ -8,7 +8,7 @@ public class ServoSubSystem extends SubsystemBase {//: )
     private Servo servo;
 
     private double openPos = 0.52;
-    private double closePos = 0.1;
+    private double closePos = 0.0;
 
     public ServoSubSystem(HardwareMap hardwareMap){
         servo = hardwareMap.get(Servo.class, "servoTest");

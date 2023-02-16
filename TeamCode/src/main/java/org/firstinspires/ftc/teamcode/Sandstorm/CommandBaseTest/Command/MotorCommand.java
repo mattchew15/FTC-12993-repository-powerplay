@@ -10,12 +10,17 @@ public class MotorCommand extends CommandBase {
     private MotorSubSystem motorSubSystem;
     private GamepadEx Gamepadex1;
     //private boolean isRuning = false; )
+    public boolean isAcitve = false;
 
     public MotorCommand(MotorSubSystem motorSubSystem, GamepadEx Gamepadex1){
         this.motorSubSystem = motorSubSystem;
         this.Gamepadex1 = Gamepadex1;
 
         addRequirements(motorSubSystem);
+    }
+    @Override
+    public void initialize(){
+        isAcitve = true;
     }
     @Override
     public void execute() {
@@ -31,5 +36,6 @@ public class MotorCommand extends CommandBase {
     @Override
     public void end(boolean interrupted){
         motorSubSystem.stop();
+        isAcitve = false;
     }
 }

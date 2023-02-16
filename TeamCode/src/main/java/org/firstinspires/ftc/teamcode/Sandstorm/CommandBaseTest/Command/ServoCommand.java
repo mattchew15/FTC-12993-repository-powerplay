@@ -8,17 +8,22 @@ import org.firstinspires.ftc.teamcode.Sandstorm.CommandBaseTest.SubSystem.ServoS
 
 public class ServoCommand extends CommandBase {
     private ServoSubSystem servoSubSystem;
-    private GamepadEx Gamepadex1;
+    private GamepadEx gamepadex1;
+    public boolean isActive = false;
 
-    public ServoCommand(ServoSubSystem servoSubSystem, GamepadEx Gamepadex1){
+    public ServoCommand(ServoSubSystem servoSubSystem, GamepadEx gamepadex1){
         this.servoSubSystem = servoSubSystem;
-        this.Gamepadex1 = Gamepadex1;
+        this.gamepadex1 = gamepadex1;
 
         addRequirements(servoSubSystem);
     }
     @Override
+    public void initialize(){
+        isActive = true;
+    }
+    @Override
     public void execute(){
-        if (Gamepadex1.getButton(GamepadKeys.Button.X)){// : )
+        if (gamepadex1.getButton(GamepadKeys.Button.X)){// : )
             servoSubSystem.open();
         }
     }
@@ -30,5 +35,6 @@ public class ServoCommand extends CommandBase {
     @Override
     public void end(boolean interrupted){
         servoSubSystem.close();
+        isActive = false;
     }
 }
