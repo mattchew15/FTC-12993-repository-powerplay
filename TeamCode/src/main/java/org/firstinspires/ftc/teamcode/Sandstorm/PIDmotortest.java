@@ -51,15 +51,15 @@ public class PIDmotortest extends LinearOpMode {
                 drivebase.Drive(gamepad1.left_stick_y,gamepad1.left_stick_x,gamepad1.right_stick_x);
                 // Main loop. Run class methods here to do stuff
                 if(gamepad1.a){
-                    outtake.liftTo(500, outtake.liftPos(), 1);
+                    outtake.liftTo(-500, outtake.liftPos(), 1);
                 }
                 else if (gamepad1.b){
-                    outtake.liftTo(100, outtake.liftPos(), 1);
+                    outtake.liftTo(0, outtake.liftPos(), 1);
                 }
                 if (gamepad1.x){
                     outtake.IntakeSlideTo(0, outtake.IntakeSlidePos(), 1);
                 } else if (gamepad1.y){
-                    outtake.IntakeSlideTo(-100, outtake.IntakeSlidePos(), 1);
+                    outtake.IntakeSlideTo(-400, outtake.IntakeSlidePos(), 1);
                 }
                 if (gamepad1.dpad_up){
                     outtake.turretSpin(0, outtake.turretPos(), 1);
@@ -67,6 +67,18 @@ public class PIDmotortest extends LinearOpMode {
                     outtake.turretSpin(20, outtake.turretPos(), 1);
                 }else if (gamepad1.dpad_left){
                     outtake.turretSpin(-20, outtake.turretPos(), 1);
+                }
+
+                if (gamepad1.right_bumper){
+                    outtake.liftToInternalPID(-500, 1);
+                } else if (gamepad1.left_bumper){
+                    outtake.liftToInternalPID(0, 1);
+                }
+
+                if (gamepad1.right_stick_button){
+                    outtake.IntakeSlideInternalPID(-400,1);
+                } else if (gamepad1.left_stick_button){
+                    outtake.IntakeSlideInternalPID(0, 1);
                 }
                 telemetry.addData("lift position", outtake.liftPos());
                 telemetry.addData("lift pid output", outtake.returnPIDLiftOutput());

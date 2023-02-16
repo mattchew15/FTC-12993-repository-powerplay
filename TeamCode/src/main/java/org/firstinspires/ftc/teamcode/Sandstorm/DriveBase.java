@@ -17,9 +17,9 @@ public class DriveBase {  // no constructor for this class
 
     //variable for the drivebase speed toggle;
     boolean PowerToggled;
-    double PowerBase;
-    double PowerBaseTurn;
-    double PowerStrafe;
+    double PowerBase = 1;
+    double PowerBaseTurn = 0.8;
+    double PowerStrafe = 1.05;
 
     public void Drivebase_init(HardwareMap hwMap) {
 
@@ -39,11 +39,13 @@ public class DriveBase {  // no constructor for this class
         FL.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
         //reverse correct motors
+       // FR.setDirection(DcMotorSimple.Direction.REVERSE); //DcMotorSimple class?
         FL.setDirection(DcMotorSimple.Direction.REVERSE); //DcMotorSimple class?
         BL.setDirection(DcMotorSimple.Direction.REVERSE);
-        BR.setDirection(DcMotorSimple.Direction.REVERSE);
+      //  BR.setDirection(DcMotorSimple.Direction.REVERSE);
         IntakeMotor.setDirection(DcMotorSimple.Direction.REVERSE); // one intake motor is reversed
     }
+
 
     public void Drive(double LY, double LX, double RX) {
         double denominator = Math.max(Math.abs(LY) + Math.abs(LX) + Math.abs(RX), 1);

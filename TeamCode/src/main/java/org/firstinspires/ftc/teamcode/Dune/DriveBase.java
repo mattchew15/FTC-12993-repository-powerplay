@@ -55,6 +55,7 @@ public class DriveBase {  // no constructor for this class
         BL.setDirection(DcMotorSimple.Direction.REVERSE);
         BR.setDirection(DcMotorSimple.Direction.REVERSE);
         IntakeLMotor.setDirection(DcMotorSimple.Direction.REVERSE); // one intake motor is reversed
+
     }
 
     public void Drive(double LY, double LX, double RX) {

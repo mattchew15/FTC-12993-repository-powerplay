@@ -108,6 +108,7 @@ public class StormDrive extends LinearOpMode {
         drivebase.motorsSetup();
         outtake.hardwareSetup();
         inputs.inputsSetup(); // this needs to be chnaged - changes toggle variables and stuff to false
+        inputs.IntakeToggleOutState = 0; // for intake shoot out function
 
         // sets the first case for the fsm to be in
         outtakeState = OuttakeState.SUBSYSTEMS_SET_RETURN; // tghis is return so all the other states start in the right thing
@@ -138,16 +139,16 @@ public class StormDrive extends LinearOpMode {
             while (opModeIsActive()) {
 
                 drivebase.Drive(gamepad1.left_stick_y,gamepad1.left_stick_x,gamepad1.right_stick_x);
-                drivebase.motorDirectionTest(gamepad1.left_stick_y, gamepad1.left_stick_x,gamepad1.right_stick_x,gamepad1.right_stick_y);
+                //drivebase.motorDirectionTest(gamepad1.left_stick_y, gamepad1.left_stick_x,gamepad1.right_stick_x,gamepad1.right_stick_y);
                 drivebase.PowerToggle(gamepad1.x);
-                inputs.gamepadRumbleTimer();
+                //inputs.gamepadRumbleTimer();
                 telemetry.addData("LiftMotorPosition", outtake.liftPos());
                 telemetry.addData("turretPosition", outtake.tickstoDegrees((int)Math.round(outtake.turretPos()))); // might be in the wrong degrees/other
                 telemetry.addData("turret raw position", outtake.turretPos());
                 telemetry.addData("lift motor current draw", outtake.getLiftVoltage());
                 telemetry.addData("intakeSlideMotor", outtake.IntakeSlidePos());
 
-                outtakeSequence(); // if gamepad things don't work here then need to pass them in as parameters of this function
+               // outtakeSequence(); // if gamepad things don't work here then need to pass them in as parameters of this function
 
                 telemetry.addData("Main Outtake State", outtakeState);
                 telemetry.addData("Intake Out State", outtakeState);
@@ -155,8 +156,8 @@ public class StormDrive extends LinearOpMode {
                 telemetry.addData("Flip Cone State", flipConesState);
                 telemetry.addData("Outtake Pickup state", outtakePickupState);
 
+                telemetry.addData("powerbase", drivebase.PowerBase);
                 telemetry.update();
-
             }
         }
     }
@@ -166,6 +167,7 @@ public class StormDrive extends LinearOpMode {
                 outtake.IntakeClawOpen();
                 outtake.IntakeArmReady();
                 outtake.IntakeLiftReady();
+                liftTargetPosition = 0; // if lift target position is zero, then the transfer won't happen
 
                 resetAllMotors(); // might break something
 
@@ -208,7 +210,7 @@ public class StormDrive extends LinearOpMode {
                 break;
             case CLAW_GRIP_TRANSFER:
                 resetAllMotors();
-                if (outtake.liftTargetReached()){ // make sure that the lift arm is down before doing the whole transfer thing
+                if (outtake.liftTargetReached() && (liftTargetPosition != 0)){ // make sure height is selected before transferring
                     outtake.OuttakeClawClose();
                     if (GlobalTimer.milliseconds() - OuttakeTimer > 150){
                         outtake.IntakeClawOpen();
@@ -292,7 +294,7 @@ public class StormDrive extends LinearOpMode {
                 outtake.IntakeArmReady();
                 outtake.IntakeLiftReady();
                 IntakeReady = true; // use this variable somewhere else
-                if (gamepad1.a || inputs.IntakeToggleOutState == 2) { // make sure this function isn't called in a case that it start unintentially
+                if (gamepad1.left_bumper || inputs.IntakeToggleOutState == 2) { // make sure this function isn't called in a case that it start unintentially
                     intakeout = IntakeOut.INTAKE_INITIAL_LIFT; // this will start the timer and the inputs function will also go to 2 at the same time
                     IntakeOutTimer = GlobalTimer.milliseconds();
                 }
@@ -516,7 +518,7 @@ public class StormDrive extends LinearOpMode {
         if (gamepad1.y || gamepad2.y){
             liftTargetPosition = LiftHighPosition; // add servo change here if its different for each height
         } else if (gamepad1.x || gamepad2.x){
-            liftTargetPosition = LiftHighPosition;
+            liftTargetPosition = LiftMidPosition;
         } else if (gamepad1.a || gamepad2.a){
             liftTargetPosition = LiftLowPosition;
         }
