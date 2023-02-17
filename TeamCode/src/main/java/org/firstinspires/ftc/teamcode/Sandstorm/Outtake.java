@@ -40,7 +40,7 @@ public class Outtake {  // no constructor for this class
     //Servo Positions for Intake
     public static double IntakeClawOpenPos = 0.52, IntakeClawClosedPos = 0.405, IntakeClawOpenHardPos = 0.61;
     public static double IntakeArmReadyPos = 0.81, IntakeArmTransferPos = 0.36, IntakeArmPickupPos = 0;
-    public static double IntakeLiftReadyPos = 0.575, IntakeLiftTransferPos = 0;
+    public static double IntakeLiftReadyPos = 0.578, IntakeLiftTransferPos = 0.85;
 
     //Servo Positions for Stack Height
     public static double IntakeHeight5 = 0, IntakeHeight4 = 0, IntakeHeight3 = 0, IntakeHeight2 = 0, IntakeHeight1 = 0;
@@ -201,19 +201,19 @@ public class Outtake {  // no constructor for this class
         IntakeClawServo.setPosition(IntakeClawOpenHardPos);
     }
 
-    public void IntakeArmReady(){IntakeClawServo.setPosition(IntakeArmReadyPos);}
+    public void IntakeArmReady(){IntakeArmServo.setPosition(IntakeArmReadyPos);}
     public void IntakeArmTransfer(){
-        IntakeClawServo.setPosition(IntakeArmTransferPos);
+        IntakeArmServo.setPosition(IntakeArmTransferPos);
     }
 
-    public void IntakeLiftReady(){IntakeClawServo.setPosition(IntakeLiftReadyPos);}
-    public void IntakeLiftTransfer(){IntakeClawServo.setPosition(IntakeLiftTransferPos);}
+    public void IntakeLiftReady(){IntakeSlideServo.setPosition(IntakeLiftReadyPos);}
+    public void IntakeLiftTransfer(){IntakeSlideServo.setPosition(IntakeLiftTransferPos);}
 
-    public void IntakeLift5(){IntakeClawServo.setPosition(IntakeHeight5);}
-    public void IntakeLift4(){IntakeClawServo.setPosition(IntakeHeight4);}
-    public void IntakeLift3(){IntakeClawServo.setPosition(IntakeHeight3);}
-    public void IntakeLift2(){IntakeClawServo.setPosition(IntakeHeight2);}
-    public void IntakeLift1(){IntakeClawServo.setPosition(IntakeHeight1);}
+    public void IntakeLift5(){IntakeSlideServo.setPosition(IntakeHeight5);}
+    public void IntakeLift4(){IntakeSlideServo.setPosition(IntakeHeight4);}
+    public void IntakeLift3(){IntakeSlideServo.setPosition(IntakeHeight3);}
+    public void IntakeLift2(){IntakeSlideServo.setPosition(IntakeHeight2);}
+    public void IntakeLift1(){IntakeSlideServo.setPosition(IntakeHeight1);}
 
     public void OuttakeClawOpen(){
         OuttakeClawServo.setPosition(OuttakeClawOpenPos);

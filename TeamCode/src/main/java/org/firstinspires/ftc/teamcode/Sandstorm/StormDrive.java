@@ -148,15 +148,15 @@ public class StormDrive extends LinearOpMode {
                 telemetry.addData("lift motor current draw", outtake.getLiftVoltage());
                 telemetry.addData("intakeSlideMotor", outtake.IntakeSlidePos());
 
-               // outtakeSequence(); // if gamepad things don't work here then need to pass them in as parameters of this function
+                outtakeSequence(); // if gamepad things don't work here then need to pass them in as parameters of this function
 
                 telemetry.addData("Main Outtake State", outtakeState);
-                telemetry.addData("Intake Out State", outtakeState);
+                telemetry.addData("Intake Out State", intakeout);
                 telemetry.addData("Cone Deposit State", coneDepositState);
                 telemetry.addData("Flip Cone State", flipConesState);
                 telemetry.addData("Outtake Pickup state", outtakePickupState);
 
-                telemetry.addData("powerbase", drivebase.PowerBase);
+                telemetry.addData("liftTargetPosition", liftTargetPosition);
                 telemetry.update();
             }
         }
@@ -164,31 +164,37 @@ public class StormDrive extends LinearOpMode {
     public void outtakeSequence(){ // make sure to go back and add when each statemachine command should be run
         switch (outtakeState) {
             case READY:
-                outtake.IntakeClawOpen();
-                outtake.IntakeArmReady();
-                outtake.IntakeLiftReady();
+                if (intakeout == IntakeOut.READY){ // this should reduce any conflicting commands with the intakeshoot out thing
+                    outtake.IntakeClawOpen();
+                    outtake.IntakeArmReady();
+                    outtake.IntakeLiftReady();
+                }
+
                 liftTargetPosition = 0; // if lift target position is zero, then the transfer won't happen
 
-                resetAllMotors(); // might break something
+                resetAllMotors(); // might break something  - makes all motors go to 0 dumbass
 
-                outtake.OuttakeSlideReady();
-                outtake.OuttakeClawOpen();
-                outtake.OuttakeArmReady();
-                outtake.BraceReady();
+                if (!inputs.FlipConeToggleMode || outtakeState != OuttakeState.READY){ // so that flip cone thing can be used without conflicting commands and pickup cones
+                    outtake.OuttakeSlideReady();
+                    outtake.OuttakeClawOpen();
+                    outtake.OuttakeArmReady();
+                    outtake.BraceReady();
+                }
 
                 if (gamepad2.right_bumper || gamepad1.right_bumper){
                     outtakeState = OuttakeState.INTAKE;
                 }
+
                 IntakeShootOut();
                 OuttakePickupSequence();
                 FlipConeSequence();
 
                 break;
             case INTAKE:
-                drivebase.intakeSpin(1); // spin the intake
+                drivebase.intakeSpin(-1); // spin the intake
                 resetAllMotors();
                 // no need to put ready stuff on because there will be nothing conflicting with it
-                if (outtake.intakeClawTouchPressed() || gamepad2.right_bumper){
+                if (outtake.intakeClawTouchPressed() || gamepad2.left_bumper){
                     outtakeState = OuttakeState.LIFT_CONE;
                     OuttakeTimer = GlobalTimer.milliseconds(); // reset timer
                     outtake.IntakeClawClose();
@@ -196,6 +202,7 @@ public class StormDrive extends LinearOpMode {
                 break;
             case LIFT_CONE:
                 outtake.IntakeClawClose();
+                drivebase.intakeSpin(0);
                 resetAllMotors();
                 if (GlobalTimer.milliseconds() - OuttakeTimer > 200){
                     outtake.IntakeLiftTransfer();
@@ -215,13 +222,14 @@ public class StormDrive extends LinearOpMode {
                     if (GlobalTimer.milliseconds() - OuttakeTimer > 150){
                         outtake.IntakeClawOpen();
                         if (GlobalTimer.milliseconds() - OuttakeTimer > 200){
-                            outtake.liftTo(50, outtake.liftPos(), 1);
+                            outtake.liftTo(-50, outtake.liftPos(), 1); // causes issues
                             outtake.OuttakeArmScore();
                             if (GlobalTimer.milliseconds()-OuttakeTimer > 230){
                                 outtake.BraceActive(); // this should happen at the same time as the outtake arm is going out so that its always parrallel to the ground
                                 outtake.IntakeArmReady();
-                                if (GlobalTimer.milliseconds()-OuttakeTimer > 300){
+                                if (GlobalTimer.milliseconds()-OuttakeTimer > 300){ // weird sequence
                                     outtake.IntakeLiftReady();
+                                    outtakeState = OuttakeState.HEIGHT_CHANGE_OUTTAKE_DEPOSIT;
                                 }
                             }
                         }
@@ -292,7 +300,7 @@ public class StormDrive extends LinearOpMode {
         switch (intakeout) {
             case READY:
                 outtake.IntakeArmReady();
-                outtake.IntakeLiftReady();
+                outtake.IntakeLiftReady(); // this is in ready as well
                 IntakeReady = true; // use this variable somewhere else
                 if (gamepad1.left_bumper || inputs.IntakeToggleOutState == 2) { // make sure this function isn't called in a case that it start unintentially
                     intakeout = IntakeOut.INTAKE_INITIAL_LIFT; // this will start the timer and the inputs function will also go to 2 at the same time
@@ -340,7 +348,7 @@ public class StormDrive extends LinearOpMode {
             case RETURN:
                 if (outtake.IntakeSlidePos() > 100){
                     if (GlobalTimer.milliseconds() - IntakeOutTimer > 350){
-                        outtake.IntakeSlideTo(0, outtake.IntakeSlidePos(),1);
+                        outtake.IntakeSlideTo(0, outtake.IntakeSlidePos(),1); // should conflict as its going to ready too
                         if (outtake.intakeSlideTargetReached()){
                             outtake.IntakeLiftReady();
                             intakeout = IntakeOut.READY;
@@ -377,7 +385,7 @@ public class StormDrive extends LinearOpMode {
     }
 
 
-    public void ConeDepositSequence(){
+    public void ConeDepositSequence(){ // this doesn't happen in ready state
         switch (coneDepositState) {
             case READY: // not being used at the moment
 
