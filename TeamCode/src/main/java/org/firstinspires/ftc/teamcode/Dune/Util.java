@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.Dune;
 
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.ServoImplEx;
 
 public class Util {

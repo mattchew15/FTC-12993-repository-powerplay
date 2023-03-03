@@ -12,23 +12,30 @@ import com.qualcomm.robotcore.hardware.ServoImplEx;
 public class Robot {
 
     //servos
-    protected ServoImplEx claw;
-    protected ServoImplEx linkage;
-    protected ServoImplEx tilt;
-    protected ServoImpl barLeft;
-    protected ServoImpl barRight;
+    public ServoImplEx claw;
+    public ServoImplEx linkage;
+    public ServoImplEx tilt;
+    public ServoImpl barLeft;
+    public ServoImpl barRight;
 
     //motors
-    protected DcMotorImplEx lift;
-    protected DcMotorEx turret;
-    protected DcMotor intake;
-    protected DcMotorEx fr;
-    protected DcMotorEx fl;
-    protected DcMotorEx br;
-    protected DcMotorEx bl;
+    public DcMotorImplEx lift;
+    public DcMotorEx turret;
+    public DcMotor intake;
+    public DcMotorEx fr;
+    public DcMotorEx fl;
+    public DcMotorEx br;
+    public DcMotorEx bl;
 
     //others
-    private DigitalChannel touchClaw;
+    public DigitalChannel touchClaw;
+
+    //positions
+    public static double clawOpenPos = 0.49, clawClosePos = 0.32, clawDropPos = 0.53, clawGrabPos = 0.4;
+    public static double linkageAuto = 0, linkageHalf = 0, linkageOut = 0.05, linkageIn = 0.49, linkageTQ = 0;
+    public static double tiltHorizontal = 0.5, tiltHigh = 0.1, tiltMid = 0.2;
+    public static double leftRest = 0.28, leftUp = 0.15, leftDown = 0.44;
+    public static double rightRest = 0.32, rightUp = 0.46, rightDown = 0.18;
 
 
 
@@ -36,31 +43,26 @@ public class Robot {
     public void Init(HardwareMap hwMap) {
 
         //servos
-        claw = hwMap.get(ServoImplEx.class, "Claw");
-        linkage = hwMap.get(ServoImplEx.class, "Linkage");
-        tilt = hwMap.get(ServoImplEx.class, "Tilt");
-        barLeft = hwMap.get(ServoImplEx.class, "Intake Left");
-        barRight = hwMap.get(ServoImplEx.class, "Intake Right");
+        claw = hwMap.get(ServoImplEx.class, "ClawS");
+        linkage = hwMap.get(ServoImplEx.class, "LinkageS");
+        tilt = hwMap.get(ServoImplEx.class, "TiltS");
+        barLeft = hwMap.get(ServoImplEx.class, "IntakeLeftS");
+        barRight = hwMap.get(ServoImplEx.class, "IntakeRightS");
 
         //motors
-        lift = hwMap.get(DcMotorImplEx.class, "Lift");
-        turret = hwMap.get(DcMotorEx.class, "Turret");
-        intake = hwMap.get(DcMotor.class, "Intake");
+        lift = hwMap.get(DcMotorImplEx.class, "LiftMotor");
+        turret = hwMap.get(DcMotorEx.class, "TurretMotor");
+        intake = hwMap.get(DcMotor.class, "IntakeMotor");
         fr = hwMap.get(DcMotorEx.class, "FR");
         fl = hwMap.get(DcMotorEx.class, "FL");
         br = hwMap.get(DcMotorEx.class, "BR");
         bl = hwMap.get(DcMotorEx.class, "BL");
 
         //others
-        touchClaw = hwMap.get(DigitalChannel.class, "Touch Claw");
+        touchClaw = hwMap.get(DigitalChannel.class, "sensor_touchClaw");
     }
 
-    //positions
-    public static double clawOpenPos = 0, clawClosePos = 0.5, clawDropPos = 0, clawGrabPos = 0;
-    public static double linkageAuto = 0, linkageHalf = 0, linkageOut = 0, linkageIn = 0.49, linkageTQ = 0;
-    public static double tiltHorizontal = 0, tiltHigh = 0, tiltMid = 0;
-    public static double leftRest = 0, leftUp = 0, leftDown = 0;
-    public static double rightRest = 0, rightUp = 0, rightDown = 0;
+
 
     //setting positions
     public void ClawOpen(){claw.setPosition(clawOpenPos);}
