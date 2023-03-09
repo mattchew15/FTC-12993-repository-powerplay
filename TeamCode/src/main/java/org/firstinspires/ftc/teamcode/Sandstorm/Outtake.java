@@ -35,7 +35,7 @@ public class Outtake {  // no constructor for this class
     public static double OuttakeClawOpenPos = 0.81, OuttakeClawClosedPos = 0.93, OuttakeClawOpenHardPos = 0.64;
     public static double OuttakeArmReadyPos = 0.22, OuttakeArmDepositPos = 0.8, OuttakeArmPickupPos = 0.87, OuttakeArmScorePos = 0.75, OuttakeArmSlightlyTiltedUpPos = 0.7;
     public static double BraceReadyPos = 0.3, BraceActivePos = 0.69, BraceTuckedPos = 0.05, BraceFlipConePos = 0.7;
-    public static double OuttakeSlideReadyPos = 0, OuttakeSlideScorePos = 0, OuttakeSlideScoreDropPos = 0, OuttakeSlideGroundPos = 0, OuttakeSlideConeFlipPos = 0, OuttakeSlideAboveConePos = 0;
+    public static double OuttakeSlideReadyPos = 0.627, OuttakeSlideScorePos = 0.627, OuttakeSlideScoreDropPos = 0.46, OuttakeSlideGroundPos = 0.22, OuttakeSlideConeFlipPos = 0.27, OuttakeSlideAboveConePos = 0.4;
 
     //Servo Positions for Intake
     public static double IntakeClawOpenPos = 0.52, IntakeClawClosedPos = 0.75, IntakeClawOpenHardPos = 0.54;
@@ -46,9 +46,9 @@ public class Outtake {  // no constructor for this class
     public static double IntakeHeight5 = 0, IntakeHeight4 = 0, IntakeHeight3 = 0, IntakeHeight2 = 0, IntakeHeight1 = 0;
 
     //editable dashboard variables must be public static - PID values for turret and lift that can be tuned
-    public static double TurretKp = 0.005, TurretKi = 0.001, TurretKd = 0.05, TurretIntegralSumLimit = 1, TurretFeedforward = 0.3;
-    public static double LiftKp = 0.005, LiftKi = 0.01, LiftKd = 0.05, LiftIntegralSumLimit = 10, LiftKf = 0;
-    public static double intakeSlideKp = 0.016, intakeSlideKi = 0.01, intakeSlideKd = 0.4, intakeSlideIntegralSumLimit = 10, intakeSlideKf = 0;
+    public static double TurretKp = 0.005, TurretKi = 0.000, TurretKd = 0.05, TurretIntegralSumLimit = 1, TurretFeedforward = 0.3;
+    public static double LiftKp = 0.02, LiftKi = 0.0, LiftKd = 0.09, LiftIntegralSumLimit = 10, LiftKf = 0;
+    public static double intakeSlideKp = 0.016, intakeSlideKi = 0.00, intakeSlideKd = 0.05, intakeSlideIntegralSumLimit = 10, intakeSlideKf = 0;
 
     // New instance of PID class with editable variables
     PID turretPID = new PID(TurretKp,TurretKi,TurretKd,TurretIntegralSumLimit,TurretFeedforward);

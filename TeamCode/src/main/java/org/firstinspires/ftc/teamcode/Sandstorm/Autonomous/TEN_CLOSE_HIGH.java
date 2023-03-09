@@ -6,10 +6,7 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
-import org.firstinspires.ftc.teamcode.Sandstorm.Autonomous.AprilTagDetectionPipeline;
-import org.firstinspires.ftc.teamcode.Dune.TurretLift;
 import org.firstinspires.ftc.teamcode.Sandstorm.Outtake;
-import org.firstinspires.ftc.teamcode.drive.DriveConstants;
 import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
 import org.openftc.apriltag.AprilTagDetection;
 import org.openftc.easyopencv.OpenCvCamera;
@@ -18,8 +15,8 @@ import org.openftc.easyopencv.OpenCvCameraRotation;
 import java.util.ArrayList;
 
 
-@Autonomous(name = "1+10 Centreline-High Auto", group = "Autonomous")
-public class ELEVEN_AUTO_CENTRELINE_HIGH extends LinearOpMode {
+@Autonomous(name = "1+10 Close-High Auto", group = "Autonomous")
+public class TEN_CLOSE_HIGH extends LinearOpMode {
 
     // class members
     ElapsedTime GlobalTimer;
@@ -39,9 +36,8 @@ public class ELEVEN_AUTO_CENTRELINE_HIGH extends LinearOpMode {
     int SignalRotation;
     int slowerVelocityConstraint;
 
-    final double outconestackX = 40;
-    final double outconestackY = -6.1;
-    final double outconestackRotation = 180;
+    final double outconestackX = 28;
+    final double outconestackY = -12;
 
 
     // create class instances
@@ -132,8 +128,7 @@ public class ELEVEN_AUTO_CENTRELINE_HIGH extends LinearOpMode {
         // trajectories that aren't changing should all be here
 
         Trajectory PreloadDrive = drive.trajectoryBuilder(startPose)
-                .lineToLinearHeading(new Pose2d(38, -15, Math.toRadians(90)))
-                .splineToSplineHeading(new Pose2d(38, -6, Math.toRadians(180)), Math.toRadians(90))
+                .lineToLinearHeading(new Pose2d(36, -12, Math.toRadians(0)))
                 .build();
 
         Trajectory DriveOtherSide = drive.trajectoryBuilder(PreloadDrive.end())

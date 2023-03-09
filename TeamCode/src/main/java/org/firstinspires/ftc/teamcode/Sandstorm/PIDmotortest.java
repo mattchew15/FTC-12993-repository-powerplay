@@ -51,7 +51,7 @@ public class PIDmotortest extends LinearOpMode {
                 drivebase.Drive(gamepad1.left_stick_y,gamepad1.left_stick_x,gamepad1.right_stick_x);
                 // Main loop. Run class methods here to do stuff
                 if(gamepad1.a){
-                    outtake.liftTo(-500, outtake.liftPos(), 1);
+                    outtake.liftTo(500, outtake.liftPos(), 1);
                 }
                 else if (gamepad1.b){
                     outtake.liftTo(0, outtake.liftPos(), 1);

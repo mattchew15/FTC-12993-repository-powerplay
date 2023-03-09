@@ -222,7 +222,7 @@ public class StormDrive extends LinearOpMode {
                     if (GlobalTimer.milliseconds() - OuttakeTimer > 150){
                         outtake.IntakeClawOpen();
                         if (GlobalTimer.milliseconds() - OuttakeTimer > 200){
-                            outtake.liftTo(-50, outtake.liftPos(), 1); // causes issues
+                            outtake.liftTo(50, outtake.liftPos(), 1); // causes issues
                             outtake.OuttakeArmScore();
                             if (GlobalTimer.milliseconds()-OuttakeTimer > 230){
                                 outtake.BraceActive(); // this should happen at the same time as the outtake arm is going out so that its always parrallel to the ground
@@ -239,6 +239,7 @@ public class StormDrive extends LinearOpMode {
             case HEIGHT_CHANGE_OUTTAKE_DEPOSIT:
                 outtake.turretSpin(turretTargetPosition,outtake.turretPos(),1);
                 outtake.liftTo(liftTargetPosition, outtake.liftPos(),1);
+                outtake.OuttakeSlideReady(); // outtake slide to top
                 if (gamepad1.right_bumper){
                     outtakeState = OuttakeState.DROP;
                     coneDepositState = ConeDepositState.CONE_DROP; // should run the whole drop sequence here
@@ -396,7 +397,7 @@ public class StormDrive extends LinearOpMode {
                 break;
 
             case BRACE_RETRACT:
-                outtake.OuttakeSlideScore(); // drops down on pole a bit
+                outtake.OuttakeSlideScoreDrop(); // drops down on pole a bit
                 if (GlobalTimer.milliseconds() - ConeDepositTimer > 200){
                     outtake.BraceReady(); // might need a new position for this
                     outtake.OuttakeArmScore();
@@ -496,7 +497,7 @@ public class StormDrive extends LinearOpMode {
                 }
             case HEIGHT_OUTTAKE:
                 if (GlobalTimer.milliseconds() - OuttakePickupTimer > 200){ // wait 200 ms before the claw closes
-                    outtake.OuttakeSlideScore();
+                    outtake.OuttakeSlideReady();
                     outtake.liftTo(liftTargetPosition, outtake.liftPos(),1);
                     if (GlobalTimer.milliseconds() - OuttakePickupTimer > 250){ // just wait a teensy weensy bit before arm tilts
                         outtake.OuttakeArmTiltUpSlightly();

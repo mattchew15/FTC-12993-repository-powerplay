@@ -23,7 +23,7 @@ public class TurretLift {  // no constructor for this class
     AnalogInput linkagePosition;
 
     //config variables can be changed/tuned in dashboard
-    public static double ClawOpenPos = 0.52, ClawClosedPos = 0.405, ClawCloseSoftPos = 0.45, ClawOpenHardPos = 0.61, ClawCloseHardPos = 0.38;
+    public static double ClawOpenPos = 0.49, ClawClosedPos = 0.38, ClawCloseSoftPos = 0.41, ClawOpenHardPos = 0.59, ClawCloseHardPos = 0.37;
     public static double LinkageFullPos = 0, LinkageHalfPos = 0.16, LinkageQuarterPos = 0.26, LinkageClosedPos = 0.49, LinkageNearlyOutPos = 0.08, LinkageNearlyOutHalfPos = 0.2;
     public static double TiltUpPos = 0.31, TiltDownPos = 0.87, TiltHalfPos = 0.48;
 
@@ -37,7 +37,7 @@ public class TurretLift {  // no constructor for this class
 
     // final variables
     final double turretthresholdDistance = degreestoTicks(8); // should make the threshold less
-    final double turretthresholdDistanceTwo = degreestoTicks(2);
+    final double turretthresholdDistanceTwo = degreestoTicks(7);
     final double liftthresholdDistance = 60;
     int turretTarget;
     int liftTarget;
@@ -52,7 +52,7 @@ public class TurretLift {  // no constructor for this class
         TiltServo = hwMap.get(Servo.class, "TiltS");
         sensorTouchClaw = hwMap.get(DigitalChannel.class, "sensor_touchClaw");
         sensorTouchClaw.setMode(DigitalChannel.Mode.INPUT);
-        linkagePosition = hwMap.get(AnalogInput.class, "linkageEncoder");
+       // linkagePosition = hwMap.get(AnalogInput.class, "linkageEncoder");
 
     }
 
@@ -218,10 +218,10 @@ public class TurretLift {  // no constructor for this class
     }
 
     public double degreestoTicks(int degrees){
-        return degrees * 7.6;
+        return degrees * 5.2;
     }
     public double tickstoDegrees(int ticks){
-        return ticks / 7.6;
+        return ticks / 5.2;
     }
 
     public double returnPIDLiftError(){

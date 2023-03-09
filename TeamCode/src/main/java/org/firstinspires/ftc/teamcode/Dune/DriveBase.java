@@ -13,8 +13,7 @@ public class DriveBase {  // no constructor for this class
     private DcMotor BR;
     private DcMotor BL;
     private DcMotor FL;
-    private DcMotor IntakeRMotor;
-    private DcMotor IntakeLMotor;
+    private DcMotor IntakeMotor;
     private Servo IntakeRightServo;
     private Servo IntakeLeftServo;
 
@@ -35,8 +34,7 @@ public class DriveBase {  // no constructor for this class
         BL = hwMap.get(DcMotor.class, "BL");
         FL = hwMap.get(DcMotor.class, "FL");
 
-        //IntakeRMotor = hwMap.get(DcMotor.class, "IntakeR");
-        //IntakeLMotor = hwMap.get(DcMotor.class, "IntakeL");
+        IntakeMotor = hwMap.get(DcMotor.class, "IntakeMotor");
 
         IntakeRightServo = hwMap.get(Servo.class, "IntakeRightS");
         IntakeLeftServo = hwMap.get(Servo.class, "IntakeLeftS");
@@ -54,7 +52,7 @@ public class DriveBase {  // no constructor for this class
         FL.setDirection(DcMotorSimple.Direction.REVERSE); //DcMotorSimple class?
         BL.setDirection(DcMotorSimple.Direction.REVERSE);
         BR.setDirection(DcMotorSimple.Direction.REVERSE);
-        //IntakeLMotor.setDirection(DcMotorSimple.Direction.REVERSE); // one intake motor is reversed
+        IntakeMotor.setDirection(DcMotorSimple.Direction.REVERSE); // one intake motor is reversed
 
     }
 
@@ -115,8 +113,6 @@ public class DriveBase {  // no constructor for this class
         IntakeRightServo.setPosition(IntakeRSLoweredPos);
     }
     public void intakeSpin(double speedDirection){
-        IntakeRMotor.setPower(speedDirection);
-        IntakeLMotor.setPower(speedDirection);
+        IntakeMotor.setPower(speedDirection);
     }
-
 }

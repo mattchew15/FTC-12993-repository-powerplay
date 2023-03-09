@@ -122,12 +122,11 @@ public class DuneDrive extends LinearOpMode {
                 telemetry.addData("turret raw position", turretlift.turretPos());
                 telemetry.addData("lift motor current draw", turretlift.getLiftVoltage());
                 telemetry.addData("sequence state", outakestate);
-                telemetry.addData("linkageposition:", turretlift.getLinkagePosition());
+                //telemetry.addData("linkageposition:", turretlift.getLinkagePosition());
                 telemetry.addData("INTAKE STACK TOGGLE MODE", inputs.IntakeStackToggleMode);
                 telemetry.addData("INTAKE TOUCH", turretlift.intakeTouchPressed());
                // telemetry.addData("")
                 telemetry.update();
-
             }
         }
     }
@@ -181,12 +180,12 @@ public class DuneDrive extends LinearOpMode {
                 turretlift.turretSpinInternalPID(0, 1);
                 turretlift.readyServos();
                 if (intaketype == 0){ // normal intake case
-                    drivebase.intakeSpin(0.65);
+                    drivebase.intakeSpin(1);
                     drivebase.intakeBarUp();
                     intakesequencetransition(); // this is the dpad or limit switch thing
                 }
                 else if (intaketype == 1 || intaketype == 2) { // second intake case
-                    drivebase.intakeSpin(0.65);
+                    drivebase.intakeSpin(1);
                     drivebase.intakeBarDown();
                     intakesequencetransition();
                 }
@@ -201,10 +200,10 @@ public class DuneDrive extends LinearOpMode {
                 if (GlobalTimer.milliseconds() - outakesequencetimer > 200){
                     telemetry.addLine("past this stageeeeeeeeeeeeeeeeeeeeee");
                     turretlift.closeClaw(); // not needed, servo is already going to position?
-                    turretlift.liftToInternalPID(350,1);
+                    turretlift.liftToInternalPID(liftpositiontype,1);
                     //turretlift.linkageIn(); // this should make it so that the linkage doesnt go in when we are picking up from stack
                     turretlift.tiltUpHalf();
-                    if (turretlift.liftTargetReachedInternalPID()){
+                    if (turretlift.liftPos() > 250){ // change this if it doesn't work
                         turretlift.linkageIn();
                         telemetry.addLine("lift is up");
                         turretlift.turretSpinInternalPID((int)Math.round(turretpositiontype), 1); //
@@ -255,8 +254,8 @@ public class DuneDrive extends LinearOpMode {
                         turretlift.tiltReset();
                         turretlift.linkageIn();
                         turretlift.closeClawHard();
-                        drivebase.intakeSpin(-0.5);
-                        if (turretlift.turretTargetReachedInteralPID()){
+                        drivebase.intakeSpin(-0.7);
+                        if (turretlift.turretTargetReachedInteralPIDNewThreshold()){
                             //telemetry.addData("turret return target reached?", true);
                             telemetry.addLine("turret return target reached");
                             turretlift.liftToInternalPID(0,0.8); // slower so nothing breaks
@@ -349,10 +348,6 @@ public class DuneDrive extends LinearOpMode {
             outakestate = OutakeState.GRAB;
             outakesequencetimer = GlobalTimer.milliseconds(); //  reset timer
         }
-        else if (gamepad2.dpad_down || gamepad1.dpad_down){
-            outakestate = OutakeState.GRAB;
-            outakesequencetimer = GlobalTimer.milliseconds(); //  reset timer
-        }
     }
 
     public void turretPositionChange(){
@@ -364,9 +359,6 @@ public class DuneDrive extends LinearOpMode {
         }
         else if (gamepad2.dpad_right || gamepad1.dpad_right){
             turretpositiontype = turretlift.degreestoTicks(-90);
-        }
-        else if (gamepad2.dpad_down || gamepad1.dpad_down){
-            turretpositiontype = 0;
         }
     }
 
@@ -423,6 +415,8 @@ public class DuneDrive extends LinearOpMode {
         }
         else if (gamepad2.x || gamepad1.x){
             liftpositiontype = liftMidPosition;
+        }else if (gamepad2.dpad_down || gamepad1.dpad_down){
+            liftpositiontype = 50;
         }
     }
 

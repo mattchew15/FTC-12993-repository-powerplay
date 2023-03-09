@@ -360,17 +360,14 @@ public class NATIONALS_AUTO_RIGHT extends LinearOpMode {
                     break;
 
                 case WAIT_AFTER_DUMP_MID:
-                    if (GlobalTimer.milliseconds() - autoTimer > 400){
-                        //turretlift.liftToInternalPID(liftMidPosition - 300, 1);
-                        if (GlobalTimer.milliseconds() - autoTimer > 600){ // wait after claw
-                            turretlift.openClaw();
-                            if (GlobalTimer.milliseconds() - autoTimer > 850){
-                                turretlift.linkageIn();
-                                if (GlobalTimer.milliseconds() - autoTimer > 1000){ // could be faster
-                                    currentState = AutoState.DRIVE_INTO_STACK;
-                                    autoTimer = GlobalTimer.milliseconds(); // reset timer
-                                    drive.followTrajectoryAsync(IntoConeStack);
-                                }
+                    if (GlobalTimer.milliseconds() - autoTimer > 300){ // wait after claw
+                        turretlift.openClaw();
+                        if (GlobalTimer.milliseconds() - autoTimer > 500){
+                            turretlift.linkageIn();
+                            if (GlobalTimer.milliseconds() - autoTimer > 600){ // could be faster
+                                currentState = AutoState.DRIVE_INTO_STACK;
+                                autoTimer = GlobalTimer.milliseconds(); // reset timer
+                                drive.followTrajectoryAsync(IntoConeStack);
                             }
                         }
                     }
