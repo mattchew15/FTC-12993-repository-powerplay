@@ -168,7 +168,7 @@ public class OuttakeSequence {
                     outtake.IntakeLiftTransfer();
                     if (GlobalTimer.milliseconds() - OuttakeTimer > 400){
                         outtake.IntakeArmTransfer();
-                        if ((GlobalTimer.milliseconds() - OuttakeTimer > 650) ||outtake.outtakeClawTouchPressed()){
+                        if ((GlobalTimer.milliseconds() - OuttakeTimer > 650)){
                             outtakeState = OuttakeState.CLAW_GRIP_TRANSFER;
                             OuttakeTimer = GlobalTimer.milliseconds(); // reset timer
                         }

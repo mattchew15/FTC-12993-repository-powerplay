@@ -40,6 +40,7 @@ public class PIDmotortest extends LinearOpMode {
         drivebase.Drivebase_init(hardwareMap);
         outtake.Outtake_init(hardwareMap); // this might be clashing with initializing 2 of the same thing at once
        // outtakeSequence.OuttakeHardware();
+        outtake.encodersReset();
 
         // waits for user to press start on driverhub
         waitForStart();
@@ -49,9 +50,10 @@ public class PIDmotortest extends LinearOpMode {
 
             while (opModeIsActive()) {
                 drivebase.Drive(gamepad1.left_stick_y,gamepad1.left_stick_x,gamepad1.right_stick_x);
+
                 // Main loop. Run class methods here to do stuff
                 if(gamepad1.a){
-                    outtake.liftTo(500, outtake.liftPos(), 1);
+                    outtake.liftTo(-500, outtake.liftPos(), 1);
                 }
                 else if (gamepad1.b){
                     outtake.liftTo(0, outtake.liftPos(), 1);
@@ -64,11 +66,9 @@ public class PIDmotortest extends LinearOpMode {
                 if (gamepad1.dpad_up){
                     outtake.turretSpin(0, outtake.turretPos(), 1);
                 } else if (gamepad1.dpad_right){
-                    outtake.turretSpin(20, outtake.turretPos(), 1);
-                }else if (gamepad1.dpad_left){
-                    outtake.turretSpin(-20, outtake.turretPos(), 1);
-                }
-
+                    outtake.turretSpin(8, outtake.turretPos(), 1);
+                }else if (gamepad1.dpad_left)
+                    outtake.turretSpin(-8, outtake.turretPos(), 1);
                 if (gamepad1.right_bumper){
                     outtake.liftToInternalPID(-500, 1);
                 } else if (gamepad1.left_bumper){
@@ -86,12 +86,20 @@ public class PIDmotortest extends LinearOpMode {
                 telemetry.addData("intake slide position", outtake.IntakeSlidePos());
                 telemetry.addData("intake slide pid output", outtake.returnPIDIntakeSlideOutput());
                 telemetry.addData("intake-slide-reached-target?", outtake.intakeSlideTargetReached());
+                telemetry.addData("turret position", outtake.tickstoDegrees((int)Math.round(outtake.turretPos())));
                 telemetry.addData("turret position", outtake.turretPos());
+                telemetry.addData("turret position", outtake.degreestoTicks(-20));
                 telemetry.addData("turret pid output", outtake.returnPIDTurretOutput());
                 telemetry.addData("turret-target-reached?", outtake.turretTargetReached());
+
+                telemetry.addData("IntakeArmPosition", outtake.getIntakeArmPos());
+                telemetry.addData("OuttakeArmPosition", outtake.getOuttakeArmPos());
+                telemetry.addData("IntakeLiftPosition", outtake.getIntakeLiftPos());
+
                 telemetry.update();
+                }
             }
         }
     }
-}
+
 

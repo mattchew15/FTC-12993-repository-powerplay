@@ -26,6 +26,10 @@ public class Inputs {
     public boolean IntakeToggleOut;
     public int IntakeToggleOutState;
 
+
+    public boolean ManualResetToggleMode;
+    public boolean ToggledManualReset;
+
     public void resetMatchTimer(){matchTimer.reset();}
 
     public void inputsSetup(){ // must run this on init in dune drive
@@ -42,6 +46,9 @@ public class Inputs {
         ToggledFlipConeHeight = false;
         FlipConeHeightState = 0;
         AboveConeHeight = false;
+
+        ToggledManualReset = false;
+        ManualResetToggleMode = false;
     }
 
     public void gamepadRumbleTimer (){
@@ -56,6 +63,22 @@ public class Inputs {
                     gamepad2.rumbleBlips(3);
                 }
             }
+        }
+    }
+
+    public void manualResetToggleMode(boolean togglebtn) {
+        if (togglebtn) {
+            if (!ToggledManualReset) { // the first time you first press it it will change stuff, then won't go past this if statement
+                if (ManualResetToggleMode) {
+                    ManualResetToggleMode = false; // will have to access this variable in dune drive
+                } else {
+                    ManualResetToggleMode = true;
+                }
+                ToggledManualReset = true;
+            }
+        }
+        else {
+            ToggledManualReset = false;
         }
     }
 
@@ -74,7 +97,7 @@ public class Inputs {
         if (intaketogglebtn) {
             if (!IntakeToggleOut) {
                 IntakeToggleOut = true;
-                IntakeToggleOutState  = (IntakeToggleOutState  + 1) % 4;
+                IntakeToggleOutState  = (IntakeToggleOutState  + 1) % 3;
             }
         }
         else {
@@ -85,7 +108,7 @@ public class Inputs {
         if (togglebtn) {
             if (!ToggledFlipConeHeight) {
                 ToggledFlipConeHeight = true;
-                FlipConeHeightState  = (FlipConeHeightState + 1) % 3; // as of right now the only states are go above cone, cone down on cone, and get ready for pickup
+                FlipConeHeightState  = (FlipConeHeightState + 1) % 2; // as of right now the only states are go above cone, cone down on cone
                 if (AboveConeHeight){
                     FlipConeHeightState = 1; // back to down on cone
                     AboveConeHeight = false; // makes it so that it doesn't go to above cone again
@@ -115,5 +138,7 @@ public class Inputs {
             FlipConeToggled = false;
         }
     }
+
+
 
 }

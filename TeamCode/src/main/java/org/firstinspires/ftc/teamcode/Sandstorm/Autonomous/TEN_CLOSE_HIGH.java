@@ -27,8 +27,8 @@ public class TEN_CLOSE_HIGH extends LinearOpMode {
     final int LiftMidPosition = 400;
     final int LiftLowPosition = 0;
 
-    final int TurretLeftPosition = -30;
-    final int TurretRightposition = 30;
+    final int TurretLeftPosition = -8;
+    final int TurretRightposition = 8;
 
     boolean outakeResetReady;
     boolean outakeOutReady;
@@ -303,7 +303,7 @@ public class TEN_CLOSE_HIGH extends LinearOpMode {
                             if (GlobalTimer.milliseconds()-autoTimer > 300){
                                 outtake.IntakeSlideTo(0,outtake.IntakeSlidePos(),1);
                                 // drivebrase.spin inwards and stoff
-                                if (outtake.outtakeClawTouchPressed() || outtake.intakeSlideTargetReached()){
+                                if (outtake.intakeSlideTargetReached()){
                                     if (numCycles == 5){
                                         autoTimer = GlobalTimer.milliseconds(); // reset timer not rly needed here
                                         currentState = AutoState.DRIVE_OTHER_SIDE_AND_TRANSFER;

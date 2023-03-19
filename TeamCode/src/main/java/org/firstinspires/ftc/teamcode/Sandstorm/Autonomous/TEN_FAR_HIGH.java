@@ -30,8 +30,8 @@ public class TEN_FAR_HIGH extends LinearOpMode {
     final int LiftMidPosition = 400;
     final int LiftLowPosition = 0;
 
-    final int TurretLeftPosition = -30;
-    final int TurretRightposition = 30;
+    final int TurretLeftPosition = -8;
+    final int TurretRightposition = 8;
 
     boolean outakeResetReady;
     boolean outakeOutReady;
@@ -147,8 +147,8 @@ public class TEN_FAR_HIGH extends LinearOpMode {
                 .build();
 
         Trajectory DriveOtherSide = drive.trajectoryBuilder(DriveIntoStack.end())
-                .lineToLinearHeading(new Pose2d(-20, -6, Math.toRadians(180)))
-                .splineToSplineHeading(new Pose2d(-38, -6, Math.toRadians(0)), Math.toRadians(180))
+                .lineToLinearHeading(new Pose2d(-20, outconestackY, Math.toRadians(180)))
+                .splineToSplineHeading(new Pose2d(-38, outconestackY, Math.toRadians(0)), Math.toRadians(180))
                 .build();
 
         Trajectory ParkRight = drive.trajectoryBuilder(DriveOtherSide.end())
