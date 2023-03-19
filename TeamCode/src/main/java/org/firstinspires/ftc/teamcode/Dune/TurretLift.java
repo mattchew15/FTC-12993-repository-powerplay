@@ -187,8 +187,7 @@ public class TurretLift {  // no constructor for this class
         ClawServo.setPosition(ClawClosedPos);
     }
     public void closeClawSoft() {ClawServo.setPosition(ClawCloseSoftPos);}
-    public void openClawHard(){
-        ClawServo.setPosition(ClawOpenHardPos);}
+    public void openClawHard(){ClawServo.setPosition(ClawOpenHardPos);}
     public void tiltUp(){
         TiltServo.setPosition(TiltUpPos);
     }

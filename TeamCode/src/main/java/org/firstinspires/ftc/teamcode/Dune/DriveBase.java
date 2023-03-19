@@ -35,8 +35,8 @@ public class DriveBase {  // no constructor for this class
         BL = hwMap.get(DcMotor.class, "BL");
         FL = hwMap.get(DcMotor.class, "FL");
 
-        IntakeRMotor = hwMap.get(DcMotor.class, "IntakeR");
-        IntakeLMotor = hwMap.get(DcMotor.class, "IntakeL");
+        //IntakeRMotor = hwMap.get(DcMotor.class, "IntakeR");
+        //IntakeLMotor = hwMap.get(DcMotor.class, "IntakeL");
 
         IntakeRightServo = hwMap.get(Servo.class, "IntakeRightS");
         IntakeLeftServo = hwMap.get(Servo.class, "IntakeLeftS");
@@ -54,7 +54,7 @@ public class DriveBase {  // no constructor for this class
         FL.setDirection(DcMotorSimple.Direction.REVERSE); //DcMotorSimple class?
         BL.setDirection(DcMotorSimple.Direction.REVERSE);
         BR.setDirection(DcMotorSimple.Direction.REVERSE);
-        IntakeLMotor.setDirection(DcMotorSimple.Direction.REVERSE); // one intake motor is reversed
+        //IntakeLMotor.setDirection(DcMotorSimple.Direction.REVERSE); // one intake motor is reversed
 
     }
 

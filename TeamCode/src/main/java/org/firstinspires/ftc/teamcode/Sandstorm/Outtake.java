@@ -38,7 +38,7 @@ public class Outtake {  // no constructor for this class
     public static double OuttakeSlideReadyPos = 0, OuttakeSlideScorePos = 0, OuttakeSlideScoreDropPos = 0, OuttakeSlideGroundPos = 0, OuttakeSlideConeFlipPos = 0, OuttakeSlideAboveConePos = 0;
 
     //Servo Positions for Intake
-    public static double IntakeClawOpenPos = 0.52, IntakeClawClosedPos = 0.405, IntakeClawOpenHardPos = 0.61;
+    public static double IntakeClawOpenPos = 0.52, IntakeClawClosedPos = 0.75, IntakeClawOpenHardPos = 0.54;
     public static double IntakeArmReadyPos = 0.81, IntakeArmTransferPos = 0.36, IntakeArmPickupPos = 0;
     public static double IntakeLiftReadyPos = 0.578, IntakeLiftTransferPos = 0.85;
 

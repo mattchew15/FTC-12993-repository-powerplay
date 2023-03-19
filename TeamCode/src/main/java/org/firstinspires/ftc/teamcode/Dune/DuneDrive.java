@@ -76,11 +76,11 @@ public class DuneDrive extends LinearOpMode {
         GlobalTimer.reset();
         inputs.resetMatchTimer();
         drivebase.motorsSetup();
-        turretlift.motorsSetup();
+        //turretlift.motorsSetup();
         inputs.inputsSetup(); // sets toggle variables to false
         outakestate = OutakeState.READY;
         outakesequencetimer = 0;
-        liftpositiontype = 350;
+        //liftpositiontype = 350;
     }
 
 
@@ -111,11 +111,11 @@ public class DuneDrive extends LinearOpMode {
                 drivebase.Drive(gamepad1.left_stick_y,gamepad1.left_stick_x,gamepad1.right_stick_x);
                 //drivebase.motorDirectionTest(gamepad1.left_stick_y, gamepad1.left_stick_x,gamepad1.right_stick_x,gamepad1.right_stick_y);
                 drivebase.PowerToggle(gamepad1.a);
-                liftSequence();
+                /*liftSequence();
                 inputs.intakeStackToggleMode(gamepad2.right_stick_button);
                 inputs.manualResetToggleMode(gamepad2.left_stick_button);
                 inputs.cycleToggleUp(gamepad2.right_bumper);
-                inputs.cycleToggleDown(gamepad2.left_bumper);
+                inputs.cycleToggleDown(gamepad2.left_bumper);*/
                 //inputs.gamepadRumbleTimer();
                 telemetry.addData("LiftMotorPosition", turretlift.liftPos());
                 telemetry.addData("turretPosition", turretlift.tickstoDegrees((int)Math.round(turretlift.turretPos())));

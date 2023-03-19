@@ -1,51 +1,60 @@
 package org.firstinspires.ftc.teamcode.Dune.Autonomous.Sensors;
 
 import com.qualcomm.hardware.bosch.BNO055IMU;
-import com.qualcomm.hardware.bosch.JustLoggingAccelerationIntegrator;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
+import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
-
 
 @TeleOp
 public class NewBNO055IMU extends LinearOpMode {
 
-    private BNO055IMU imu;
-
+    BNO055IMU imu;
     Orientation angles;
-    Boolean tipping = false;
-    float roll;
+
+    double roll;
+    boolean tipp;
 
     @Override
-    public void runOpMode(){
+    public void runOpMode() {
 
+        //we can use more than just tipping, see external samples -> SensorBNO055IMU.java
+
+        //defining needed parameters
         BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
         parameters.angleUnit           = BNO055IMU.AngleUnit.DEGREES;
-        parameters.accelUnit           = BNO055IMU.AccelUnit.METERS_PERSEC_PERSEC;
-        parameters.calibrationDataFile = "BNO055IMUCalibration.json"; // see the calibration sample opmode
         parameters.loggingEnabled      = true;
         parameters.loggingTag          = "IMU";
-        parameters.accelerationIntegrationAlgorithm = new JustLoggingAccelerationIntegrator();
 
-        imu = hardwareMap.get(com.qualcomm.hardware.bosch.BNO055IMU.class, "imu");
+        //init of imu and parameters
+        imu = hardwareMap.get(BNO055IMU.class, "imu");
         imu.initialize(parameters);
 
         waitForStart();
 
-        roll = AngleUnit.DEGREES.fromUnit(angles.angleUnit, angles.secondAngle);
-
-        if (roll > -85){
-            tipping = true;
-        }
-        else {
-            tipping = false;
-        }
         while (opModeIsActive()) {
-            telemetry.addData("Tipping: ", Boolean.toString(tipping));
+
+            //setting angles value using IMU integrated code to use variable in next calculation
+            angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
+
+            //calculating the angle aka roll through multiple angles (look in source code if you want to know)
+            roll = AngleUnit.DEGREES.normalize(AngleUnit.DEGREES.fromUnit(angles.angleUnit, angles.secondAngle));
+
+            //setting boolean
+            if(roll > -80 || roll < -82){
+                tipp = true;
+            }
+            else{
+                tipp = false;
+            }
+
+            //telemetry
+            telemetry.addData("tipping", Boolean.toString(tipp));
+            telemetry.addData("roll", Double.toString(roll));
             telemetry.update();
         }
     }
 }
-
