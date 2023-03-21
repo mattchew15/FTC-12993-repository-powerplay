@@ -244,23 +244,14 @@ public class TEN_CLOSE_HIGH extends LinearOpMode {
             // main switch statement logic
             switch (currentState) {
                 case PRELOAD_DRIVE:
+                    outtake.IntakeSlideInternalPID(0,1); // might break something
+                    outtake.liftTo(0, outtake.liftPos(),1);
+                    outtake.turretSpinInternalPID(0,1);
                     outtake.OuttakeSlideReady();
-                    if (GlobalTimer.milliseconds() - autoTimer > 200){
-                        outtake.IntakeArmTransfer();
-                        if (GlobalTimer.milliseconds() - autoTimer > 700){ // extra wait to make sure its cone is in outtake claw
-                            outtake.OuttakeClawClose();
-                            if (GlobalTimer.milliseconds() - autoTimer > 800){
-                                outtake.IntakeClawOpen();
-                            }
-                        } else {
-                            outtake.IntakeClawClose();
-                            outtake.IntakeLiftTransfer();
-                            outtake.BraceReady();
-                        }
-                    } else {
-                        outtake.IntakeClawClose();
-                        outtake.IntakeLiftTransfer();
-                    }
+                    outtake.OuttakeClawClose();
+                    outtake.OuttakeArmReady();
+                    outtake.IntakeClawOpenHard();
+                    outtake.IntakeLift5();
                     if (!drive.isBusy()){
                         autoTimer = GlobalTimer.milliseconds(); // reset timer not rly needed here
                         currentState = AutoState.OUTTAKE_CONE;

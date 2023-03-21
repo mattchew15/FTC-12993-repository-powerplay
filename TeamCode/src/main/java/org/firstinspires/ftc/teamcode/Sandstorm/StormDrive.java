@@ -284,15 +284,15 @@ public class StormDrive extends LinearOpMode {
             case LIFT_CONE:
                 outtake.IntakeClawClose();
                 drivebase.intakeSpin(0);
-                outtake.IntakeSlideInternalPID(3,1); // might break something
                 outtake.liftTo(0, outtake.liftPos(),1);
                 outtake.turretSpinInternalPID(0,1);
                 if (GlobalTimer.milliseconds() - OuttakeTimer > 170){
                     outtake.IntakeLiftTransfer();
                     if (GlobalTimer.milliseconds() - OuttakeTimer > 320 ){ // so it doesn't hit the intakes
+                        outtake.IntakeSlideTo(5, outtake.IntakeSlidePos(),1); // might break something
                         outtake.IntakeArmTransfer();
                         if ((outtake.getIntakeArmPos() > 196)){ // put the or statement here for the arm being in the right position
-                            if (outtake.liftTargetReached() && outtake.IntakeSlidePos() > -2){ // make sure height is selected before transferring
+                            if (outtake.liftTargetReached()){ // make sure height is selected before transferring - add intkae slides t hing
                                 outtake.OuttakeClawClose();
                                 outtakeState = OuttakeState.CLAW_GRIP_TRANSFER_START;
                                 OuttakeTimer = GlobalTimer.milliseconds(); // basically grabs in this state
@@ -302,7 +302,7 @@ public class StormDrive extends LinearOpMode {
                 }
                 break;
             case CLAW_GRIP_TRANSFER_START: // fix so if i don't go
-                if ((outtake.getIntakeArmPos() > 195) && outtake.IntakeSlidePos() > -2 && outtake.liftTargetReached() && GlobalTimer.milliseconds() - OuttakeTimer > 80 ){  // this is actually used as if you are transferring from intake out pickup there is a inbuilt delay - this is an old comment for when there was global timer = 0
+                if ((outtake.getIntakeArmPos() > 195) && outtake.liftTargetReached() && GlobalTimer.milliseconds() - OuttakeTimer > 80 ){  // this is actually used as if you are transferring from intake out pickup there is a inbuilt delay - this is an old comment for when there was global timer = 0 - check if intake slidse are all the way in
                     outtake.OuttakeClawClose();
                     outtakeState = OuttakeState.CLAW_GRIP_TRANSFER_END;
                     OuttakeTimer = GlobalTimer.milliseconds(); // reset timer
@@ -357,7 +357,7 @@ public class StormDrive extends LinearOpMode {
                         coneDepositState = ConeDepositState.CONE_DROP; // should run the whole drop sequence here
                         OuttakeTimer = GlobalTimer.milliseconds(); // reset timer
                     }
-
+                    outtake.OuttakeArmScore(); // so if you switch back from ground junction mode the arm will go out
                     if (GlobalTimer.milliseconds()-OuttakeTimer > 120){
                         outtake.BraceActive(); // this should happen at the same time as the outtake arm is going out so that its always parrallel to the ground
                         if (GlobalTimer.milliseconds()-OuttakeTimer > 400){ // weird sequence
@@ -435,7 +435,7 @@ public class StormDrive extends LinearOpMode {
                 // puts the state into idle when other actions are happening
                 break;
         }
-        if ((gamepad2.b && outtakeState != OuttakeState.READY) || (gamepad1.b && outtakeState != OuttakeState.READY)){
+        if ((gamepad2.b && (outtakeState != OuttakeState.READY || intakeout != IntakeOut.READY)) || (gamepad1.b && (outtakeState != OuttakeState.READY || intakeout != IntakeOut.READY))){ // so that it returns when intake is out
             outtakeState = OuttakeState.SUBSYSTEMS_SET_RETURN; // if b is pressed at any state then return to ready
             drivebase.intakeSpin(-1);
         }
@@ -634,15 +634,18 @@ public class StormDrive extends LinearOpMode {
             case READY_TO_OUTTAKE_END:
                 if (GlobalTimer.milliseconds() - OuttakePickupTimer > 300){ // this is the time it takes for the brace to tuck under
                     outtakePickupState = OuttakePickupState.GRAB_OUTTAKE;
+                    liftTargetPosition = 0;
                     outtake.OuttakeClawOpenHard();
                 }
                 break;
             case GRAB_OUTTAKE: // waiting to for drivers to grab the cone
                 outtake.OuttakeSlidePickupCones();
                 outtake.OuttakeArmPickup();
-                outtake.liftToInternalPID(0,0.8);
+                outtake.liftToInternalPID(liftTargetPosition,0.8); // bumps should be able to be used here to fine adjust
                 if (gamepad1.right_bumper || gamepad2.left_bumper){
                     outtake.OuttakeClawClose();
+                    GroundJunctions = true; // this will ensure the brace won't come out so you can fine adjust off the poles, however need to be able to switch off ground junctions mode
+                    liftTargetPosition = 0; // this is so that the lift will not lift up and topple any cones , you can still use bumpers of joystick to fine adjust, and switch to score using a,x,y
                     OuttakePickupTimer = GlobalTimer.milliseconds(); // reset timer
                     outtakePickupState = OuttakePickupState.HEIGHT_OUTTAKE;
                 }
@@ -714,10 +717,14 @@ public class StormDrive extends LinearOpMode {
     public void liftPositionChange(){ // if gamepad inputs don't work in this class then pass them through as parameters in the function
         if (gamepad1.y || gamepad2.y){
             liftTargetPosition = LiftHighPosition; // add servo change here if its different for each height
+            GroundJunctions = false;
         } else if (gamepad1.x || gamepad2.x){
             liftTargetPosition = LiftMidPosition;
+            GroundJunctions = false; // the way setting a variable works is that it won't change until you change it back to false
+            // therefore, if we want to switch off ground junction mode we need to be able to switch it off true
         } else if (gamepad1.a || gamepad2.a){
             liftTargetPosition = LiftLowPosition;
+            GroundJunctions = false;
         } else if (gamepad1.dpad_down || gamepad2.dpad_down){
             GroundJunctions = true;
             liftTargetPosition = LiftGroundPosition;

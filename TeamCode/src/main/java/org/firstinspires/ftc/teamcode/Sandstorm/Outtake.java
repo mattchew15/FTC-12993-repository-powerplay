@@ -55,7 +55,7 @@ public class Outtake {  // no constructor for this class
 
     //editable dashboard variables must be public static - PID values for turret and lift that can be tuned
     public static double TurretKp = 0.01, TurretKi = 0.000, TurretKd = 0.008, TurretIntegralSumLimit = 1, TurretFeedforward = 0.3;
-    public static double LiftKp = 0.02, LiftKi = 0.0, LiftKd = 0.02, LiftIntegralSumLimit = 10, LiftKf = 0;
+    public static double LiftKp = 0.02, LiftKi = 0.0, LiftKd = 0.01, LiftIntegralSumLimit = 10, LiftKf = 0;
     public static double intakeSlideKp = 0.008, intakeSlideKi = 0.00, intakeSlideKd = 0.08, intakeSlideIntegralSumLimit = 10, intakeSlideKf = 0;
 
     // New instance of PID class with editable variables
@@ -113,7 +113,7 @@ public class Outtake {  // no constructor for this class
 
     public void liftMotorRawControl(double manualcontrollift){
         LiftMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        LiftMotor.setPower(manualcontrollift * 0.6);
+        LiftMotor.setPower(manualcontrollift * 0.7);
     }
 
     public void turretMotorRawControl(double manualcontrolturret){

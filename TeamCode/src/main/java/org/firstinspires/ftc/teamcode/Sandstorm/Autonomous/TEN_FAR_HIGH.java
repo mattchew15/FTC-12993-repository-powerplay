@@ -259,25 +259,16 @@ public class TEN_FAR_HIGH extends LinearOpMode {
             // main switch statement logic
             switch (currentState) {
                 case PRELOAD_DRIVE:
+                    outtake.IntakeSlideInternalPID(0,1); // might break something
+                    outtake.liftTo(0, outtake.liftPos(),1);
+                    outtake.turretSpinInternalPID(0,1);
                     outtake.OuttakeSlideReady();
-                    if (GlobalTimer.milliseconds() - autoTimer > 200){
-                        outtake.IntakeArmTransfer();
-                        if (GlobalTimer.milliseconds() - autoTimer > 700){ // extra wait to make sure its cone is in outtake claw
-                            outtake.OuttakeClawClose();
-                            if (GlobalTimer.milliseconds() - autoTimer > 800){
-                                outtake.IntakeClawOpen();
-                            }
-                        } else {
-                            outtake.IntakeClawClose();
-                            outtake.IntakeLiftTransfer();
-                            outtake.BraceReady();
-                        }
-                    } else {
-                        outtake.IntakeClawClose();
-                        outtake.IntakeLiftTransfer();
-                    }
+                    outtake.OuttakeClawClose();
+                    outtake.OuttakeArmReady();
+                    outtake.IntakeClawOpenHard();
+                    outtake.IntakeLift5();
                     if (!drive.isBusy()){
-                        autoTimer = GlobalTimer.milliseconds(); // reset timer not rly needed here
+                        autoTimer = GlobalTimer.milliseconds(); // reset timer
                         currentState = AutoState.OUTTAKE_CONE;
                         drive.followTrajectoryAsync(DriveOutStackAfterPreload);
                         outtake.OuttakeArmScore();
@@ -479,7 +470,9 @@ public class TEN_FAR_HIGH extends LinearOpMode {
         outtake.liftTo(LiftHighPosition, outtake.liftPos(), 1);
         outtake.turretSpin(TurretRightposition, outtake.turretPos(),1);
         outtake.OuttakeArmScore();
-        outtake.BraceActive();
+        if (GlobalTimer.milliseconds()-autoTimer > 120){ // this is the right time
+            outtake.BraceActive();
+        }
     }
 
     public void ResetOuttake(){
