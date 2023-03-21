@@ -44,12 +44,7 @@ public class NewBNO055IMU extends LinearOpMode {
             roll = AngleUnit.DEGREES.normalize(AngleUnit.DEGREES.fromUnit(angles.angleUnit, angles.secondAngle));
 
             //setting boolean
-            if(roll > -80 || roll < -82){
-                tipp = true;
-            }
-            else{
-                tipp = false;
-            }
+            tipp = roll > -80 || roll < -82;
 
             //telemetry
             telemetry.addData("tipping", Boolean.toString(tipp));
