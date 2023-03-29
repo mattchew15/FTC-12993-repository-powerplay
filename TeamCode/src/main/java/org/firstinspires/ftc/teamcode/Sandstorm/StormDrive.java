@@ -5,6 +5,7 @@ import static org.firstinspires.ftc.robotcore.external.BlocksOpModeCompanion.gam
 import static org.firstinspires.ftc.robotcore.external.BlocksOpModeCompanion.gamepad2;
 import static org.firstinspires.ftc.robotcore.external.BlocksOpModeCompanion.hardwareMap;
 
+import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.Gamepad;
@@ -12,6 +13,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 import org.firstinspires.ftc.teamcode.Dune.DuneDrive;
+import org.firstinspires.ftc.teamcode.drive.StandardTrackingWheelLocalizer;
 
 
 @TeleOp(name = "StormDrive")
@@ -32,13 +34,23 @@ public class StormDrive extends LinearOpMode {
     final double tenTime = 110.0;
     final double oneFourth = 30.0;
 
+    final double xTarget = 0;
+    final double yTarget = 0;
+    final double headingTarget = -90;
+
+    final double distanceFromPointThreshold = 10; // this would have to be changed
+
+    double xPosition;
+    double yPosition;
+    double headingPosition;
+
     boolean one = true;
     boolean two = false;
     boolean three = false;
     boolean four = false;
 
     // uses the ElapsedTime class from the SDK to create variable GlobalTimer
-    final double IntakeSlideOutTicks = -500;
+    final double IntakeSlideOutTicks = -700;
 
     final int LiftHighPosition = -765;
     final int LiftMidPosition = -420;
@@ -176,6 +188,7 @@ public class StormDrive extends LinearOpMode {
         // this is basically init, all setup, hardware classes etc get initialized here
         drivebase.Drivebase_init(hardwareMap);
         outtake.Outtake_init(hardwareMap);
+        StandardTrackingWheelLocalizer location = new StandardTrackingWheelLocalizer(hardwareMap);
 
         // waits for user to press start on driverhub
         waitForStart();
@@ -184,8 +197,22 @@ public class StormDrive extends LinearOpMode {
             Setup();
             // reset the rumble timer before start is pressed - this will be slightly off because we start the program before teleop starts
             runtime.reset();
+            location.setPoseEstimate(PoseStorage.currentPose); // this gets sets the current position to what it ended in auto
+
             while (opModeIsActive()) {
                 //rumble();
+                location.update();
+                // Retrieve your pose
+                Pose2d poseEstimate = location.getPoseEstimate();
+
+                xPosition = poseEstimate.getX();
+                yPosition = poseEstimate.getY();
+                headingPosition = poseEstimate.getHeading();
+
+                telemetry.addData("x", xPosition);
+                telemetry.addData("y", yPosition);
+                telemetry.addData("heading", headingPosition);
+
                 drivebase.Drive(gamepad1.left_stick_y,gamepad1.left_stick_x,gamepad1.right_stick_x);
                 //drivebase.motorDirectionTest(gamepad1.left_stick_y, gamepad1.left_stick_x,gamepad1.right_stick_x,gamepad1.right_stick_y);
                 //drivebase.PowerToggle(gamepad1.left_stick_button);
@@ -223,6 +250,7 @@ public class StormDrive extends LinearOpMode {
     public void outtakeSequence(){ // make sure to go back and add when each statemachine command should be run
         switch (outtakeState) {
             case READY:
+                driveToPosition(xTarget,yTarget,headingTarget,xPosition,yPosition,headingPosition, 1,1);
                 if (intakeout == IntakeOut.READY){ // this should reduce any conflicting commands with the intakeshoot out thing
                     outtake.IntakeClawClose();
                     outtake.IntakeArmReady();
@@ -271,7 +299,6 @@ public class StormDrive extends LinearOpMode {
             case INTAKE:
                 drivebase.intakeSpin(1); // spin the intake
                 outtake.IntakeClawOpen();
-                outtake.IntakeSlideTo(0, outtake.IntakeSlidePos(),1); // might break something
                 outtake.liftTo(0, outtake.liftPos(),1);
                 // no need to put ready stuff on because there will be nothing conflicting with it
                 if (outtake.intakeClawTouchPressed() || gamepad2.left_bumper){
@@ -289,7 +316,6 @@ public class StormDrive extends LinearOpMode {
                 if (GlobalTimer.milliseconds() - OuttakeTimer > 170){
                     outtake.IntakeLiftTransfer();
                     if (GlobalTimer.milliseconds() - OuttakeTimer > 320 ){ // so it doesn't hit the intakes
-                        outtake.IntakeSlideTo(5, outtake.IntakeSlidePos(),1); // might break something
                         outtake.IntakeArmTransfer();
                         if ((outtake.getIntakeArmPos() > 196)){ // put the or statement here for the arm being in the right position
                             if (outtake.liftTargetReached()){ // make sure height is selected before transferring - add intkae slides t hing
@@ -425,6 +451,7 @@ public class StormDrive extends LinearOpMode {
                 outtake.IntakeClawClose();
                 outtake.OuttakeClawOpenHard(); // shouuld be fine
                 outtake.IntakeLiftTransfer();
+                outtake.IntakeClipOpen();
                 if (gamepad2.right_bumper){
                     outtake.encodersReset();
                     outtakeState = OuttakeState.READY;
@@ -454,7 +481,11 @@ public class StormDrive extends LinearOpMode {
         switch (intakeout) {
             case READY:
                 //drivebase.intakeSpin(0);
-                //outtake.IntakeSlideTo(3,outtake.IntakeSlidePos(),1); // if this is internal pid it might be wierd and not do other stuff
+                if (outtake.IntakeSlidePos() > -2) {
+                    outtake.IntakeClipHold(); // turn the intake slide pid running to pos off to save battery draw
+                } else {
+                    outtake.IntakeClipOpen(); // this might break something when as the intake slides won't go in, but stops jittering
+                }
                 outtake.IntakeSlideInternalPID(0,1);
                 outtake.IntakeArmReady();
                 outtake.IntakeLiftReady(); // this is in ready as well
@@ -477,20 +508,25 @@ public class StormDrive extends LinearOpMode {
 
                  */
             case INTAKE_SHOOT_OUT:
-                outtake.IntakeSlideTo(IntakeSlideOutTicks, outtake.IntakeSlidePos(), 1);
-               // drivebase.intakeSpin(-0.4); // helps the slides go out
-                if (outtake.IntakeSlidePos() < -100) {
-                    outtake.IntakeClawOpenHard();
-                    outtake.IntakeLiftReady();
-                }
-                if (inputs.IntakeToggleOutState == 2){ // if gamepad2.leftbumper is pressed
-                    outtake.IntakeClawClose();
-                    IntakeOutTimer = GlobalTimer.milliseconds();
-                    intakeout = IntakeOut.INTAKE_TO_TRANSFER;
+                outtake.IntakeClipOpen(); // time for intake clip to open
+                if (GlobalTimer.milliseconds() - IntakeOutTimer > 150){
+                    outtake.IntakeSlideTo(IntakeSlideOutTicks, outtake.IntakeSlidePos(), 1);
+                    // drivebase.intakeSpin(-0.4); // helps the slides go out
+                    if (outtake.IntakeSlidePos() < -100) {
+                        outtake.IntakeClawOpenHard();
+                        outtake.IntakeLiftReady();
+                        outtake.IntakeArmReady();
+                    }
+                    if (inputs.IntakeToggleOutState == 2){ // if gamepad2.leftbumper is pressed
+                        outtake.IntakeClawClose();
+                        IntakeOutTimer = GlobalTimer.milliseconds();
+                        intakeout = IntakeOut.INTAKE_TO_TRANSFER;
+                    }
                 }
                 break;
             case INTAKE_TO_TRANSFER:
                 outtake.IntakeClawClose();
+                outtake.IntakeClipOpen();
                 if (GlobalTimer.milliseconds() - IntakeOutTimer > 200){ // wait for the claw to grab
                         intakeExtendedToTransfer();
                         if (IntakeReady){ // if the slides are all the way in
@@ -510,6 +546,11 @@ public class StormDrive extends LinearOpMode {
                 liftTargetPosition = LiftLowPosition;
                 break;
             case RETURN:
+                if (outtake.IntakeSlidePos() < -3){
+                    outtake.IntakeClipOpen();
+                } else {
+                    outtake.IntakeClipHold();
+                }
                 if (outtake.IntakeSlidePos() < -100){ // if the intake slides aren't in yet
                     outtake.IntakeSlideTo(0, outtake.IntakeSlidePos(),1); // should conflict as its going to ready too
                     outtake.IntakeLiftReady();
@@ -529,7 +570,6 @@ public class StormDrive extends LinearOpMode {
                     inputs.IntakeToggleOutState = 0; // makes sure when it goes back to ready it won't autonomatically go back to previous state
                 }
                 break;
-
         }
         inputs.IntakeToggleOut(gamepad1.left_bumper); // ONLY RUN THIS FUNCTION IN PLACES WHERE YOU WANT BUTTON SPAM, DO NOT RUN THIS FUNCTION OTHERWISE INTAKE THING WILL CHANGE STATES WITH BUTTON SPAMS
         // PUT TO IDLE WHEN SWITCHING STATES so the code runs once and this function doesn't re-run with a different intake toggleoutstate
@@ -715,17 +755,17 @@ public class StormDrive extends LinearOpMode {
         }
     }
     public void liftPositionChange(){ // if gamepad inputs don't work in this class then pass them through as parameters in the function
-        if (gamepad1.y || gamepad2.y){
+        if (gamepad2.y || gamepad1.y){
             liftTargetPosition = LiftHighPosition; // add servo change here if its different for each height
             GroundJunctions = false;
-        } else if (gamepad1.x || gamepad2.x){
+        } else if (gamepad2.x || gamepad1.x){
             liftTargetPosition = LiftMidPosition;
             GroundJunctions = false; // the way setting a variable works is that it won't change until you change it back to false
             // therefore, if we want to switch off ground junction mode we need to be able to switch it off true
-        } else if (gamepad1.a || gamepad2.a){
+        } else if (gamepad2.a){
             liftTargetPosition = LiftLowPosition;
             GroundJunctions = false;
-        } else if (gamepad1.dpad_down || gamepad2.dpad_down){
+        } else if (gamepad2.dpad_down){
             GroundJunctions = true;
             liftTargetPosition = LiftGroundPosition;
             groundJunctionsDeposit = GroundJunctionDeposit.READY_TO_OUTTAKE_START;
@@ -766,6 +806,27 @@ public class StormDrive extends LinearOpMode {
             return true;
         }
     }
+    public void driveToPosition(double xTarget, double yTarget, double headingTarget, double xPosition, double yPosition, double headingPosition, double maxTranslationalSpeed, double maxRotationalSpeed){
+        inputs.driveToPositionToggle(gamepad1.a);
+        if (inputs.DriveToPositionToggleMode){
+            drivebase.DriveToPosition(xTarget,yTarget,headingTarget,xPosition,yPosition,headingPosition, maxTranslationalSpeed,maxTranslationalSpeed); // last values are translationalspeed, and rotational speed
+            if ((drivebase.getDistanceFromPosition(xTarget,yTarget,headingTarget,xPosition,yPosition,headingPosition) > distanceFromPointThreshold)){ // have to deal with the heading here, read telemetry for heading angle
+                inputs.IntakeToggleOutState = 1; // sets the intake slides to come out
+            }
+        }
+        if (gamepad1SticksBeingUsed()){
+            inputs.DriveToPositionToggleMode = false; // if the gamepad sticks are moved then stop the automatic driving
+        }
+    }
+    public boolean gamepad1SticksBeingUsed(){
+        double gamepadThresholdDistance = 0.13;
+        if (gamepad1.right_stick_x > gamepadThresholdDistance || gamepad1.right_stick_x < -gamepadThresholdDistance || gamepad1.left_stick_y > gamepadThresholdDistance || gamepad1.left_stick_y < -gamepadThresholdDistance || gamepad1.left_stick_x > gamepadThresholdDistance || gamepad1.left_stick_x < -gamepadThresholdDistance) { // makes the deadzone for the controller more
+            return true;
+        } else {
+            return false;
+        }
+    }
+
     public void rumbleSetup() {
         oneFourthRumbleEffect = new Gamepad.RumbleEffect.Builder()
                 .addStep(1.0, 1.0, 100)

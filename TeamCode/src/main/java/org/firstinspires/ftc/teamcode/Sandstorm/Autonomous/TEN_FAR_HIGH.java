@@ -9,6 +9,8 @@ import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.teamcode.Sandstorm.Autonomous.AprilTagDetectionPipeline;
 import org.firstinspires.ftc.teamcode.Dune.TurretLift;
 import org.firstinspires.ftc.teamcode.Sandstorm.Outtake;
+import org.firstinspires.ftc.teamcode.Sandstorm.PoseStorage;
+import org.firstinspires.ftc.teamcode.Sandstorm.StormDrive;
 import org.firstinspires.ftc.teamcode.drive.DriveConstants;
 import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
 import org.openftc.apriltag.AprilTagDetection;
@@ -290,17 +292,21 @@ public class TEN_FAR_HIGH extends LinearOpMode {
 
                 case GRAB_OFF_STACK:
                     // this section is for scoring the cone
-                    outtake.OuttakeClawOpen();
-                    outtake.OuttakeSlideScoreDrop();
-                    outtake.BraceReady();
-                    if (GlobalTimer.milliseconds() - autoTimer > 150){
-                        outtake.liftTo(0, outtake.liftPos(), 1);
-                        outtake.BraceReady();
-                        outtake.OuttakeArmReady();
-                        outtake.turretSpin(0,outtake.turretPos(),1); // spin turret after
+                    outtake.OuttakeSlideScoreDrop(); // drops down on pole a bit
+                    outtake.OuttakeArmDeposit();
+                    if (GlobalTimer.milliseconds() - autoTimer > 50){
+                        outtake.OuttakeClawOpenHard();
+                        if (GlobalTimer.milliseconds() - autoTimer > 75){
+                            outtake.BraceReady(); // might need a new position for this
+                            if (GlobalTimer.milliseconds() - autoTimer > 200){
+                                outtake.liftTo(0, outtake.liftPos(), 1);
+                                outtake.turretSpin(0, outtake.turretPos(),1);
+                                outtake.OuttakeArmReady();
+                            }
+                        }
                     }
                     // this section is for scoring the cone
-                    if (GlobalTimer.milliseconds() - autoTimer > 300) {
+                    if (GlobalTimer.milliseconds() - autoTimer > 400) {
                         if (outtake.intakeClawTouchPressed() || !drive.isBusy()){ // if it drives into the cone basically
                             outtake.IntakeSlideTo(IntakeSlideOutTicks, outtake.IntakeSlidePos(), 0); // stop the intake slides
                             outtake.IntakeClawClose();
@@ -426,6 +432,7 @@ public class TEN_FAR_HIGH extends LinearOpMode {
 
                 case IDLE:
                     telemetry.addLine("WWWWWWWWWWW");
+                    PoseStorage.currentPose = drive.getPoseEstimate(); // this stores the pose for teleop
                     break;
 
             }

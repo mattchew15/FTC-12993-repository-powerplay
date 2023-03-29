@@ -3,12 +3,14 @@ package org.firstinspires.ftc.teamcode.Sandstorm;
 import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.hardware.bosch.JustLoggingAccelerationIntegrator;
+import com.qualcomm.hardware.lynx.LynxModule;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
+import org.firstinspires.ftc.teamcode.Dune.PID;
 
 @Config // Allows dashboard to tune
 public class DriveBase {  // no constructor for this class
@@ -22,8 +24,17 @@ public class DriveBase {  // no constructor for this class
     //variable for the drivebase speed toggle;
     boolean PowerToggled;
     double PowerBase = 1;
-    double PowerBaseTurn = 0.8;
+    double PowerBaseTurn = 0.85;
     double PowerStrafe = 1.05;
+
+    public static double DrivebaseXKp = 0.0005, DrivebaseXKi = 0.00, DrivebaseXKd = 0.0, DrivebaseXIntegralSumLimit = 10, DrivebaseXKf = 0;
+    public static double DrivebaseYKp = 0.0005, DrivebaseYKi = 0.00, DrivebaseYKd = 0.0, DrivebaseYIntegralSumLimit = 10, DrivebaseYKf = 0;
+    public static double DrivebaseThetaKp = 0.0005, DrivebaseThetaKi = 0.00, DrivebaseThetaKd = 0.0, DrivebaseThetaIntegralSumLimit = 10, DrivebaseThetaKf = 0;
+
+    // should be able to use one instance of a drivebase pid because the x,y,z translation should all be the same
+    PID drivebaseXPID = new PID(DrivebaseXKp,DrivebaseXKi,DrivebaseXKd,DrivebaseXIntegralSumLimit,DrivebaseXKf);
+    PID drivebaseYPID = new PID(DrivebaseYKp,DrivebaseYKi,DrivebaseYKd,DrivebaseYIntegralSumLimit,DrivebaseYKf);
+    PID drivebaseThetaPID = new PID(DrivebaseThetaKp,DrivebaseThetaKi,DrivebaseThetaKd,DrivebaseThetaIntegralSumLimit,DrivebaseThetaKf);
 
     public void Drivebase_init(HardwareMap hwMap) {
 
@@ -33,6 +44,9 @@ public class DriveBase {  // no constructor for this class
         FL = hwMap.get(DcMotor.class, "FL");
 
         IntakeMotor = hwMap.get(DcMotor.class, "IntakeMotor");
+        for (LynxModule module : hwMap.getAll(LynxModule.class)) { // turns on bulk reads - might not work??
+            module.setBulkCachingMode(LynxModule.BulkCachingMode.AUTO);
+        }
     }
 
     public void motorsSetup(){
@@ -63,6 +77,52 @@ public class DriveBase {  // no constructor for this class
         FR.setPower(frontRightPower);
         BR.setPower(backRightPower);
     }
+
+    // this will need to use an inputs class to toggle this state. This will go out of state if the joystick sare moved
+    public void DriveToPosition(double xTarget, double yTarget, double thetaTarget, double xRobotPosition, double yRobotPosition, double robotTheta, double maxTranslationalSpeed, double maxRotationalSpeed){
+            double x = drivebaseXPID.update(xTarget,xRobotPosition,maxTranslationalSpeed); // set a target, get the robots state, and set the max speed
+            double y = drivebaseYPID.update(yTarget,yRobotPosition,maxTranslationalSpeed);
+            double theta = drivebaseThetaPID.update(thetaTarget,robotTheta,maxRotationalSpeed); // this pid should probably be different
+            double x_rotated = x * Math.cos(robotTheta) - y * Math.sin(robotTheta);
+            double y_rotated = x * Math.sin(robotTheta) + y * Math.cos(robotTheta);
+
+            // x, y, theta input mixing
+            FR.setPower(x_rotated + y_rotated + theta);
+            BL.setPower(x_rotated - y_rotated + theta);
+            FR.setPower(x_rotated - y_rotated - theta);
+            BR.setPower(x_rotated + y_rotated - theta);
+    }
+    public double getDistanceFromPosition(double xTarget, double yTarget, double thetaTarget, double xRobotPosition, double yRobotPosition, double robotTheta){
+        double xDistance = xTarget - xRobotPosition;
+        double yDistance = yTarget - yRobotPosition;
+        double distance = Math.sqrt(Math.pow(xDistance,2) + Math.pow(yDistance,2));
+        return distance;
+    }
+
+    public double getXError(){
+        return drivebaseXPID.returnError();
+    }
+    public double getYError(){
+        return drivebaseYPID.returnError();
+    }
+    public double getHeadingError(){
+        return drivebaseThetaPID.returnError();
+    }
+
+    public double getXOutput(){
+        return drivebaseXPID.returnOutput();
+    }
+    public double getYOutput(){
+        return drivebaseYPID.returnOutput();
+    }
+    public double getHeadingOutput(){
+        return drivebaseThetaPID.returnOutput();
+    }
+
+    public void ResetDriveToPosition(){ // this should probably be in stormdrive
+
+    }
+
     public void motorDirectionTest(double a, double b, double c, double d){
         FL.setPower(a);
         BL.setPower(b);

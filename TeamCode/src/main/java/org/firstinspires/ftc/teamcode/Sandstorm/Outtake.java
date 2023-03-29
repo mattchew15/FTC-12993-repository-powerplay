@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.Sandstorm;
 
 import com.acmerobotics.dashboard.config.Config;
+import com.qualcomm.hardware.lynx.LynxModule;
 import com.qualcomm.robotcore.hardware.AnalogInput;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
@@ -29,6 +30,7 @@ public class Outtake {  // no constructor for this class
     private ServoImplEx IntakeClawServo;
 
     private ServoImplEx ConeArmServo;
+    private ServoImplEx IntakeClipServo;
 
     private DigitalChannel IntakeClawTouch;
     private DigitalChannel OuttakeClawTouch;
@@ -44,6 +46,7 @@ public class Outtake {  // no constructor for this class
 
     // Servo Position for ConeArm
     public static double ConeArmReadyPos = 0.13, ConeArmAboveConePos = 0.525, ConeArmDownOnConePos = 0.6;
+    public static double IntakeClipHold = 0.515, IntakeClipOpen = 0.71;
 
     //Servo Positions for Intake
     public static double IntakeClawOpenPos = 0.655, IntakeClawClosedPos = 0.7, IntakeClawOpenHardPos = 0.54;
@@ -54,9 +57,9 @@ public class Outtake {  // no constructor for this class
     public static double IntakeHeight5 = 0.12, IntakeHeight4 = 0.215, IntakeHeight3 = 0.29, IntakeHeight2 = 0.35, IntakeHeight1 = 0.429;
 
     //editable dashboard variables must be public static - PID values for turret and lift that can be tuned
-    public static double TurretKp = 0.01, TurretKi = 0.000, TurretKd = 0.008, TurretIntegralSumLimit = 1, TurretFeedforward = 0.3;
-    public static double LiftKp = 0.02, LiftKi = 0.0, LiftKd = 0.01, LiftIntegralSumLimit = 10, LiftKf = 0;
-    public static double intakeSlideKp = 0.008, intakeSlideKi = 0.00, intakeSlideKd = 0.08, intakeSlideIntegralSumLimit = 10, intakeSlideKf = 0;
+    public static double TurretKp = 0.012, TurretKi = 0.000, TurretKd = 0.0003, TurretIntegralSumLimit = 1, TurretFeedforward = 0.3;
+    public static double LiftKp = 0.015, LiftKi = 0.0, LiftKd = 0.00037, LiftIntegralSumLimit = 10, LiftKf = 0;
+    public static double intakeSlideKp = 0.015, intakeSlideKi = 0.00, intakeSlideKd = 0.0005, intakeSlideIntegralSumLimit = 10, intakeSlideKf = 0;
 
     // New instance of PID class with editable variables
     PID turretPID = new PID(TurretKp,TurretKi,TurretKd,TurretIntegralSumLimit,TurretFeedforward);
@@ -88,6 +91,7 @@ public class Outtake {  // no constructor for this class
         IntakeSlideServo = hwMap.get(ServoImplEx.class, "InLiftS");
         IntakeClawServo = hwMap.get(ServoImplEx.class, "InClawS");
         ConeArmServo = hwMap.get(ServoImplEx.class, "ConeArmS");
+        IntakeClipServo = hwMap.get(ServoImplEx.class, "InClipS");
 
         IntakeClawTouch = hwMap.get(DigitalChannel.class, "InTouch");
         //OuttakeClawTouch = hwMap.get(DigitalChannel.class, "OuttakeTouch");
@@ -95,6 +99,9 @@ public class Outtake {  // no constructor for this class
         IntakeArmPosition = hwMap.get(AnalogInput.class, "InSEncoder");
         OuttakeArmPosition = hwMap.get(AnalogInput.class, "OutSEncoder");
         IntakeLiftPosition = hwMap.get(AnalogInput.class, "InLiftSEncoder");
+        for (LynxModule module : hwMap.getAll(LynxModule.class)) { // turns on bulk reads
+            module.setBulkCachingMode(LynxModule.BulkCachingMode.AUTO);
+        }
     }
 
     public void hardwareSetup(){
@@ -216,6 +223,8 @@ public class Outtake {  // no constructor for this class
     public void ConeArmReady(){ConeArmServo.setPosition(ConeArmReadyPos);}
     public void ConeArmAboveCone(){ConeArmServo.setPosition(ConeArmAboveConePos);}
     public void ConeArmDownOnCone(){ConeArmServo.setPosition(ConeArmDownOnConePos);}
+    public void IntakeClipOpen(){IntakeClipServo.setPosition(IntakeClipOpen);}
+    public void IntakeClipHold(){IntakeClipServo.setPosition(IntakeClipHold);}
 
     public void IntakeClawOpen(){
         IntakeClawServo.setPosition(IntakeClawOpenPos);

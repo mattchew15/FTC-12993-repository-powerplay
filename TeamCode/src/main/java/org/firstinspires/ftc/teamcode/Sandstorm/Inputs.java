@@ -30,6 +30,9 @@ public class Inputs {
     public boolean ManualResetToggleMode;
     public boolean ToggledManualReset;
 
+    public boolean DriveToPositionToggleMode;
+    public boolean ToggledDriveToPosition;
+
     public void resetMatchTimer(){matchTimer.reset();}
 
     public void inputsSetup(){ // must run this on init in dune drive
@@ -49,6 +52,9 @@ public class Inputs {
 
         ToggledManualReset = false;
         ManualResetToggleMode = false;
+
+        ToggledDriveToPosition = false;
+        DriveToPositionToggleMode = false;
     }
 
     public void gamepadRumbleTimer (){
@@ -79,6 +85,22 @@ public class Inputs {
         }
         else {
             ToggledManualReset = false;
+        }
+    }
+
+    public void driveToPositionToggle(boolean togglebtn) {
+        if (togglebtn) {
+            if (!ToggledDriveToPosition) { // the first time you first press it it will change stuff, then won't go past this if statement
+                if (DriveToPositionToggleMode) {
+                    DriveToPositionToggleMode = false; // will have to access this variable in other classes
+                } else {
+                    DriveToPositionToggleMode = true;
+                }
+                ToggledDriveToPosition = true;
+            }
+        }
+        else {
+            ToggledDriveToPosition = false;
         }
     }
 

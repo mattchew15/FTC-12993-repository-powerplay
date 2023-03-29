@@ -265,13 +265,17 @@ public class TEN_CLOSE_HIGH extends LinearOpMode {
                     break;
 
                 case GRAB_OFF_STACK:
-                    outtake.OuttakeClawOpen();
-                    if (GlobalTimer.milliseconds() - autoTimer > 150){
-                        outtake.liftTo(0, outtake.liftPos(), 1);
-                        outtake.BraceReady();
-                        if (GlobalTimer.milliseconds() - autoTimer > 200){
-                            outtake.OuttakeArmReady();
-                            outtake.turretSpin(0,outtake.turretPos(),1);
+                    outtake.OuttakeSlideScoreDrop(); // drops down on pole a bit
+                    outtake.OuttakeArmDeposit();
+                    if (GlobalTimer.milliseconds() - autoTimer > 50){
+                        outtake.OuttakeClawOpenHard();
+                        if (GlobalTimer.milliseconds() - autoTimer > 75){
+                            outtake.BraceReady(); // might need a new position for this
+                            if (GlobalTimer.milliseconds() - autoTimer > 200){
+                                outtake.liftTo(0, outtake.liftPos(), 1);
+                                outtake.turretSpin(0, outtake.turretPos(),1);
+                                outtake.OuttakeArmReady();
+                            }
                         }
                     }
                     if (GlobalTimer.milliseconds() - autoTimer > 300) {
@@ -346,7 +350,7 @@ public class TEN_CLOSE_HIGH extends LinearOpMode {
                     }
                     break;
                 case OUTTAKE_CONE_NO_INTAKE_SLIDES:
-                    OuttakeCone(false); // in a function so that i don't have eto make 2 changes
+                    OuttakeCone(false); // in a function so that i don't have to make 2 changes
                     break;
                 case RETRACT_SLIDES:
                     outtake.OuttakeClawOpen();
