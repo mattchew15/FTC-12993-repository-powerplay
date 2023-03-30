@@ -27,9 +27,10 @@ public class DriveBase {  // no constructor for this class
     double PowerBaseTurn = 0.85;
     double PowerStrafe = 1.05;
 
-    public static double DrivebaseXKp = 0.0005, DrivebaseXKi = 0.00, DrivebaseXKd = 0.0, DrivebaseXIntegralSumLimit = 10, DrivebaseXKf = 0;
-    public static double DrivebaseYKp = 0.0005, DrivebaseYKi = 0.00, DrivebaseYKd = 0.0, DrivebaseYIntegralSumLimit = 10, DrivebaseYKf = 0;
-    public static double DrivebaseThetaKp = 0.0005, DrivebaseThetaKi = 0.00, DrivebaseThetaKd = 0.0, DrivebaseThetaIntegralSumLimit = 10, DrivebaseThetaKf = 0;
+    public static double DrivebaseXKp = 0.4, DrivebaseXKi = 0.00, DrivebaseXKd = 0.03, DrivebaseXIntegralSumLimit = 10, DrivebaseXKf = 0;
+    public static double DrivebaseYKp = 0.4, DrivebaseYKi = 0.00, DrivebaseYKd = 0.01, DrivebaseYIntegralSumLimit = 10, DrivebaseYKf = 0;
+    public static double DrivebaseThetaKp = 2.5, DrivebaseThetaKi = 0.0008, DrivebaseThetaKd = 0.02, DrivebaseThetaIntegralSumLimit = 10, DrivebaseThetaKf = 0;
+
 
     // should be able to use one instance of a drivebase pid because the x,y,z translation should all be the same
     PID drivebaseXPID = new PID(DrivebaseXKp,DrivebaseXKi,DrivebaseXKd,DrivebaseXIntegralSumLimit,DrivebaseXKf);
@@ -44,9 +45,7 @@ public class DriveBase {  // no constructor for this class
         FL = hwMap.get(DcMotor.class, "FL");
 
         IntakeMotor = hwMap.get(DcMotor.class, "IntakeMotor");
-        for (LynxModule module : hwMap.getAll(LynxModule.class)) { // turns on bulk reads - might not work??
-            module.setBulkCachingMode(LynxModule.BulkCachingMode.AUTO);
-        }
+
     }
 
     public void motorsSetup(){
@@ -81,17 +80,33 @@ public class DriveBase {  // no constructor for this class
     // this will need to use an inputs class to toggle this state. This will go out of state if the joystick sare moved
     public void DriveToPosition(double xTarget, double yTarget, double thetaTarget, double xRobotPosition, double yRobotPosition, double robotTheta, double maxTranslationalSpeed, double maxRotationalSpeed){
             double x = drivebaseXPID.update(xTarget,xRobotPosition,maxTranslationalSpeed); // set a target, get the robots state, and set the max speed
-            double y = drivebaseYPID.update(yTarget,yRobotPosition,maxTranslationalSpeed);
-            double theta = drivebaseThetaPID.update(thetaTarget,robotTheta,maxRotationalSpeed); // this pid should probably be different
+            double y = drivebaseYPID.update(yTarget,-yRobotPosition,maxTranslationalSpeed);
+            double theta = drivebaseThetaPID.update(thetaTarget,-robotTheta,maxRotationalSpeed); // this pid should probably be different
             double x_rotated = x * Math.cos(robotTheta) - y * Math.sin(robotTheta);
             double y_rotated = x * Math.sin(robotTheta) + y * Math.cos(robotTheta);
 
             // x, y, theta input mixing
-            FR.setPower(x_rotated + y_rotated + theta);
-            BL.setPower(x_rotated - y_rotated + theta);
-            FR.setPower(x_rotated - y_rotated - theta);
-            BR.setPower(x_rotated + y_rotated - theta);
+            double denominator = Math.max(Math.abs(x_rotated) + Math.abs(y_rotated) + Math.abs(robotTheta), 1);
+            FL.setPower((x_rotated + y_rotated + theta)/denominator);
+            BL.setPower((x_rotated - y_rotated + theta)/denominator);
+            FR.setPower((x_rotated - y_rotated - theta)/denominator);
+            BR.setPower((x_rotated + y_rotated - theta)/denominator);
     }
+    public void DriveToPositionAutonomous(double xTarget, double yTarget, double thetaTarget, double xRobotPosition, double yRobotPosition, double robotTheta, double maxTranslationalSpeed, double maxRotationalSpeed){
+        double x = drivebaseXPID.update(xTarget,xRobotPosition,maxTranslationalSpeed); // set a target, get the robots state, and set the max speed
+        double y = -drivebaseYPID.update(yTarget,yRobotPosition,maxTranslationalSpeed);
+        double theta = drivebaseThetaPID.update(thetaTarget,-robotTheta,maxRotationalSpeed); // this pid should probably be different
+        double x_rotated = x * Math.cos(robotTheta) - y * Math.sin(robotTheta);
+        double y_rotated = x * Math.sin(robotTheta) + y * Math.cos(robotTheta);
+
+        // x, y, theta input mixing
+        double denominator = Math.max(Math.abs(x_rotated) + Math.abs(y_rotated) + Math.abs(robotTheta), 1);
+        FL.setPower((x_rotated + y_rotated + theta)/denominator);
+        BL.setPower((x_rotated - y_rotated + theta)/denominator);
+        FR.setPower((x_rotated - y_rotated - theta)/denominator);
+        BR.setPower((x_rotated + y_rotated - theta)/denominator);
+    }
+
     public double getDistanceFromPosition(double xTarget, double yTarget, double thetaTarget, double xRobotPosition, double yRobotPosition, double robotTheta){
         double xDistance = xTarget - xRobotPosition;
         double yDistance = yTarget - yRobotPosition;

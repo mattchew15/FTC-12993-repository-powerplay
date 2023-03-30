@@ -39,9 +39,9 @@ public class Outtake {  // no constructor for this class
     AnalogInput IntakeLiftPosition;
 
     //Servo Positions for outtake
-    public static double OuttakeClawOpenPos = 0.49, OuttakeClawClosedPos = 0.37, OuttakeClawOpenHardPos = 0.68;
+    public static double OuttakeClawOpenPos = 0.49, OuttakeClawClosedPos = 0.37, OuttakeClawOpenHardPos = 0.62;
     public static double OuttakeArmReadyPos = 0.958, OuttakeArmDepositPos = 0.34, OuttakeArmPickupPos = 0.34, OuttakeArmScorePos = 0.44, OuttakeArmSlightlyTiltedUpPos = 0.5;
-    public static double BraceReadyPos = 0.25, BraceActivePos = 0.71, BraceTuckedPos = 0, BraceFlipConePos = 0.6;
+    public static double BraceReadyPos = 0.25, BraceActivePos = 0.71, BraceActivePosAuto = 0.68, BraceTuckedPos = 0, BraceFlipConePos = 0.6;
     public static double OuttakeSlideReadyPos = 0.03, OuttakeSlideScorePos = 0.03, OuttakeSlideScoreDropPos = 0.16, OuttakeSlideGroundPos =  0.305, OuttakeSlideConeFlipPos = 0.18, OuttakeSlideAboveConePos = 0.245;
 
     // Servo Position for ConeArm
@@ -49,12 +49,12 @@ public class Outtake {  // no constructor for this class
     public static double IntakeClipHold = 0.515, IntakeClipOpen = 0.71;
 
     //Servo Positions for Intake
-    public static double IntakeClawOpenPos = 0.655, IntakeClawClosedPos = 0.7, IntakeClawOpenHardPos = 0.54;
+    public static double IntakeClawOpenPos = 0.655, IntakeClawClosedPos = 0.7, IntakeClawOpenHardPos = 0.55;
     public static double IntakeArmReadyPos = 0.908, IntakeArmTransferPos = 0.448, IntakeArmPickupPos = 0;
     public static double IntakeLiftReadyPos = 0.429, IntakeLiftTransferPos = 0.225;
 
     //Servo Positions for Stack Height
-    public static double IntakeHeight5 = 0.12, IntakeHeight4 = 0.215, IntakeHeight3 = 0.29, IntakeHeight2 = 0.35, IntakeHeight1 = 0.429;
+    public static double IntakeHeight5 = 0.145, IntakeHeight4 = 0.241, IntakeHeight3 = 0.32, IntakeHeight2 = 0.39, IntakeHeight1 = 0.435;
 
     //editable dashboard variables must be public static - PID values for turret and lift that can be tuned
     public static double TurretKp = 0.012, TurretKi = 0.000, TurretKd = 0.0003, TurretIntegralSumLimit = 1, TurretFeedforward = 0.3;
@@ -70,10 +70,11 @@ public class Outtake {  // no constructor for this class
     final double turretthresholdDistance = degreestoTicks(8); // should make the threshold less
     final double turretthresholdDistanceTwo = degreestoTicks(2);
 
-    final double liftthresholdDistance = 60;
-    final double intakeSlidethresholdDistance = 60;
+    final double liftthresholdDistance = 10;
+    final double intakeSlidethresholdDistance = 20;
+    final double intakeSlidethresholdDistanceNewThreshold = 4;
 
-    int turretTarget;
+    double turretTarget;
     int liftTarget;
     int intakeSlideTarget;
 
@@ -99,9 +100,7 @@ public class Outtake {  // no constructor for this class
         IntakeArmPosition = hwMap.get(AnalogInput.class, "InSEncoder");
         OuttakeArmPosition = hwMap.get(AnalogInput.class, "OutSEncoder");
         IntakeLiftPosition = hwMap.get(AnalogInput.class, "InLiftSEncoder");
-        for (LynxModule module : hwMap.getAll(LynxModule.class)) { // turns on bulk reads
-            module.setBulkCachingMode(LynxModule.BulkCachingMode.AUTO);
-        }
+
     }
 
     public void hardwareSetup(){
@@ -139,11 +138,13 @@ public class Outtake {  // no constructor for this class
         LiftMotor.setPower(output);
     }
     public void turretSpin(double targetRotations, double motorPosition, double maxSpeed){
+        turretTarget = targetRotations;
         TurretMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         double output = turretPID.update(targetRotations,motorPosition,maxSpeed); //does a lift to with external PID instead of just regular encoders
         TurretMotor.setPower(output);
     }
-    public void IntakeSlideTo(double targetRotations, double motorPosition, double maxSpeed){
+    public void IntakeSlideTo(int targetRotations, double motorPosition, double maxSpeed){
+        intakeSlideTarget = targetRotations;
         IntakeSlideMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         double output = intakeSlidePID.update(targetRotations,motorPosition,maxSpeed); //does a lift to with external PID instead of just regular encoders
         IntakeSlideMotor.setPower(output);
@@ -179,7 +180,7 @@ public class Outtake {  // no constructor for this class
     }
 
     public boolean liftTargetReached(){
-        if (liftPos() < (liftTarget + liftthresholdDistance) && liftPos() > (liftTarget-liftthresholdDistance)){ //liftthresholdDistance
+        if (liftPos() > (liftTarget - liftthresholdDistance) && liftPos() < (liftTarget+liftthresholdDistance)){ //liftthresholdDistance
             return true;
         }
         else{
@@ -188,7 +189,15 @@ public class Outtake {  // no constructor for this class
     }
 
     public boolean intakeSlideTargetReached(){
-        if (IntakeSlidePos() < (intakeSlideTarget + intakeSlidethresholdDistance) && IntakeSlidePos() > (intakeSlideTarget-intakeSlidethresholdDistance)){
+        if (IntakeSlidePos() > (intakeSlideTarget - intakeSlidethresholdDistance) && IntakeSlidePos() < (intakeSlideTarget + intakeSlidethresholdDistance)){
+            return true;
+        }
+        else{
+            return false;
+        }
+    }
+    public boolean intakeSlideTargetReachedSmallerThreshold(){
+        if (IntakeSlidePos() > (intakeSlideTarget - intakeSlidethresholdDistanceNewThreshold) && IntakeSlidePos() < (intakeSlideTarget + intakeSlidethresholdDistanceNewThreshold)){
             return true;
         }
         else{
@@ -269,6 +278,7 @@ public class Outtake {  // no constructor for this class
     public void BraceReady(){OuttakeBraceServo.setPosition(BraceReadyPos);}
     public void BraceActive(){OuttakeBraceServo.setPosition(BraceActivePos);}
     public void BraceTucked(){OuttakeBraceServo.setPosition(BraceTuckedPos);}
+    public void BraceActiveAuto(){OuttakeBraceServo.setPosition(BraceActivePosAuto);}
     public void BracePickupCones(){OuttakeBraceServo.setPosition(BraceFlipConePos);}
 
     public void OuttakeSlideReady(){OuttakeSlideServo.setPosition(OuttakeSlideReadyPos);}
@@ -305,7 +315,7 @@ public class Outtake {  // no constructor for this class
     }
     public void turretSpinInternalPID(int rotations, double maxSpeed){
         turretTarget = (int)Math.round(degreestoTicks(rotations)); // rounds whatever the double is to a whole number to make it an int
-        TurretMotor.setTargetPosition(turretTarget);
+        TurretMotor.setTargetPosition((int)Math.round(turretTarget));
         TurretMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         TurretMotor.setPower(maxSpeed);
     }

@@ -27,7 +27,7 @@ public class TEN_FAR_HIGH extends LinearOpMode {
     ElapsedTime GlobalTimer;
     double autoTimer;
 
-    final double IntakeSlideOutTicks = -400;
+    final int IntakeSlideOutTicks = -400;
     final int LiftHighPosition = 800;
     final int LiftMidPosition = 400;
     final int LiftLowPosition = 0;
@@ -221,7 +221,7 @@ public class TEN_FAR_HIGH extends LinearOpMode {
 
             telemetry.update();
             sleep(20);
-            outtake.IntakeClawClose();
+            outtake.OuttakeClawClose();
         }
 
 

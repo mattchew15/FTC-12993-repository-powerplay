@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.Sandstorm;
 
 // Old imports, some not needed
 import com.acmerobotics.roadrunner.geometry.Pose2d;
+import com.qualcomm.hardware.lynx.LynxModule;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.Gamepad;
@@ -16,7 +17,7 @@ public class PIDmotortest extends LinearOpMode {
 
     final double xTarget = 0;
     final double yTarget = 0;
-    final double headingTarget = Math.toRadians(-90);
+    final double headingTarget = Math.toRadians(0);
 
     //create new instances of class
     DriveBase drivebase = new DriveBase();
@@ -46,10 +47,12 @@ public class PIDmotortest extends LinearOpMode {
     public void runOpMode() {
 
         // this is basically init, all setup, hardware classes etc get initialized here
+        for (LynxModule module : hardwareMap.getAll(LynxModule.class)) { // turns on bulk reads - might not work??
+            module.setBulkCachingMode(LynxModule.BulkCachingMode.AUTO);
+        } //
         drivebase.Drivebase_init(hardwareMap);
         outtake.Outtake_init(hardwareMap); // this might be clashing with initializing 2 of the same thing at once
         StandardTrackingWheelLocalizer location = new StandardTrackingWheelLocalizer(hardwareMap);
-       // outtakeSequence.OuttakeHardware();
         outtake.encodersReset();
 
         // waits for user to press start on driverhub
@@ -59,7 +62,6 @@ public class PIDmotortest extends LinearOpMode {
             Setup();
 
             while (opModeIsActive()) {
-                drivebase.Drive(gamepad1.left_stick_y,gamepad1.left_stick_x,gamepad1.right_stick_x);
 
                 // Main loop. Run class methods here to do stuff
                 if(gamepad1.a){
@@ -114,10 +116,12 @@ public class PIDmotortest extends LinearOpMode {
                 double xPosition = poseEstimate.getX();
                 double yPosition = poseEstimate.getY();
                 double headingPosition = poseEstimate.getHeading();
+                double correctedHeading = inputs.angleWrap(headingPosition);
 
                 telemetry.addData("x", xPosition);
                 telemetry.addData("y", yPosition);
                 telemetry.addData("heading", headingPosition);
+                telemetry.addData("corrected heading", correctedHeading);
 
                 telemetry.addData("XError", drivebase.getXError());
                 telemetry.addData("YError", drivebase.getYError());
@@ -127,25 +131,31 @@ public class PIDmotortest extends LinearOpMode {
                 telemetry.addData("YOutput", drivebase.getYOutput());
                 telemetry.addData("HeadingOutput", drivebase.getHeadingOutput());
 
-                driveToPosition(xTarget,yTarget,headingTarget,xPosition,yPosition,headingPosition, 1,1);
+                driveToPosition(xTarget,yTarget,headingTarget,xPosition,yPosition,correctedHeading, 1,1, headingPosition);
 
                 telemetry.addData("Distance from target",drivebase.getDistanceFromPosition(xTarget,yTarget,headingTarget,xPosition,yPosition,headingPosition));
+                telemetry.addData("Automatic driving toggle", inputs.DriveToPositionToggleMode);
 
 
                 telemetry.update();
                 }
             }
         }
-    public void driveToPosition(double xTarget, double yTarget, double headingTarget, double xPosition, double yPosition, double headingPosition, double maxTranslationalSpeed, double maxRotationalSpeed){
+    public void driveToPosition(double xTarget, double yTarget, double headingTarget, double xPosition, double yPosition, double correctedHeading, double maxTranslationalSpeed, double maxRotationalSpeed, double rawHeading){
         inputs.driveToPositionToggle(gamepad1.dpad_down);
+
         if (inputs.DriveToPositionToggleMode){
-            drivebase.DriveToPosition(xTarget,yTarget,headingTarget,xPosition,yPosition,headingPosition, maxTranslationalSpeed,maxTranslationalSpeed); // last values are translationalspeed, and rotational speed
-            if ((drivebase.getDistanceFromPosition(xTarget,yTarget,headingTarget,xPosition,yPosition,headingPosition) > distanceFromPointThreshold)){ // have to deal with the heading here, read telemetry for heading angle
+            //drivebase.Drive(0,0,0); // this ensures there is no conflicting commands from the joysticks
+            drivebase.DriveToPosition(xTarget,yTarget,headingTarget,xPosition,yPosition,correctedHeading, maxTranslationalSpeed,maxRotationalSpeed); // last values are translationalspeed, and rotational speed
+            if ((drivebase.getDistanceFromPosition(xTarget,yTarget,headingTarget,xPosition,yPosition,rawHeading) > distanceFromPointThreshold)){ // have to deal with the heading here, read telemetry for heading angle
                telemetry.addLine("POSITION REACHED");
             }
+        } else {
+            drivebase.Drive(gamepad1.left_stick_y,gamepad1.left_stick_x,gamepad1.right_stick_x);
         }
         if (gamepad1SticksBeingUsed()){
             inputs.DriveToPositionToggleMode = false; // if the gamepad sticks are moved then stop the automatic driving
+
         }
     }
     public boolean gamepad1SticksBeingUsed(){
