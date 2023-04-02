@@ -817,7 +817,7 @@ public class StormDrive extends LinearOpMode {
         inputs.driveToPositionToggle(gamepad1.a);
         if (inputs.DriveToPositionToggleMode){
             drivebase.DriveToPosition(xTarget,yTarget,headingTarget,xPosition,yPosition,correctedHeading, maxTranslationalSpeed,maxRotationalSpeed); // last values are translationalspeed, and rotational speed
-            if ((drivebase.getDistanceFromPosition(xTarget,yTarget,headingTarget,xPosition,yPosition,rawHeading) < distanceFromPointThreshold)){ // have to deal with the heading here, read telemetry for heading angle
+            if ((drivebase.getDistanceFromPosition(xTarget,yTarget,headingTarget,xPosition,yPosition,rawHeading) < distanceFromPointThreshold) && drivebase.getHeadingError() < Math.toRadians(Math.abs(3))){ // have to deal with the heading here, read telemetry for heading angle
                 if (inputs.IntakeToggleOutState == 0){ //so that it will only happen once
                     inputs.IntakeToggleOutState = 1;
                 }
@@ -930,6 +930,7 @@ public class StormDrive extends LinearOpMode {
             outtake.IntakeClipOpen(); // this might break something when as the intake slides won't go in, but stops jittering
         }
     }
+
 
 }
 

@@ -16,6 +16,8 @@ import org.firstinspires.ftc.teamcode.Dune.PID;
 @Config // Allows dashboard to tune
 public class Outtake {  // no constructor for this class
 
+    // remove all double ups of reading and writing from hubs
+
     private DcMotorEx TurretMotor;
     private DcMotorEx LiftMotor;
     private DcMotorEx IntakeSlideMotor;
@@ -38,10 +40,15 @@ public class Outtake {  // no constructor for this class
     AnalogInput OuttakeArmPosition;
     AnalogInput IntakeLiftPosition;
 
+    public double liftPosition = liftPos();
+    public double turretPosition = turretPos();
+    public double intakeSlidePosition = IntakeSlidePos();
+
+
     //Servo Positions for outtake
     public static double OuttakeClawOpenPos = 0.49, OuttakeClawClosedPos = 0.37, OuttakeClawOpenHardPos = 0.62;
-    public static double OuttakeArmReadyPos = 0.958, OuttakeArmDepositPos = 0.34, OuttakeArmPickupPos = 0.34, OuttakeArmScorePos = 0.44, OuttakeArmSlightlyTiltedUpPos = 0.5;
-    public static double BraceReadyPos = 0.25, BraceActivePos = 0.71, BraceActivePosAuto = 0.68, BraceTuckedPos = 0, BraceFlipConePos = 0.6;
+    public static double OuttakeArmReadyPos = 0.951, OuttakeArmDepositPos = 0.34, OuttakeArmPickupPos = 0.34, OuttakeArmScorePos = 0.44, OuttakeArmSlightlyTiltedUpPos = 0.5, OuttakeArmUprightPos = 0.7;
+    public static double BraceReadyPos = 0.25, BraceActivePos = 0.71, BraceActivePosAuto = 0.64, BraceTuckedPos = 0, BraceFlipConePos = 0.6;
     public static double OuttakeSlideReadyPos = 0.03, OuttakeSlideScorePos = 0.03, OuttakeSlideScoreDropPos = 0.16, OuttakeSlideGroundPos =  0.305, OuttakeSlideConeFlipPos = 0.18, OuttakeSlideAboveConePos = 0.245;
 
     // Servo Position for ConeArm
@@ -57,9 +64,9 @@ public class Outtake {  // no constructor for this class
     public static double IntakeHeight5 = 0.145, IntakeHeight4 = 0.241, IntakeHeight3 = 0.32, IntakeHeight2 = 0.39, IntakeHeight1 = 0.435;
 
     //editable dashboard variables must be public static - PID values for turret and lift that can be tuned
-    public static double TurretKp = 0.012, TurretKi = 0.000, TurretKd = 0.0003, TurretIntegralSumLimit = 1, TurretFeedforward = 0.3;
-    public static double LiftKp = 0.015, LiftKi = 0.0, LiftKd = 0.00037, LiftIntegralSumLimit = 10, LiftKf = 0;
-    public static double intakeSlideKp = 0.015, intakeSlideKi = 0.00, intakeSlideKd = 0.0005, intakeSlideIntegralSumLimit = 10, intakeSlideKf = 0;
+    public static double TurretKp = 0.012, TurretKi = 0.000, TurretKd = 0.0004, TurretIntegralSumLimit = 1, TurretFeedforward = 0.3;
+    public static double LiftKp = 0.015, LiftKi = 0.0, LiftKd = 0.0004, LiftIntegralSumLimit = 10, LiftKf = 0;
+    public static double intakeSlideKp = 0.015, intakeSlideKi = 0.00, intakeSlideKd = 0.0006, intakeSlideIntegralSumLimit = 10, intakeSlideKf = 0;
 
     // New instance of PID class with editable variables
     PID turretPID = new PID(TurretKp,TurretKi,TurretKd,TurretIntegralSumLimit,TurretFeedforward);
@@ -137,6 +144,28 @@ public class Outtake {  // no constructor for this class
         double output = liftPID.update(liftTarget,motorPosition,maxSpeed); //does a lift to with external PID instead of just regular encoders
         LiftMotor.setPower(output);
     }
+    /*
+    public void liftToDeacceleration(int rotations, double motorPosition, double maxSpeed, double accelerationRate, double deaccelerationRate, double accelerationDistance, double deccelerationDistance){
+        liftTarget = rotations;
+        double liftPosition = liftPosition - startPosition;
+        double output;
+
+        if (liftPosition < accelerationDistance) {
+            output = liftPID.update(liftTarget,motorPosition,(maxSpeed/accelerationDistance)*liftPosition);
+
+        } else if (liftPosition > rotations - deccelerationDistance) {
+            output = liftPID.update(liftTarget,motorPosition,(maxSpeed/deccelerationDistance)*(rotations-liftPosition));
+
+        } else {
+            output = liftPID.update(liftTarget,motorPosition,maxSpeed);
+        }
+
+        LiftMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER); // this is added so that the external pids could be used
+        LiftMotor.setPower(output);
+    }
+
+     */
+
     public void turretSpin(double targetRotations, double motorPosition, double maxSpeed){
         turretTarget = targetRotations;
         TurretMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
@@ -161,8 +190,15 @@ public class Outtake {  // no constructor for this class
     public double IntakeSlidePos(){return IntakeSlideMotor.getCurrentPosition();}
     public double getIntakeSlideVoltage (){return LiftMotor.getCurrent(CurrentUnit.AMPS);}
 
+    public double intakeSlideError(){
+        return intakeSlidePID.returnError();
+    }
+    public double liftError(){
+        return liftPID.returnError();
+    }
+
     public boolean turretTargetReached(){
-        if (turretPos() < (turretTarget + turretthresholdDistance) && turretPos() > (turretTarget-turretthresholdDistance)){
+        if (turretPosition < (turretTarget + turretthresholdDistance) && turretPosition > (turretTarget-turretthresholdDistance)){
             return true;
         }
         else{
@@ -171,7 +207,7 @@ public class Outtake {  // no constructor for this class
     }
 
     public boolean turretTargetReachedNewThreshold(){
-        if (turretPos() < (turretTarget + turretthresholdDistanceTwo) && turretPos() > (turretTarget-turretthresholdDistanceTwo)){
+        if (turretPosition < (turretTarget + turretthresholdDistanceTwo) && turretPosition > (turretTarget-turretthresholdDistanceTwo)){
             return true;
         }
         else{
@@ -180,7 +216,7 @@ public class Outtake {  // no constructor for this class
     }
 
     public boolean liftTargetReached(){
-        if (liftPos() > (liftTarget - liftthresholdDistance) && liftPos() < (liftTarget+liftthresholdDistance)){ //liftthresholdDistance
+        if (liftPosition > (liftTarget - liftthresholdDistance) && liftPosition < (liftTarget+liftthresholdDistance)){ //liftthresholdDistance
             return true;
         }
         else{
@@ -189,7 +225,7 @@ public class Outtake {  // no constructor for this class
     }
 
     public boolean intakeSlideTargetReached(){
-        if (IntakeSlidePos() > (intakeSlideTarget - intakeSlidethresholdDistance) && IntakeSlidePos() < (intakeSlideTarget + intakeSlidethresholdDistance)){
+        if (intakeSlidePosition > (intakeSlideTarget - intakeSlidethresholdDistance) && intakeSlidePosition < (intakeSlideTarget + intakeSlidethresholdDistance)){
             return true;
         }
         else{
@@ -197,7 +233,7 @@ public class Outtake {  // no constructor for this class
         }
     }
     public boolean intakeSlideTargetReachedSmallerThreshold(){
-        if (IntakeSlidePos() > (intakeSlideTarget - intakeSlidethresholdDistanceNewThreshold) && IntakeSlidePos() < (intakeSlideTarget + intakeSlidethresholdDistanceNewThreshold)){
+        if (intakeSlidePosition > (intakeSlideTarget - intakeSlidethresholdDistanceNewThreshold) && intakeSlidePosition < (intakeSlideTarget + intakeSlidethresholdDistanceNewThreshold)){
             return true;
         }
         else{
@@ -269,6 +305,7 @@ public class Outtake {  // no constructor for this class
     }
 
     public void OuttakeArmReady(){OuttakeArmServo.setPosition(OuttakeArmReadyPos);}
+    public void OuttakeArmUpright(){OuttakeArmServo.setPosition(OuttakeArmUprightPos);}
     public void OuttakeArmDeposit(){OuttakeArmServo.setPosition(OuttakeArmDepositPos);}
     public void OuttakeArmPickup(){OuttakeArmServo.setPosition(OuttakeArmPickupPos);}
     public void OuttakeArmScore(){OuttakeArmServo.setPosition(OuttakeArmScorePos);}

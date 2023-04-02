@@ -8,8 +8,11 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
+import org.checkerframework.checker.units.qual.Current;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 import org.firstinspires.ftc.teamcode.drive.StandardTrackingWheelLocalizer;
+
+import java.sql.Time;
 
 
 @TeleOp(name = "PIDmotortest")
@@ -26,16 +29,22 @@ public class PIDmotortest extends LinearOpMode {
     Outtake outtake = new Outtake();
     final double distanceFromPointThreshold = 2; // this would have to be changed
 
+    double CurrentTime;
+    double LoopTime;
+    double PreviousTime;
 
     //Inputs inputs = new Inputs();
 
     // uses the ElapsedTime class from the SDK to create variable GlobalTimer
     ElapsedTime GlobalTimer;
+    ElapsedTime LoopTimeTimer;
 
     // random setup function that runs once start is pressed but before main loop
     private void Setup() {
         GlobalTimer = new ElapsedTime(System.nanoTime());
+        LoopTimeTimer = new ElapsedTime(System.nanoTime());
         GlobalTimer.reset();
+        LoopTimeTimer.reset();
         drivebase.motorsSetup();
         outtake.hardwareSetup();
         inputs.inputsSetup();
@@ -62,7 +71,9 @@ public class PIDmotortest extends LinearOpMode {
             Setup();
 
             while (opModeIsActive()) {
-
+                CurrentTime = LoopTimeTimer.nanoseconds();
+                LoopTime = CurrentTime - PreviousTime;
+                telemetry.addData("Loop Time", LoopTime);
                 // Main loop. Run class methods here to do stuff
                 if(gamepad1.a){
                     outtake.liftTo(-500, outtake.liftPos(), 1);
@@ -136,7 +147,8 @@ public class PIDmotortest extends LinearOpMode {
                 telemetry.addData("Distance from target",drivebase.getDistanceFromPosition(xTarget,yTarget,headingTarget,xPosition,yPosition,headingPosition));
                 telemetry.addData("Automatic driving toggle", inputs.DriveToPositionToggleMode);
 
-
+                PreviousTime = CurrentTime;
+                LoopTimeTimer.reset();
                 telemetry.update();
                 }
             }
@@ -166,6 +178,7 @@ public class PIDmotortest extends LinearOpMode {
             return false;
         }
     }
+
     }
 
 

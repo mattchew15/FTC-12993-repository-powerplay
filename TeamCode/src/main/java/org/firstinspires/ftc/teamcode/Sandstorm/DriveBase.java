@@ -27,9 +27,9 @@ public class DriveBase {  // no constructor for this class
     double PowerBaseTurn = 0.85;
     double PowerStrafe = 1.05;
 
-    public static double DrivebaseXKp = 0.4, DrivebaseXKi = 0.00, DrivebaseXKd = 0.03, DrivebaseXIntegralSumLimit = 10, DrivebaseXKf = 0;
-    public static double DrivebaseYKp = 0.4, DrivebaseYKi = 0.00, DrivebaseYKd = 0.01, DrivebaseYIntegralSumLimit = 10, DrivebaseYKf = 0;
-    public static double DrivebaseThetaKp = 2.5, DrivebaseThetaKi = 0.0008, DrivebaseThetaKd = 0.02, DrivebaseThetaIntegralSumLimit = 10, DrivebaseThetaKf = 0;
+    public static double DrivebaseXKp = 0.22, DrivebaseXKi = 0.00, DrivebaseXKd = 0.018, DrivebaseXIntegralSumLimit = 10, DrivebaseXKf = 0;
+    public static double DrivebaseYKp = 0.22, DrivebaseYKi = 0.00, DrivebaseYKd = 0.018, DrivebaseYIntegralSumLimit = 10, DrivebaseYKf = 0;
+    public static double DrivebaseThetaKp = 2, DrivebaseThetaKi = 0.0008, DrivebaseThetaKd = 0.02, DrivebaseThetaIntegralSumLimit = 10, DrivebaseThetaKf = 0;
 
 
     // should be able to use one instance of a drivebase pid because the x,y,z translation should all be the same
@@ -55,6 +55,15 @@ public class DriveBase {  // no constructor for this class
         BL.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         FL.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
+        //reverse correct motors
+        //FR.setDirection(DcMotorSimple.Direction.REVERSE); //DcMotorSimple class?
+        FL.setDirection(DcMotorSimple.Direction.REVERSE); //DcMotorSimple class?
+        BL.setDirection(DcMotorSimple.Direction.REVERSE);
+        //BR.setDirection(DcMotorSimple.Direction.REVERSE);
+        IntakeMotor.setDirection(DcMotorSimple.Direction.REVERSE); // one intake motor is reversed
+    }
+    public void motorsSetupAutonomous(){
+        // get rid of zero power behavior?? might do something
         //reverse correct motors
         //FR.setDirection(DcMotorSimple.Direction.REVERSE); //DcMotorSimple class?
         FL.setDirection(DcMotorSimple.Direction.REVERSE); //DcMotorSimple class?
