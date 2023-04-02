@@ -41,6 +41,7 @@ public class PID {
             output = maxOutput;
         }
         lastError = error;
+        timer.reset(); // i didn't do this it will mess with the PIDs
 
         return output;
     }

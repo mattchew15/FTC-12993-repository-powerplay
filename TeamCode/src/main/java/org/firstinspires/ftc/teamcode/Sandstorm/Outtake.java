@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.Sandstorm;
 
 import com.acmerobotics.dashboard.config.Config;
+import com.qualcomm.hardware.lynx.LynxModule;
 import com.qualcomm.robotcore.hardware.AnalogInput;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
@@ -14,6 +15,8 @@ import org.firstinspires.ftc.teamcode.Dune.PID;
 
 @Config // Allows dashboard to tune
 public class Outtake {  // no constructor for this class
+
+    // remove all double ups of reading and writing from hubs
 
     private DcMotorEx TurretMotor;
     private DcMotorEx LiftMotor;
@@ -29,6 +32,7 @@ public class Outtake {  // no constructor for this class
     private ServoImplEx IntakeClawServo;
 
     private ServoImplEx ConeArmServo;
+    private ServoImplEx IntakeClipServo;
 
     private DigitalChannel IntakeClawTouch;
     private DigitalChannel OuttakeClawTouch;
@@ -36,27 +40,33 @@ public class Outtake {  // no constructor for this class
     AnalogInput OuttakeArmPosition;
     AnalogInput IntakeLiftPosition;
 
+    public double liftPosition = liftPos();
+    public double turretPosition = turretPos();
+    public double intakeSlidePosition = IntakeSlidePos();
+
+
     //Servo Positions for outtake
-    public static double OuttakeClawOpenPos = 0.49, OuttakeClawClosedPos = 0.37, OuttakeClawOpenHardPos = 0.68;
-    public static double OuttakeArmReadyPos = 0.958, OuttakeArmDepositPos = 0.34, OuttakeArmPickupPos = 0.34, OuttakeArmScorePos = 0.44, OuttakeArmSlightlyTiltedUpPos = 0.5;
-    public static double BraceReadyPos = 0.25, BraceActivePos = 0.71, BraceTuckedPos = 0, BraceFlipConePos = 0.6;
+    public static double OuttakeClawOpenPos = 0.49, OuttakeClawClosedPos = 0.37, OuttakeClawOpenHardPos = 0.62;
+    public static double OuttakeArmReadyPos = 0.951, OuttakeArmDepositPos = 0.34, OuttakeArmPickupPos = 0.34, OuttakeArmScorePos = 0.44, OuttakeArmSlightlyTiltedUpPos = 0.5, OuttakeArmUprightPos = 0.7;
+    public static double BraceReadyPos = 0.25, BraceActivePos = 0.71, BraceActivePosAuto = 0.64, BraceTuckedPos = 0, BraceFlipConePos = 0.6;
     public static double OuttakeSlideReadyPos = 0.03, OuttakeSlideScorePos = 0.03, OuttakeSlideScoreDropPos = 0.16, OuttakeSlideGroundPos =  0.305, OuttakeSlideConeFlipPos = 0.18, OuttakeSlideAboveConePos = 0.245;
 
     // Servo Position for ConeArm
     public static double ConeArmReadyPos = 0.13, ConeArmAboveConePos = 0.525, ConeArmDownOnConePos = 0.6;
+    public static double IntakeClipHold = 0.515, IntakeClipOpen = 0.71;
 
     //Servo Positions for Intake
-    public static double IntakeClawOpenPos = 0.655, IntakeClawClosedPos = 0.7, IntakeClawOpenHardPos = 0.54;
+    public static double IntakeClawOpenPos = 0.655, IntakeClawClosedPos = 0.7, IntakeClawOpenHardPos = 0.55;
     public static double IntakeArmReadyPos = 0.908, IntakeArmTransferPos = 0.448, IntakeArmPickupPos = 0;
     public static double IntakeLiftReadyPos = 0.429, IntakeLiftTransferPos = 0.225;
 
     //Servo Positions for Stack Height
-    public static double IntakeHeight5 = 0.12, IntakeHeight4 = 0.215, IntakeHeight3 = 0.29, IntakeHeight2 = 0.35, IntakeHeight1 = 0.429;
+    public static double IntakeHeight5 = 0.145, IntakeHeight4 = 0.241, IntakeHeight3 = 0.32, IntakeHeight2 = 0.39, IntakeHeight1 = 0.435;
 
     //editable dashboard variables must be public static - PID values for turret and lift that can be tuned
-    public static double TurretKp = 0.01, TurretKi = 0.000, TurretKd = 0.008, TurretIntegralSumLimit = 1, TurretFeedforward = 0.3;
-    public static double LiftKp = 0.02, LiftKi = 0.0, LiftKd = 0.01, LiftIntegralSumLimit = 10, LiftKf = 0;
-    public static double intakeSlideKp = 0.008, intakeSlideKi = 0.00, intakeSlideKd = 0.08, intakeSlideIntegralSumLimit = 10, intakeSlideKf = 0;
+    public static double TurretKp = 0.012, TurretKi = 0.000, TurretKd = 0.0004, TurretIntegralSumLimit = 1, TurretFeedforward = 0.3;
+    public static double LiftKp = 0.015, LiftKi = 0.0, LiftKd = 0.0004, LiftIntegralSumLimit = 10, LiftKf = 0;
+    public static double intakeSlideKp = 0.015, intakeSlideKi = 0.00, intakeSlideKd = 0.0006, intakeSlideIntegralSumLimit = 10, intakeSlideKf = 0;
 
     // New instance of PID class with editable variables
     PID turretPID = new PID(TurretKp,TurretKi,TurretKd,TurretIntegralSumLimit,TurretFeedforward);
@@ -67,10 +77,11 @@ public class Outtake {  // no constructor for this class
     final double turretthresholdDistance = degreestoTicks(8); // should make the threshold less
     final double turretthresholdDistanceTwo = degreestoTicks(2);
 
-    final double liftthresholdDistance = 60;
-    final double intakeSlidethresholdDistance = 60;
+    final double liftthresholdDistance = 10;
+    final double intakeSlidethresholdDistance = 20;
+    final double intakeSlidethresholdDistanceNewThreshold = 4;
 
-    int turretTarget;
+    double turretTarget;
     int liftTarget;
     int intakeSlideTarget;
 
@@ -88,6 +99,7 @@ public class Outtake {  // no constructor for this class
         IntakeSlideServo = hwMap.get(ServoImplEx.class, "InLiftS");
         IntakeClawServo = hwMap.get(ServoImplEx.class, "InClawS");
         ConeArmServo = hwMap.get(ServoImplEx.class, "ConeArmS");
+        IntakeClipServo = hwMap.get(ServoImplEx.class, "InClipS");
 
         IntakeClawTouch = hwMap.get(DigitalChannel.class, "InTouch");
         //OuttakeClawTouch = hwMap.get(DigitalChannel.class, "OuttakeTouch");
@@ -95,6 +107,7 @@ public class Outtake {  // no constructor for this class
         IntakeArmPosition = hwMap.get(AnalogInput.class, "InSEncoder");
         OuttakeArmPosition = hwMap.get(AnalogInput.class, "OutSEncoder");
         IntakeLiftPosition = hwMap.get(AnalogInput.class, "InLiftSEncoder");
+
     }
 
     public void hardwareSetup(){
@@ -131,12 +144,36 @@ public class Outtake {  // no constructor for this class
         double output = liftPID.update(liftTarget,motorPosition,maxSpeed); //does a lift to with external PID instead of just regular encoders
         LiftMotor.setPower(output);
     }
+    /*
+    public void liftToDeacceleration(int rotations, double motorPosition, double maxSpeed, double accelerationRate, double deaccelerationRate, double accelerationDistance, double deccelerationDistance){
+        liftTarget = rotations;
+        double liftPosition = liftPosition - startPosition;
+        double output;
+
+        if (liftPosition < accelerationDistance) {
+            output = liftPID.update(liftTarget,motorPosition,(maxSpeed/accelerationDistance)*liftPosition);
+
+        } else if (liftPosition > rotations - deccelerationDistance) {
+            output = liftPID.update(liftTarget,motorPosition,(maxSpeed/deccelerationDistance)*(rotations-liftPosition));
+
+        } else {
+            output = liftPID.update(liftTarget,motorPosition,maxSpeed);
+        }
+
+        LiftMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER); // this is added so that the external pids could be used
+        LiftMotor.setPower(output);
+    }
+
+     */
+
     public void turretSpin(double targetRotations, double motorPosition, double maxSpeed){
+        turretTarget = targetRotations;
         TurretMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         double output = turretPID.update(targetRotations,motorPosition,maxSpeed); //does a lift to with external PID instead of just regular encoders
         TurretMotor.setPower(output);
     }
-    public void IntakeSlideTo(double targetRotations, double motorPosition, double maxSpeed){
+    public void IntakeSlideTo(int targetRotations, double motorPosition, double maxSpeed){
+        intakeSlideTarget = targetRotations;
         IntakeSlideMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         double output = intakeSlidePID.update(targetRotations,motorPosition,maxSpeed); //does a lift to with external PID instead of just regular encoders
         IntakeSlideMotor.setPower(output);
@@ -153,8 +190,15 @@ public class Outtake {  // no constructor for this class
     public double IntakeSlidePos(){return IntakeSlideMotor.getCurrentPosition();}
     public double getIntakeSlideVoltage (){return LiftMotor.getCurrent(CurrentUnit.AMPS);}
 
+    public double intakeSlideError(){
+        return intakeSlidePID.returnError();
+    }
+    public double liftError(){
+        return liftPID.returnError();
+    }
+
     public boolean turretTargetReached(){
-        if (turretPos() < (turretTarget + turretthresholdDistance) && turretPos() > (turretTarget-turretthresholdDistance)){
+        if (turretPosition < (turretTarget + turretthresholdDistance) && turretPosition > (turretTarget-turretthresholdDistance)){
             return true;
         }
         else{
@@ -163,7 +207,7 @@ public class Outtake {  // no constructor for this class
     }
 
     public boolean turretTargetReachedNewThreshold(){
-        if (turretPos() < (turretTarget + turretthresholdDistanceTwo) && turretPos() > (turretTarget-turretthresholdDistanceTwo)){
+        if (turretPosition < (turretTarget + turretthresholdDistanceTwo) && turretPosition > (turretTarget-turretthresholdDistanceTwo)){
             return true;
         }
         else{
@@ -172,7 +216,7 @@ public class Outtake {  // no constructor for this class
     }
 
     public boolean liftTargetReached(){
-        if (liftPos() < (liftTarget + liftthresholdDistance) && liftPos() > (liftTarget-liftthresholdDistance)){ //liftthresholdDistance
+        if (liftPosition > (liftTarget - liftthresholdDistance) && liftPosition < (liftTarget+liftthresholdDistance)){ //liftthresholdDistance
             return true;
         }
         else{
@@ -181,7 +225,15 @@ public class Outtake {  // no constructor for this class
     }
 
     public boolean intakeSlideTargetReached(){
-        if (IntakeSlidePos() < (intakeSlideTarget + intakeSlidethresholdDistance) && IntakeSlidePos() > (intakeSlideTarget-intakeSlidethresholdDistance)){
+        if (intakeSlidePosition > (intakeSlideTarget - intakeSlidethresholdDistance) && intakeSlidePosition < (intakeSlideTarget + intakeSlidethresholdDistance)){
+            return true;
+        }
+        else{
+            return false;
+        }
+    }
+    public boolean intakeSlideTargetReachedSmallerThreshold(){
+        if (intakeSlidePosition > (intakeSlideTarget - intakeSlidethresholdDistanceNewThreshold) && intakeSlidePosition < (intakeSlideTarget + intakeSlidethresholdDistanceNewThreshold)){
             return true;
         }
         else{
@@ -216,6 +268,8 @@ public class Outtake {  // no constructor for this class
     public void ConeArmReady(){ConeArmServo.setPosition(ConeArmReadyPos);}
     public void ConeArmAboveCone(){ConeArmServo.setPosition(ConeArmAboveConePos);}
     public void ConeArmDownOnCone(){ConeArmServo.setPosition(ConeArmDownOnConePos);}
+    public void IntakeClipOpen(){IntakeClipServo.setPosition(IntakeClipOpen);}
+    public void IntakeClipHold(){IntakeClipServo.setPosition(IntakeClipHold);}
 
     public void IntakeClawOpen(){
         IntakeClawServo.setPosition(IntakeClawOpenPos);
@@ -251,6 +305,7 @@ public class Outtake {  // no constructor for this class
     }
 
     public void OuttakeArmReady(){OuttakeArmServo.setPosition(OuttakeArmReadyPos);}
+    public void OuttakeArmUpright(){OuttakeArmServo.setPosition(OuttakeArmUprightPos);}
     public void OuttakeArmDeposit(){OuttakeArmServo.setPosition(OuttakeArmDepositPos);}
     public void OuttakeArmPickup(){OuttakeArmServo.setPosition(OuttakeArmPickupPos);}
     public void OuttakeArmScore(){OuttakeArmServo.setPosition(OuttakeArmScorePos);}
@@ -260,6 +315,7 @@ public class Outtake {  // no constructor for this class
     public void BraceReady(){OuttakeBraceServo.setPosition(BraceReadyPos);}
     public void BraceActive(){OuttakeBraceServo.setPosition(BraceActivePos);}
     public void BraceTucked(){OuttakeBraceServo.setPosition(BraceTuckedPos);}
+    public void BraceActiveAuto(){OuttakeBraceServo.setPosition(BraceActivePosAuto);}
     public void BracePickupCones(){OuttakeBraceServo.setPosition(BraceFlipConePos);}
 
     public void OuttakeSlideReady(){OuttakeSlideServo.setPosition(OuttakeSlideReadyPos);}
@@ -296,7 +352,7 @@ public class Outtake {  // no constructor for this class
     }
     public void turretSpinInternalPID(int rotations, double maxSpeed){
         turretTarget = (int)Math.round(degreestoTicks(rotations)); // rounds whatever the double is to a whole number to make it an int
-        TurretMotor.setTargetPosition(turretTarget);
+        TurretMotor.setTargetPosition((int)Math.round(turretTarget));
         TurretMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         TurretMotor.setPower(maxSpeed);
     }
