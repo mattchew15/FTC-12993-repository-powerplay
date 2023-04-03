@@ -30,6 +30,9 @@ public class Inputs {
     public boolean ManualResetToggleMode;
     public boolean ToggledManualReset;
 
+    public boolean GroundJunctionsToggleMode;
+    public boolean ToggledGroundJunctions;
+
     public boolean DriveToPositionToggleMode;
     public boolean ToggledDriveToPosition;
 
@@ -52,6 +55,9 @@ public class Inputs {
 
         ToggledManualReset = false;
         ManualResetToggleMode = false;
+
+        ToggledGroundJunctions = false;
+        GroundJunctionsToggleMode = false;
 
         ToggledDriveToPosition = false;
         DriveToPositionToggleMode = false;
@@ -85,6 +91,22 @@ public class Inputs {
         }
         else {
             ToggledManualReset = false;
+        }
+    }
+
+    public void groundJunctionsToggle(boolean togglebtn) {
+        if (togglebtn) {
+            if (!ToggledGroundJunctions) { // the first time you first press it it will change stuff, then won't go past this if statement
+                if (GroundJunctionsToggleMode) {
+                    GroundJunctionsToggleMode = false; // will have to access this variable in dune drive
+                } else {
+                    GroundJunctionsToggleMode = true;
+                }
+                ToggledGroundJunctions = true;
+            }
+        }
+        else {
+            ToggledGroundJunctions = false;
         }
     }
 
@@ -171,6 +193,18 @@ public class Inputs {
 
         // keep in mind that the result is in radians
         return radians;
+    }
+    public double angleWrapOtherSide(double radians) {
+
+        while (radians > Math.PI) {
+            radians -= 2 * Math.PI;
+        }
+        while (radians < -Math.PI) {
+            radians += 2 * Math.PI;
+        }
+
+        // keep in mind that the result is in radians
+        return radians + Math.PI;
     }
 
 

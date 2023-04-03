@@ -37,36 +37,30 @@ public class Outtake {  // no constructor for this class
     private DigitalChannel IntakeClawTouch;
     private DigitalChannel OuttakeClawTouch;
     AnalogInput IntakeArmPosition;
-    AnalogInput OuttakeArmPosition;
     AnalogInput IntakeLiftPosition;
 
-    public double liftPosition = liftPos();
-    public double turretPosition = turretPos();
-    public double intakeSlidePosition = IntakeSlidePos();
-
-
     //Servo Positions for outtake
-    public static double OuttakeClawOpenPos = 0.49, OuttakeClawClosedPos = 0.37, OuttakeClawOpenHardPos = 0.62;
-    public static double OuttakeArmReadyPos = 0.951, OuttakeArmDepositPos = 0.34, OuttakeArmPickupPos = 0.34, OuttakeArmScorePos = 0.44, OuttakeArmSlightlyTiltedUpPos = 0.5, OuttakeArmUprightPos = 0.7;
+    public static double OuttakeClawOpenPos = 0.57, OuttakeClawClosedPos = 0.45, OuttakeClawOpenHardPos = 0.7;
+    public static double OuttakeArmReadyPos = 0.958, OuttakeArmDepositPos = 0.34, OuttakeArmPickupPos = 0.34, OuttakeArmScorePos = 0.44, OuttakeArmScoreAutoPos = 0.49, OuttakeArmSlightlyTiltedUpPos = 0.5, OuttakeArmUprightPos = 0.75;
     public static double BraceReadyPos = 0.25, BraceActivePos = 0.71, BraceActivePosAuto = 0.64, BraceTuckedPos = 0, BraceFlipConePos = 0.6;
     public static double OuttakeSlideReadyPos = 0.03, OuttakeSlideScorePos = 0.03, OuttakeSlideScoreDropPos = 0.16, OuttakeSlideGroundPos =  0.305, OuttakeSlideConeFlipPos = 0.18, OuttakeSlideAboveConePos = 0.245;
 
     // Servo Position for ConeArm
-    public static double ConeArmReadyPos = 0.13, ConeArmAboveConePos = 0.525, ConeArmDownOnConePos = 0.6;
+    public static double ConeArmReadyPos = 0.445, ConeArmAboveConePos = 0.83, ConeArmDownOnConePos = 0.87;
     public static double IntakeClipHold = 0.515, IntakeClipOpen = 0.71;
 
     //Servo Positions for Intake
-    public static double IntakeClawOpenPos = 0.655, IntakeClawClosedPos = 0.7, IntakeClawOpenHardPos = 0.55;
+    public static double IntakeClawOpenPos = 0.675, IntakeClawClosedPos = 0.72, IntakeClawOpenHardPos = 0.57;
     public static double IntakeArmReadyPos = 0.908, IntakeArmTransferPos = 0.448, IntakeArmPickupPos = 0;
-    public static double IntakeLiftReadyPos = 0.429, IntakeLiftTransferPos = 0.225;
+    public static double IntakeLiftReadyPos = 0.43, IntakeLiftTransferPos = 0.215;
 
     //Servo Positions for Stack Height
     public static double IntakeHeight5 = 0.145, IntakeHeight4 = 0.241, IntakeHeight3 = 0.32, IntakeHeight2 = 0.39, IntakeHeight1 = 0.435;
 
     //editable dashboard variables must be public static - PID values for turret and lift that can be tuned
     public static double TurretKp = 0.012, TurretKi = 0.000, TurretKd = 0.0004, TurretIntegralSumLimit = 1, TurretFeedforward = 0.3;
-    public static double LiftKp = 0.015, LiftKi = 0.0, LiftKd = 0.0004, LiftIntegralSumLimit = 10, LiftKf = 0;
-    public static double intakeSlideKp = 0.015, intakeSlideKi = 0.00, intakeSlideKd = 0.0006, intakeSlideIntegralSumLimit = 10, intakeSlideKf = 0;
+    public static double LiftKp = 0.012, LiftKi = 0.0, LiftKd = 0.00045, LiftIntegralSumLimit = 10, LiftKf = 0;
+    public static double intakeSlideKp = 0.013, intakeSlideKi = 0.00, intakeSlideKd = 0.00059, intakeSlideIntegralSumLimit = 10, intakeSlideKf = 0;
 
     // New instance of PID class with editable variables
     PID turretPID = new PID(TurretKp,TurretKi,TurretKd,TurretIntegralSumLimit,TurretFeedforward);
@@ -77,7 +71,7 @@ public class Outtake {  // no constructor for this class
     final double turretthresholdDistance = degreestoTicks(8); // should make the threshold less
     final double turretthresholdDistanceTwo = degreestoTicks(2);
 
-    final double liftthresholdDistance = 10;
+    final double liftthresholdDistance = 20;
     final double intakeSlidethresholdDistance = 20;
     final double intakeSlidethresholdDistanceNewThreshold = 4;
 
@@ -105,7 +99,7 @@ public class Outtake {  // no constructor for this class
         //OuttakeClawTouch = hwMap.get(DigitalChannel.class, "OuttakeTouch");
 
         IntakeArmPosition = hwMap.get(AnalogInput.class, "InSEncoder");
-        OuttakeArmPosition = hwMap.get(AnalogInput.class, "OutSEncoder");
+      //  OuttakeArmPosition = hwMap.get(AnalogInput.class, "OutSEncoder");
         IntakeLiftPosition = hwMap.get(AnalogInput.class, "InLiftSEncoder");
 
     }
@@ -131,7 +125,7 @@ public class Outtake {  // no constructor for this class
 
     public void turretMotorRawControl(double manualcontrolturret){
         TurretMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        TurretMotor.setPower(manualcontrolturret * -0.6);
+        TurretMotor.setPower(manualcontrolturret * -0.3);
     }
     public void intakeSlideMotorRawControl(double manualcontrolintakeslide){ // shouldn't have to do this - will be too slow
         IntakeSlideMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
@@ -198,7 +192,7 @@ public class Outtake {  // no constructor for this class
     }
 
     public boolean turretTargetReached(){
-        if (turretPosition < (turretTarget + turretthresholdDistance) && turretPosition > (turretTarget-turretthresholdDistance)){
+        if (turretPos() < (turretTarget + turretthresholdDistance) && turretPos() > (turretTarget-turretthresholdDistance)){
             return true;
         }
         else{
@@ -207,7 +201,7 @@ public class Outtake {  // no constructor for this class
     }
 
     public boolean turretTargetReachedNewThreshold(){
-        if (turretPosition < (turretTarget + turretthresholdDistanceTwo) && turretPosition > (turretTarget-turretthresholdDistanceTwo)){
+        if (turretPos() < (turretTarget + turretthresholdDistanceTwo) && turretPos() > (turretTarget-turretthresholdDistanceTwo)){
             return true;
         }
         else{
@@ -216,7 +210,7 @@ public class Outtake {  // no constructor for this class
     }
 
     public boolean liftTargetReached(){
-        if (liftPosition > (liftTarget - liftthresholdDistance) && liftPosition < (liftTarget+liftthresholdDistance)){ //liftthresholdDistance
+        if (liftPos() > (liftTarget - liftthresholdDistance) && liftPos() < (liftTarget+liftthresholdDistance)){ //liftthresholdDistance
             return true;
         }
         else{
@@ -225,7 +219,7 @@ public class Outtake {  // no constructor for this class
     }
 
     public boolean intakeSlideTargetReached(){
-        if (intakeSlidePosition > (intakeSlideTarget - intakeSlidethresholdDistance) && intakeSlidePosition < (intakeSlideTarget + intakeSlidethresholdDistance)){
+        if (IntakeSlidePos() > (intakeSlideTarget - intakeSlidethresholdDistance) && IntakeSlidePos() < (intakeSlideTarget + intakeSlidethresholdDistance)){
             return true;
         }
         else{
@@ -233,7 +227,7 @@ public class Outtake {  // no constructor for this class
         }
     }
     public boolean intakeSlideTargetReachedSmallerThreshold(){
-        if (intakeSlidePosition > (intakeSlideTarget - intakeSlidethresholdDistanceNewThreshold) && intakeSlidePosition < (intakeSlideTarget + intakeSlidethresholdDistanceNewThreshold)){
+        if (IntakeSlidePos() > (intakeSlideTarget - intakeSlidethresholdDistanceNewThreshold) && IntakeSlidePos() < (intakeSlideTarget + intakeSlidethresholdDistanceNewThreshold)){
             return true;
         }
         else{
@@ -255,10 +249,7 @@ public class Outtake {  // no constructor for this class
         double position = IntakeArmPosition.getVoltage() / 3.3 * 360;
         return position;
     }
-    public double getOuttakeArmPos(){ // does work just needs to plugged in correctly
-        double position = OuttakeArmPosition.getVoltage() / 3.3 * 360;
-        return position;
-    }
+
     public double getIntakeLiftPos(){ // does work just needs to plugged in correctly
         double position = IntakeLiftPosition.getVoltage() / 3.3 * 360;
         return position;
@@ -310,6 +301,7 @@ public class Outtake {  // no constructor for this class
     public void OuttakeArmPickup(){OuttakeArmServo.setPosition(OuttakeArmPickupPos);}
     public void OuttakeArmScore(){OuttakeArmServo.setPosition(OuttakeArmScorePos);}
     public void OuttakeArmTiltUpSlightly(){OuttakeArmServo.setPosition(OuttakeArmSlightlyTiltedUpPos);}
+    public void OuttakeArmScoreAuto(){OuttakeArmServo.setPosition(OuttakeArmScoreAutoPos);}
    // public void GetOuttakeArmPosition(){OuttakeArmServo.getPosition();}
 
     public void BraceReady(){OuttakeBraceServo.setPosition(BraceReadyPos);}

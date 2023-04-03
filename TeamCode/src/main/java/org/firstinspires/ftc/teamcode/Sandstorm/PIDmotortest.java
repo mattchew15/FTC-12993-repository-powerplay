@@ -77,14 +77,16 @@ public class PIDmotortest extends LinearOpMode {
                 // Main loop. Run class methods here to do stuff
                 if(gamepad1.a){
                     outtake.liftTo(-500, outtake.liftPos(), 1);
+                    outtake.OuttakeArmScoreAuto();
                 }
                 else if (gamepad1.b){
                     outtake.liftTo(0, outtake.liftPos(), 1);
+                    outtake.OuttakeArmReady();
                 }
                 if (gamepad1.x){
                     outtake.IntakeSlideTo(0, outtake.IntakeSlidePos(), 1);
                 } else if (gamepad1.y){
-                    outtake.IntakeSlideTo(-700, outtake.IntakeSlidePos(), 1);
+                    outtake.IntakeSlideTo(-500, outtake.IntakeSlidePos(), 1);
                 }
                 if (gamepad1.dpad_up){
                     outtake.turretSpin(0, outtake.turretPos(), 1);
@@ -99,7 +101,7 @@ public class PIDmotortest extends LinearOpMode {
                 }
 
                 if (gamepad1.right_stick_button){
-                    outtake.IntakeSlideInternalPID(-700,1);
+                    outtake.IntakeSlideInternalPID(-500,1);
                 } else if (gamepad1.left_stick_button){
                     outtake.IntakeSlideInternalPID(0, 1);
                 }

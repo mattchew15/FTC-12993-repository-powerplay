@@ -19,8 +19,8 @@ import org.openftc.easyopencv.OpenCvCameraRotation;
 import java.util.ArrayList;
 
 
-@Autonomous(name = "1+10 Close-High Auto", group = "Autonomous")
-public class TEN_CLOSE_HIGH extends LinearOpMode {
+@Autonomous(name = "Hold Position Other Side Test", group = "Autonomous")
+public class holdPositionOtherSideTest extends LinearOpMode {
 
     // class members
     ElapsedTime GlobalTimer;
@@ -32,7 +32,7 @@ public class TEN_CLOSE_HIGH extends LinearOpMode {
     final double TurretLeftposition = -8.5;
     final double TurretRightposition = -TurretLeftposition;
 
-    final int IntakeSlideNotQuiteOutTicks = IntakeSlideOutTicks + 80;
+    final int IntakeSlideNotQuiteOutTicks = IntakeSlideOutTicks + 75;
     final int IntakeSlideBackFromStack = IntakeSlideOutTicks + 68;
 
     boolean outakeResetReady;
@@ -44,6 +44,7 @@ public class TEN_CLOSE_HIGH extends LinearOpMode {
     int slowerVelocityConstraint;
 
     double correctedHeading;
+    double correctedHeadingOtherSide;
     double xPosition;
     double yPosition;
     double headingPosition;
@@ -97,23 +98,24 @@ public class TEN_CLOSE_HIGH extends LinearOpMode {
         outtake.hardwareSetup();
         drivebase.motorsSetup();
         inputs.inputsSetup(); // hopefully won't conflict
-        currentState = AutoState.PRELOAD_DRIVE; // this go here?
+        currentState = AutoState.DRIVE_OTHER_SIDE_AND_TRANSFER; // this go here?
         autoTimer = 0;
         numCycles = 0;
         slowerVelocityConstraint = 12;
         outtake.encodersReset();
-        OtherSide = false;
+        OtherSide = true;
     }
     // Define our start pose
-    Pose2d startPose = new Pose2d(34, -69, Math.toRadians(0));
+
 
     final double outconestackX = 42;
     final double outconestackY = -17.7;
     final double outconeStackRotation = Math.toRadians(-1.2);
 
     final double outconestackXOtherSide = -outconestackX;
-    final double outconeStackRotationOtherSide = -3;
+    final double outconeStackRotationOtherSide = -outconeStackRotation + Math.toRadians(180) - 2 * Math.PI;
 
+    Pose2d startPose = new Pose2d(-outconestackX, outconestackY, Math.toRadians(0));
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -251,7 +253,7 @@ public class TEN_CLOSE_HIGH extends LinearOpMode {
         }
 
         // runs instantly once
-        drive.followTrajectoryAsync(PreloadDrive);
+        //drive.followTrajectoryAsync(PreloadDrive);
         autoTimer = GlobalTimer.milliseconds(); // reset timer not rly needed here
 
         while (opModeIsActive() && !isStopRequested()) {
@@ -262,32 +264,24 @@ public class TEN_CLOSE_HIGH extends LinearOpMode {
 
             xPosition = poseEstimate.getX();
             yPosition = poseEstimate.getY();
-            headingPosition = poseEstimate.getHeading();
+            headingPosition = poseEstimate.getHeading(); // returns raw heading position
+            if (!OtherSide){
+                headingPosition = poseEstimate.getHeading(); // returns raw heading position
+            } else if (OtherSide){
+                headingPosition = poseEstimate.getHeading(); //+ Math.toRadians(180); // returns raw heading position
+            }
             correctedHeading = inputs.angleWrap(headingPosition);
-
+            correctedHeadingOtherSide = inputs.angleWrapOtherSide(headingPosition);
             telemetry.addData("OtherSide", OtherSide);
-            telemetry.addData("x", xPosition);
-            telemetry.addData("y", yPosition);
-            telemetry.addData("heading", headingPosition);
-            telemetry.addData("corrected heading", correctedHeading);
-
+            telemetry.addData("heading", Math.toDegrees(headingPosition));
+            telemetry.addData("corrected heading", Math.toDegrees(correctedHeading));
+            telemetry.addData("corrected heading Other side", Math.toDegrees(correctedHeadingOtherSide));
             telemetry.addData("autostate", currentState);
-            telemetry.addData("Intake Slide Position", outtake.IntakeSlidePos());
-            telemetry.addData("Intake Slide Target Reached", outtake.intakeSlideTargetReachedSmallerThreshold());
-
-            telemetry.addData("liftPosition", outtake.liftPos());
-            telemetry.addData("lift target reached", outtake.liftTargetReached());
-
-
-            telemetry.addData("XError", drivebase.getXError());
-            telemetry.addData("YError", drivebase.getYError());
             telemetry.addData("HeadingError", drivebase.getHeadingError());
-
-            telemetry.addData("XOutput", drivebase.getXOutput());
-            telemetry.addData("YOutput", drivebase.getYOutput());
             telemetry.addData("HeadingOutput", drivebase.getHeadingOutput());
+            telemetry.addData("outconeStackRotationOtherSide", Math.toDegrees(outconeStackRotationOtherSide));
 
-            telemetry.addData("number of cycles:", numCycles);
+
 
 
             // main switch statement logic
@@ -421,21 +415,8 @@ public class TEN_CLOSE_HIGH extends LinearOpMode {
                     }
                     break;
                 case DRIVE_OTHER_SIDE_AND_TRANSFER:
-                    outtake.OuttakeClawClose();
-                    outtake.IntakeSlideTo(1,outtake.IntakeSlidePos(),1);
-                    outtake.turretSpin(0,outtake.turretPos(),1); // spin turret after
-                    outtake.liftTo(3, outtake.liftPos(), 1);
-                    if (GlobalTimer.milliseconds()-autoTimer > 200){ // time between claw transfers
-                        outtake.IntakeClawOpenHard();
-                        if (!drive.isBusy()){ // if its finished driving
-                            outtake.IntakeArmReady();
-                            outtake.IntakeLift3();
-                            autoTimer = GlobalTimer.milliseconds(); // reset timer
-                            drive.setPoseEstimate(new Pose2d(xPosition,yPosition, headingPosition + Math.toRadians(180)));
-                            currentState = AutoState.TURN_OTHER_STACK;
-                            // offsets the heading to avoid the annoying angle wrap glitch
-                        }
-                    }
+                    currentState = AutoState.TURN_OTHER_STACK;
+                    drive.setPoseEstimate(new Pose2d(xPosition,yPosition, headingPosition + Math.toRadians(180)));
                     break;
                 case TURN_OTHER_STACK:
                     // turns using my PID
@@ -444,14 +425,12 @@ public class TEN_CLOSE_HIGH extends LinearOpMode {
                     outtake.turretSpin(0,outtake.turretPos(),1); // spin turret after
                     outtake.liftTo(0, outtake.liftPos(), 1);
                     //threshold is 1 inch, 2 degrees
-
-                    if ((drivebase.getDistanceFromPosition(outconestackXOtherSide,outconestackY,outconeStackRotationOtherSide,xPosition,yPosition,headingPosition) < 1) && drivebase.getHeadingError() < Math.toRadians(Math.abs(2))){ // have to deal with the heading here, read telemetry for heading angle
+                    if (false){ // have to deal with the heading here, read telemetry for heading angle
                         autoTimer = GlobalTimer.milliseconds(); // reset timer
                         currentState = AutoState.OUTTAKE_CONE;
                         holdDrivebaseOtherSide(); // just so it runs it this loop and doesn't drift??
                         OtherSide = true; // indicates that we are going to do the other stack
                     }
-
                     break;
                 case OUTTAKE_CONE_NO_INTAKE_SLIDES:
                     OuttakeCone(false); // in a function so that i don't have to make 2 changes
@@ -580,7 +559,7 @@ public class TEN_CLOSE_HIGH extends LinearOpMode {
     }
 
     public void holdDrivebaseOtherSide(){ // inputs the raw heading instead of corrected heading
-        drivebase.DriveToPositionAutonomous(outconestackXOtherSide,outconestackY,-outconeStackRotationOtherSide,xPosition,yPosition,correctedHeading, 1,1); // last values are translationalspeed, and rotational speed
+        drivebase.DriveToPositionAutonomous(outconestackXOtherSide,outconestackY,-Math.toRadians(0),xPosition,yPosition,correctedHeading, 1,1); // last values are translationalspeed, and rotational speed
     }
 
     public double slidedeacceleration(double slideError, double deaccelerationThreshold, double deaccelerationRate, double maxSpeed, double minSpeeed){
