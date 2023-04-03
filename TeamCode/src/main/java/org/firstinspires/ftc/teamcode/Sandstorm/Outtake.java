@@ -79,6 +79,10 @@ public class Outtake {  // no constructor for this class
     int liftTarget;
     int intakeSlideTarget;
 
+    double turretPosition = turretPos(); // these might not update with the correct class
+    double liftPosition = liftPos(); // if this breaks then maybe updates similar to the target?
+    double intakeSlidePosition = IntakeSlidePos(); // stops multiple reads in the one loop
+
 
     public void Outtake_init(HardwareMap hwMap) {
         TurretMotor = hwMap.get(DcMotorEx.class, "TurretMotor");
@@ -110,6 +114,10 @@ public class Outtake {  // no constructor for this class
         IntakeSlideMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         TurretMotor.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE); // this should make it so that we don't use a pid on the main loop and take up power
         IntakeClawTouch.setMode(DigitalChannel.Mode.INPUT);
+
+        turretPosition = 0; // these need to be initialized on setup or you will get null error
+        liftPosition = 0;
+        intakeSlidePosition = 0;
     }
 
     public void encodersReset(){
@@ -119,7 +127,7 @@ public class Outtake {  // no constructor for this class
     }
 
     public void liftMotorRawControl(double manualcontrollift){
-        LiftMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        LiftMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER); // this is a write that is not needed
         LiftMotor.setPower(manualcontrollift * 0.7);
     }
 
@@ -192,7 +200,7 @@ public class Outtake {  // no constructor for this class
     }
 
     public boolean turretTargetReached(){
-        if (turretPos() < (turretTarget + turretthresholdDistance) && turretPos() > (turretTarget-turretthresholdDistance)){
+        if (turretPosition < (turretTarget + turretthresholdDistance) && turretPosition > (turretTarget-turretthresholdDistance)){
             return true;
         }
         else{
@@ -201,7 +209,7 @@ public class Outtake {  // no constructor for this class
     }
 
     public boolean turretTargetReachedNewThreshold(){
-        if (turretPos() < (turretTarget + turretthresholdDistanceTwo) && turretPos() > (turretTarget-turretthresholdDistanceTwo)){
+        if (turretPosition < (turretTarget + turretthresholdDistanceTwo) && turretPosition > (turretTarget-turretthresholdDistanceTwo)){
             return true;
         }
         else{
@@ -210,7 +218,7 @@ public class Outtake {  // no constructor for this class
     }
 
     public boolean liftTargetReached(){
-        if (liftPos() > (liftTarget - liftthresholdDistance) && liftPos() < (liftTarget+liftthresholdDistance)){ //liftthresholdDistance
+        if (liftPosition > (liftTarget - liftthresholdDistance) && liftPosition < (liftTarget+liftthresholdDistance)){ //liftthresholdDistance
             return true;
         }
         else{
