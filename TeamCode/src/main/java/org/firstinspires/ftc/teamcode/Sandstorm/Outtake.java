@@ -51,7 +51,7 @@ public class Outtake {  // no constructor for this class
 
     //Servo Positions for Intake
     public static double IntakeClawOpenPos = 0.675, IntakeClawClosedPos = 0.72, IntakeClawOpenHardPos = 0.57;
-    public static double IntakeArmReadyPos = 0.908, IntakeArmTransferPos = 0.448, IntakeArmPickupPos = 0;
+    public static double IntakeArmReadyPos = 0.908, IntakeArmTransferPos = 0.448, IntakeArmCOneHoldForTransferPos = 0.6;
     public static double IntakeLiftReadyPos = 0.43, IntakeLiftTransferPos = 0.215;
 
     //Servo Positions for Stack Height
@@ -285,6 +285,7 @@ public class Outtake {  // no constructor for this class
     public void IntakeArmTransfer(){
         IntakeArmServo.setPosition(IntakeArmTransferPos);
     }
+    public void IntakeArmConeHoldForTransfer(){IntakeArmServo.setPosition(IntakeArmCOneHoldForTransferPos);}
 
     public void IntakeLiftReady(){IntakeSlideServo.setPosition(IntakeLiftReadyPos);}
     public void IntakeLiftTransfer(){IntakeSlideServo.setPosition(IntakeLiftTransferPos);}

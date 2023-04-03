@@ -76,24 +76,24 @@ public class PIDmotortest extends LinearOpMode {
                 telemetry.addData("Loop Time", LoopTime);
                 // Main loop. Run class methods here to do stuff
                 if(gamepad1.a){
-                    outtake.liftTo(-500, outtake.liftPos(), 1);
+                    outtake.liftTo(-500, outtake.liftPosition, 1);
                     outtake.OuttakeArmScoreAuto();
                 }
                 else if (gamepad1.b){
-                    outtake.liftTo(0, outtake.liftPos(), 1);
+                    outtake.liftTo(0, outtake.liftPosition, 1);
                     outtake.OuttakeArmReady();
                 }
                 if (gamepad1.x){
-                    outtake.IntakeSlideTo(0, outtake.IntakeSlidePos(), 1);
+                    outtake.IntakeSlideTo(0, outtake.intakeSlidePosition, 1);
                 } else if (gamepad1.y){
-                    outtake.IntakeSlideTo(-500, outtake.IntakeSlidePos(), 1);
+                    outtake.IntakeSlideTo(-500, outtake.intakeSlidePosition, 1);
                 }
                 if (gamepad1.dpad_up){
-                    outtake.turretSpin(0, outtake.turretPos(), 1);
+                    outtake.turretSpin(0, outtake.turretPosition, 1);
                 } else if (gamepad1.dpad_right){
-                    outtake.turretSpin(8, outtake.turretPos(), 1);
+                    outtake.turretSpin(8, outtake.turretPosition, 1);
                 }else if (gamepad1.dpad_left)
-                    outtake.turretSpin(-8, outtake.turretPos(), 1);
+                    outtake.turretSpin(-8, outtake.turretPosition, 1);
                 if (gamepad1.right_bumper){
                     outtake.liftToInternalPID(-500, 1);
                 } else if (gamepad1.left_bumper){
@@ -106,14 +106,14 @@ public class PIDmotortest extends LinearOpMode {
                     outtake.IntakeSlideInternalPID(0, 1);
                 }
                 /*
-                telemetry.addData("lift position", outtake.liftPos());
+                telemetry.addData("lift position", outtake.liftPosition);
                 telemetry.addData("lift pid output", outtake.returnPIDLiftOutput());
                 telemetry.addData("lift-reached-target?", outtake.liftTargetReached());
-                telemetry.addData("intake slide position", outtake.IntakeSlidePos());
+                telemetry.addData("intake slide position", outtake.intakeSlidePosition);
                 telemetry.addData("intake slide pid output", outtake.returnPIDIntakeSlideOutput());
                 telemetry.addData("intake-slide-reached-target?", outtake.intakeSlideTargetReached());
-                telemetry.addData("turret position", outtake.tickstoDegrees((int)Math.round(outtake.turretPos())));
-                telemetry.addData("turret position", outtake.turretPos());
+                telemetry.addData("turret position", outtake.tickstoDegrees((int)Math.round(outtake.turretPosition)));
+                telemetry.addData("turret position", outtake.turretPosition);
                 telemetry.addData("turret position", outtake.degreestoTicks(-20));
                 telemetry.addData("turret pid output", outtake.returnPIDTurretOutput());
                 telemetry.addData("turret-target-reached?", outtake.turretTargetReached());
@@ -129,7 +129,7 @@ public class PIDmotortest extends LinearOpMode {
                 double xPosition = poseEstimate.getX();
                 double yPosition = poseEstimate.getY();
                 double headingPosition = poseEstimate.getHeading();
-                double correctedHeading = inputs.angleWrap(headingPosition);
+                double correctedHeading = inputs.angleWrap(headingPosition); // do not do this twice
 
                 telemetry.addData("x", xPosition);
                 telemetry.addData("y", yPosition);

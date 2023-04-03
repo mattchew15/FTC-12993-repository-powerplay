@@ -72,6 +72,8 @@ public class StormDrive extends LinearOpMode {
     double OuttakePickupTimer;
     double IntakeOutTimer;
     double GroundJunctionDepositTimer;
+    double IntakeLeftSequenceTimer;
+
 
     boolean IntakeReady; // might not need this - it just goes true when the intake is ready
     boolean BeaconScore; // if this variable is true the intake will not reset but it will hold the cone
@@ -95,6 +97,7 @@ public class StormDrive extends LinearOpMode {
         CLAW_GRIP_TRANSFER_START,
         CLAW_GRIP_TRANSFER_END,
         HEIGHT_CHANGE_OUTTAKE_DEPOSIT,
+        PICKUP_CONE_AND_BEACON,
         DROP,
         SUBSYSTEMS_SET_RETURN,
         RETURN,
@@ -129,6 +132,12 @@ public class StormDrive extends LinearOpMode {
         DROP_TO_GROUND,
         IDLE
     }
+    enum IntakeLiftSequence {
+        READY,
+        INTAKE,
+        LIFT_CONE,
+        IDLE
+    }
     enum IntakeOut {
         READY,
         INTAKE_INITIAL_LIFT,
@@ -146,6 +155,7 @@ public class StormDrive extends LinearOpMode {
     OuttakePickupState outtakePickupState;
     GroundJunctionDeposit groundJunctionsDeposit;
     IntakeOut intakeout;
+    IntakeLiftSequence intakeLiftSequence;
 
     Pose2d resetPose = new Pose2d(0, 0, Math.toRadians(0));
 
@@ -160,6 +170,7 @@ public class StormDrive extends LinearOpMode {
         FlipConeArmTimer = 0;
         ConeDepositTimer = 0;
         GroundJunctionDepositTimer = 0;
+        IntakeLeftSequenceTimer = 0;
         SlidesToggleUp = false;
         SlidesToggleDown = false;
 
@@ -177,10 +188,12 @@ public class StormDrive extends LinearOpMode {
         outtakePickupState = OuttakePickupState.IDLE;
         intakeout = IntakeOut.READY;
         groundJunctionsDeposit = GroundJunctionDeposit.READY;
+        intakeLiftSequence = IntakeLiftSequence.IDLE;
 
         turretTargetPosition = 0;
         liftTargetPosition = 50; // if no height is specified, then the lift needs to go out a bit for the transfer
         intakeSlideTargetPosition = 0;
+        BeaconScore = false;
     }
 
     @Override
@@ -189,7 +202,7 @@ public class StormDrive extends LinearOpMode {
         // this is basically init, all setup, hardware classes etc get initialized here
         drivebase.Drivebase_init(hardwareMap);
         outtake.Outtake_init(hardwareMap);
-        for (LynxModule module : hardwareMap.getAll(LynxModule.class)) { // turns on bulk reads - might not work??
+        for (LynxModule module : hardwareMap.getAll(LynxModule.class)) { // turns on bulk reads cannot read or write to the same motor mor ethan once or it will issues multiple bulk reads
             module.setBulkCachingMode(LynxModule.BulkCachingMode.AUTO);
         } //
         StandardTrackingWheelLocalizer location = new StandardTrackingWheelLocalizer(hardwareMap);
@@ -240,6 +253,7 @@ public class StormDrive extends LinearOpMode {
                 telemetry.addData("Flip Cone State", flipConeArmState);
                 telemetry.addData("Outtake Pickup state", outtakePickupState);
                 telemetry.addData("Ground Junctions deposit state", groundJunctionsDeposit);
+                telemetry.addData("IntakeLiftSequence", intakeLiftSequence);
                 telemetry.addData("GroundJunctionsToggleMode", inputs.GroundJunctionsToggleMode);
                 telemetry.addData("intakeTouch", outtake.intakeClawTouchPressed());
                 telemetry.addData("gamepad2RightStickYPastDeadZone", gamepad2RightStickYPastDeadZone());
@@ -351,6 +365,7 @@ public class StormDrive extends LinearOpMode {
                         outtake.liftTo(-50, outtake.liftPos(), 1);
                         outtake.OuttakeArmScore();
                         outtakeState = OuttakeState.HEIGHT_CHANGE_OUTTAKE_DEPOSIT;
+                        intakeLiftSequence = IntakeLiftSequence.READY;
                         OuttakeTimer = GlobalTimer.milliseconds(); // reset timer
                         if (inputs.GroundJunctionsToggleMode){
                             groundJunctionsDeposit = GroundJunctionDeposit.READY;
@@ -392,15 +407,25 @@ public class StormDrive extends LinearOpMode {
                     outtake.OuttakeArmScore(); // so if you switch back from ground junction mode the arm will go out
                     if (GlobalTimer.milliseconds()-OuttakeTimer > 120){
                         outtake.BraceActive(); // this should happen at the same time as the outtake arm is going out so that its always parrallel to the ground
-                        if (GlobalTimer.milliseconds()-OuttakeTimer > 400){ // weird sequence
-                            outtake.IntakeArmReady();
+                    }
+
+                    }
+                if (!BeaconScore){
+                    if (GlobalTimer.milliseconds()-OuttakeTimer > 150){ // This is returning the intake
+                        outtake.IntakeArmReady();
+                        if (GlobalTimer.milliseconds()-OuttakeTimer > 150){
                             outtake.IntakeClawClose(); // so it doesn't hit the brushes
-                            if (GlobalTimer.milliseconds()-OuttakeTimer > 600){
+                            if (GlobalTimer.milliseconds()-OuttakeTimer > 500){
                                 outtake.IntakeLiftReady();
                             }
                         }
                     }
+                } else {
+                    IntakeConeLiftSequence();
                 }
+                break;
+            case PICKUP_CONE_AND_BEACON:
+
                 break;
             case DROP:
                 if (inputs.GroundJunctionsToggleMode){
@@ -428,7 +453,7 @@ public class StormDrive extends LinearOpMode {
                 intakeout = IntakeOut.RETURN_SET_TIMER;// sets the intake to return state - will return no matter its state
                 outtakeState = OuttakeState.RETURN;
                 OuttakeTimer = GlobalTimer.milliseconds(); // reset timer
-
+                BeaconScore = false;
                 // makes all the subsystems states go back to default
                 inputs.FlipConeHeightState = 0; // makes the flip cone state go back to zero so it goes to the first state in the modulo rather than a random stage of picking up cones
                 flipConeArmState = FlipConeArmState.OUTTAKE_FLIP_CONE_EXECUTE;
@@ -554,31 +579,36 @@ public class StormDrive extends LinearOpMode {
                 liftTargetPosition = LiftLowPosition;
                 break;
             case RETURN:
-                intakeClipHoldorNotHold();
-                if (outtake.IntakeSlidePos() < -100){ // if the intake slides aren't in yet
-                    outtake.IntakeSlideTo(0, outtake.IntakeSlidePos(),1); // should conflict as its going to ready too
-                    outtake.IntakeLiftReady();
-                    outtake.IntakeArmReady();
-                    outtake.IntakeClawClose();
-                    if (outtake.intakeSlideTargetReached()){
+                if (!BeaconScore){
+                    intakeClipHoldorNotHold();
+                    if (outtake.IntakeSlidePos() < -100){ // if the intake slides aren't in yet
+                        outtake.IntakeSlideTo(0, outtake.IntakeSlidePos(),1); // should conflict as its going to ready too
+                        outtake.IntakeLiftReady();
+                        outtake.IntakeArmReady();
+                        outtake.IntakeClawClose();
+                        if (outtake.intakeSlideTargetReached()){
+                            intakeout = IntakeOut.READY;
+                            inputs.IntakeToggleOutState = 0;
+                        } else {
+                            drivebase.intakeSpin(0.8); // spin in when its coming in
+                        }
+                    } else { // if they are in - technically this isnt needed
+                        outtake.IntakeLiftReady();
+                        outtake.IntakeArmReady();
+                        outtake.IntakeClawClose();
                         intakeout = IntakeOut.READY;
-                        inputs.IntakeToggleOutState = 0;
-                    } else {
-                        drivebase.intakeSpin(0.8); // spin in when its coming in
+                        inputs.IntakeToggleOutState = 0; // makes sure when it goes back to ready it won't autonomatically go back to previous state
                     }
-                } else { // if they are in - technically this isnt needed
-                    outtake.IntakeLiftReady();
-                    outtake.IntakeArmReady();
-                    outtake.IntakeClawClose();
+                } else {
                     intakeout = IntakeOut.READY;
-                    inputs.IntakeToggleOutState = 0; // makes sure when it goes back to ready it won't autonomatically go back to previous state
+                    inputs.IntakeToggleOutState = 0;
                 }
                 break;
         }
         inputs.IntakeToggleOut(gamepad1.left_bumper); // ONLY RUN THIS FUNCTION IN PLACES WHERE YOU WANT BUTTON SPAM, DO NOT RUN THIS FUNCTION OTHERWISE INTAKE THING WILL CHANGE STATES WITH BUTTON SPAMS
         // PUT TO IDLE WHEN SWITCHING STATES so the code runs once and this function doesn't re-run with a different intake toggleoutstate
         // put the inputs Toggle out state back to 0 in a function
-        if (inputs.IntakeToggleOutState == 0 && intakeout != IntakeOut.IDLE && intakeout != IntakeOut.RETURN&& intakeout != IntakeOut.RETURN_SET_TIMER){ // can break if you spam button fix
+        if (inputs.IntakeToggleOutState == 0 && intakeout != IntakeOut.IDLE && intakeout != IntakeOut.RETURN && intakeout != IntakeOut.RETURN_SET_TIMER){ // can break if you spam button fix
             intakeout = IntakeOut.READY; // make sure these inputs don't count when this is happening
         }
         else if (inputs.IntakeToggleOutState == 1 && intakeout != IntakeOut.IDLE && intakeout != IntakeOut.RETURN&& intakeout != IntakeOut.RETURN_SET_TIMER){
@@ -773,6 +803,48 @@ public class StormDrive extends LinearOpMode {
                 break;
         }
     }
+    public void IntakeConeLiftSequence(){
+        switch (intakeLiftSequence) {
+            case READY: // this case is basically when we want the command in toggle, otherwise we set it to idle case
+                // reseting happens here so no conflicting writes, should return when going height linkage
+                if (GlobalTimer.milliseconds()-OuttakeTimer > 150){ // This is returning the intake
+                    outtake.IntakeArmReady();
+                    if (GlobalTimer.milliseconds()-OuttakeTimer > 150){
+                        outtake.IntakeClawClose(); // so it doesn't hit the brushes
+                        if (GlobalTimer.milliseconds()-OuttakeTimer > 500){
+                            outtake.IntakeLiftReady();
+                            if ((gamepad2.right_bumper || gamepad1.right_bumper) && !gamepadRightTriggersDown()){ // if the triggers are used for the cone arm dont go into intake
+                                intakeLiftSequence = IntakeLiftSequence.INTAKE;
+                            }
+                        }
+                    }
+                }
+                break;
+            case INTAKE:
+                drivebase.intakeSpin(1); // spin the intake
+                outtake.IntakeClawOpen();
+                // no need to put ready stuff on because there will be nothing conflicting with it
+                if (outtake.intakeClawTouchPressed() || gamepad2.left_bumper){
+                    intakeLiftSequence = IntakeLiftSequence.LIFT_CONE;
+                    IntakeLeftSequenceTimer = GlobalTimer.milliseconds(); // reset timer
+                    outtake.IntakeClawClose();
+                }
+                break;
+            case LIFT_CONE:
+                outtake.IntakeClawClose();
+                if (GlobalTimer.milliseconds() - IntakeLeftSequenceTimer > 170){
+                    outtake.IntakeLiftTransfer();
+                    if (outtake.getIntakeLiftPos() > 254){ // this is actually the intake lift
+                        outtake.IntakeArmConeHoldForTransfer();
+                        BeaconScore = true;
+                        }
+                    }
+                break;
+            case IDLE:
+                // does nothing
+                break;
+        }
+    }
 
     public void liftPositionChange(){ // if gamepad inputs don't work in this class then pass them through as parameters in the function
         if (gamepad2.y || gamepad1.y){
@@ -782,11 +854,14 @@ public class StormDrive extends LinearOpMode {
             liftTargetPosition = LiftMidPosition;
             //GroundJunctions = false; // the way setting a variable works is that it won't change until you change it back to false
             // therefore, if we want to switch off ground junction mode we need to be able to switch it off true
-        } else if (gamepad2.a){
+        } else if (gamepad2.a || gamepad1.a || gamepad2.right_trigger > 0.2){ // if the trigger is pressed then select a height, so that the simaltaneous scoring can still commence
             liftTargetPosition = LiftLowPosition;
             //GroundJunctions = false;
         } else if (gamepad1.dpad_down || gamepad2.dpad_down){
            liftTargetPosition = LiftGroundPosition;
+        }
+        if (gamepad2.left_trigger > 0.2){
+            BeaconScore = true; // sets beacon score to true
         }
         inputs.groundJunctionsToggle(gamepad2.dpad_down || gamepad1.dpad_down);
     }
@@ -971,7 +1046,6 @@ public class StormDrive extends LinearOpMode {
             outtake.IntakeSlideTo(3, outtake.IntakeSlidePos(),1);
         }
     }
-
 
 }
 
