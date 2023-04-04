@@ -131,6 +131,7 @@ public class PIDmotortest extends LinearOpMode {
                 double headingPosition = poseEstimate.getHeading();
                 double correctedHeading = inputs.angleWrap(headingPosition); // do not do this twice
 
+                outtake.outtakeReads();
                 telemetry.addData("x", xPosition);
                 telemetry.addData("y", yPosition);
                 telemetry.addData("heading", headingPosition);
@@ -148,6 +149,11 @@ public class PIDmotortest extends LinearOpMode {
 
                 telemetry.addData("Distance from target",drivebase.getDistanceFromPosition(xTarget,yTarget,headingTarget,xPosition,yPosition,headingPosition));
                 telemetry.addData("Automatic driving toggle", inputs.DriveToPositionToggleMode);
+
+                telemetry.addData("liftPosition", outtake.liftPosition);
+                telemetry.addData("turretposition", outtake.turretPosition);
+                telemetry.addData("IntakeslidePosition", outtake.intakeSlidePosition);
+                telemetry.addData("liftError", outtake.liftError());
 
                 PreviousTime = CurrentTime;
                 LoopTimeTimer.reset();

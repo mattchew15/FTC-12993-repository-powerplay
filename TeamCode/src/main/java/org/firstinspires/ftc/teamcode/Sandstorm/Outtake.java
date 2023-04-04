@@ -41,18 +41,18 @@ public class Outtake {  // no constructor for this class
 
     //Servo Positions for outtake
     public static double OuttakeClawOpenPos = 0.57, OuttakeClawClosedPos = 0.45, OuttakeClawOpenHardPos = 0.7;
-    public static double OuttakeArmReadyPos = 0.958, OuttakeArmDepositPos = 0.34, OuttakeArmPickupPos = 0.34, OuttakeArmScorePos = 0.44, OuttakeArmScoreAutoPos = 0.49, OuttakeArmSlightlyTiltedUpPos = 0.5, OuttakeArmUprightPos = 0.75;
+    public static double OuttakeArmReadyPos = 0.97, OuttakeArmDepositPos = 0.34, OuttakeArmPickupPos = 0.34, OuttakeArmScorePos = 0.44, OuttakeArmScoreAutoPos = 0.49, OuttakeArmSlightlyTiltedUpPos = 0.5, OuttakeArmUprightPos = 0.75;
     public static double BraceReadyPos = 0.25, BraceActivePos = 0.71, BraceActivePosAuto = 0.64, BraceTuckedPos = 0, BraceFlipConePos = 0.6;
     public static double OuttakeSlideReadyPos = 0.03, OuttakeSlideScorePos = 0.03, OuttakeSlideScoreDropPos = 0.16, OuttakeSlideGroundPos =  0.305, OuttakeSlideConeFlipPos = 0.18, OuttakeSlideAboveConePos = 0.245;
 
     // Servo Position for ConeArm
-    public static double ConeArmReadyPos = 0.445, ConeArmAboveConePos = 0.83, ConeArmDownOnConePos = 0.87;
-    public static double IntakeClipHold = 0.515, IntakeClipOpen = 0.71;
+    public static double ConeArmReadyPos = 0.15, ConeArmAboveConePos = 0.53, ConeArmDownOnConePos = 0.575;
+    public static double IntakeClipHold = 0.712, IntakeClipOpen = 0.575;
 
     //Servo Positions for Intake
     public static double IntakeClawOpenPos = 0.675, IntakeClawClosedPos = 0.72, IntakeClawOpenHardPos = 0.57;
     public static double IntakeArmReadyPos = 0.908, IntakeArmTransferPos = 0.448, IntakeArmCOneHoldForTransferPos = 0.6;
-    public static double IntakeLiftReadyPos = 0.43, IntakeLiftTransferPos = 0.215;
+    public static double IntakeLiftReadyPos = 0.43, IntakeLiftTransferPos = 0.21;
 
     //Servo Positions for Stack Height
     public static double IntakeHeight5 = 0.145, IntakeHeight4 = 0.241, IntakeHeight3 = 0.32, IntakeHeight2 = 0.39, IntakeHeight1 = 0.435;
@@ -79,9 +79,11 @@ public class Outtake {  // no constructor for this class
     int liftTarget;
     int intakeSlideTarget;
 
-    double turretPosition = turretPos(); // these might not update with the correct class
-    double liftPosition = liftPos(); // if this breaks then maybe updates similar to the target?
-    double intakeSlidePosition = IntakeSlidePos(); // stops multiple reads in the one loop
+    public double turretPosition;
+    public double liftPosition;
+    public double intakeSlidePosition;
+    public double intakeArmPosition;
+    public double intakeLiftPosition;
 
 
     public void Outtake_init(HardwareMap hwMap) {
@@ -115,9 +117,16 @@ public class Outtake {  // no constructor for this class
         TurretMotor.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE); // this should make it so that we don't use a pid on the main loop and take up power
         IntakeClawTouch.setMode(DigitalChannel.Mode.INPUT);
 
-        turretPosition = 0; // these need to be initialized on setup or you will get null error
-        liftPosition = 0;
-        intakeSlidePosition = 0;
+        //turretPosition = 0; // these need to be initialized on setup or you will get null error
+        //liftPosition = 0;
+        //intakeSlidePosition = 0;
+    }
+    public void outtakeReads(){
+        turretPosition = turretPos();
+        liftPosition = liftPos();
+        intakeSlidePosition = IntakeSlidePos();
+        intakeLiftPosition = getIntakeLiftPos();
+        intakeArmPosition = getIntakeArmPos();
     }
 
     public void encodersReset(){
