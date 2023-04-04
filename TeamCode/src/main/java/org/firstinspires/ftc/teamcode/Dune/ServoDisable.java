@@ -1,9 +1,10 @@
 package org.firstinspires.ftc.teamcode.Dune;
 
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-
+@Disabled
 @TeleOp(name = "Servo Disable")
 public class ServoDisable extends LinearOpMode {
 

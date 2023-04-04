@@ -1,13 +1,14 @@
 package org.firstinspires.ftc.teamcode.Dune;
 
 // Old imports, some not needed
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 
-
+@Disabled
 @TeleOp(name = "motorEncoderTest")
 public class motorEncoderTest extends LinearOpMode {
 
