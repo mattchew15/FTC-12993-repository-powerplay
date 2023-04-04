@@ -164,6 +164,8 @@ public class PIDmotortest extends LinearOpMode {
     public void driveToPosition(double xTarget, double yTarget, double headingTarget, double xPosition, double yPosition, double correctedHeading, double maxTranslationalSpeed, double maxRotationalSpeed, double rawHeading){
         inputs.driveToPositionToggle(gamepad1.dpad_down);
 
+        // try a different angle wrap for holding drivebase position to the other side (offvset by 180 degrees if over a certain extent?) - if this works, integrate this into the one method to make autonomous easier
+
         if (inputs.DriveToPositionToggleMode){
             //drivebase.Drive(0,0,0); // this ensures there is no conflicting commands from the joysticks
             drivebase.DriveToPosition(xTarget,yTarget,headingTarget,xPosition,yPosition,correctedHeading, maxTranslationalSpeed,maxRotationalSpeed); // last values are translationalspeed, and rotational speed
