@@ -269,11 +269,16 @@ public class StormDrive extends LinearOpMode {
     public void outtakeSequence(){ // make sure to go back and add when each statemachine command should be run
         switch (outtakeState) {
             case READY:
+                BeaconScore = false; // this is fine because it never reaches the ready stage when scoring beacon
                 driveToPosition(xTarget,yTarget,headingTarget,xPosition,yPosition,correctedHeading, 1,1, headingPosition);
-                if (intakeout == IntakeOut.READY){ // this should reduce any conflicting commands with the intakeshoot out thing
+                if (intakeout == IntakeOut.READY && !BeaconScore){ // this should reduce any conflicting commands with the intakeshoot out thing
                     outtake.IntakeClawClose();
                     outtake.IntakeArmReady();
                     outtake.IntakeLiftReady();
+                } else if (BeaconScore){ // this technicaly isn't needed
+                    outtake.IntakeClawClose();
+                    outtake.IntakeArmConeHoldForTransfer();
+                    outtake.IntakeArmConeHoldForTransfer();
                 }
 
                 if (outtakePickupState == OuttakePickupState.READY){ // so it doesn't conflict when lift has to lift up to move counterspringing arm
@@ -421,8 +426,11 @@ public class StormDrive extends LinearOpMode {
                         }
                     }
                 } else {
-                    IntakeConeLiftSequence();
+                    IntakeConeLiftSequence();// this should be happening when the other side is still outtaking
                 }
+                if (gamepad2.left_trigger > 0.2){
+                    BeaconScore = true; // sets beacon score to true
+                } // doesn't set it to false until returning
                 break;
             case PICKUP_CONE_AND_BEACON:
 
@@ -453,7 +461,6 @@ public class StormDrive extends LinearOpMode {
                 intakeout = IntakeOut.RETURN_SET_TIMER;// sets the intake to return state - will return no matter its state
                 outtakeState = OuttakeState.RETURN;
                 OuttakeTimer = GlobalTimer.milliseconds(); // reset timer
-                BeaconScore = false;
                 // makes all the subsystems states go back to default
                 inputs.FlipConeHeightState = 0; // makes the flip cone state go back to zero so it goes to the first state in the modulo rather than a random stage of picking up cones
                 flipConeArmState = FlipConeArmState.OUTTAKE_FLIP_CONE_EXECUTE;
@@ -497,6 +504,7 @@ public class StormDrive extends LinearOpMode {
         if ((gamepad2.b && (outtakeState != OuttakeState.READY || intakeout != IntakeOut.READY || groundJunctionsDeposit != GroundJunctionDeposit.IDLE)) || (gamepad1.b && (outtakeState != OuttakeState.READY || intakeout != IntakeOut.READY || groundJunctionsDeposit != GroundJunctionDeposit.IDLE ))){ // so that it returns when intake is out
             outtakeState = OuttakeState.SUBSYSTEMS_SET_RETURN; // if b is pressed at any state then return to ready
             drivebase.intakeSpin(-1);
+            BeaconScore = false; // if return do not do the beacon thing
         }
         if (inputs.ManualResetToggleMode){
             outtakeState = OuttakeState.MANUAL_ENCODER_RESET;
@@ -599,9 +607,9 @@ public class StormDrive extends LinearOpMode {
                         intakeout = IntakeOut.READY;
                         inputs.IntakeToggleOutState = 0; // makes sure when it goes back to ready it won't autonomatically go back to previous state
                     }
-                } else {
-                    intakeout = IntakeOut.READY;
-                    inputs.IntakeToggleOutState = 0;
+                } else if (BeaconScore) { // doesn't reset the arm if its holding another cone
+                    outtakeState = OuttakeState.LIFT_CONE; // goes back to transfer
+                    OuttakeTimer = GlobalTimer.milliseconds() + 450; // offsets timer in the main state machine to give outtake time to return
                 }
                 break;
         }
@@ -813,7 +821,7 @@ public class StormDrive extends LinearOpMode {
                         outtake.IntakeClawClose(); // so it doesn't hit the brushes
                         if (GlobalTimer.milliseconds()-OuttakeTimer > 500){
                             outtake.IntakeLiftReady();
-                            if ((gamepad2.right_bumper || gamepad1.right_bumper) && !gamepadRightTriggersDown()){ // if the triggers are used for the cone arm dont go into intake
+                            if (gamepad2.right_bumper && !gamepadRightTriggersDown()){ // if the triggers are used for the cone arm dont go into intake
                                 intakeLiftSequence = IntakeLiftSequence.INTAKE;
                             }
                         }
@@ -859,9 +867,6 @@ public class StormDrive extends LinearOpMode {
             //GroundJunctions = false;
         } else if (gamepad1.dpad_down || gamepad2.dpad_down){
            liftTargetPosition = LiftGroundPosition;
-        }
-        if (gamepad2.left_trigger > 0.2){
-            BeaconScore = true; // sets beacon score to true
         }
         inputs.groundJunctionsToggle(gamepad2.dpad_down || gamepad1.dpad_down);
     }
