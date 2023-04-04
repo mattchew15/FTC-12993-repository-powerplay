@@ -72,8 +72,8 @@ public class PIDmotortest extends LinearOpMode {
 
             while (opModeIsActive()) {
                 CurrentTime = LoopTimeTimer.nanoseconds();
-                LoopTime = CurrentTime - PreviousTime;
-                telemetry.addData("Loop Time", LoopTime);
+                LoopTime = CurrentTime - PreviousTime; // previous loop time
+                telemetry.addData("Loop Time", LoopTime/LoopTimeTimer.nanoseconds()); // should return loop time for previous loop
                 // Main loop. Run class methods here to do stuff
                 if(gamepad1.a){
                     outtake.liftTo(-500, outtake.liftPosition, 1);
