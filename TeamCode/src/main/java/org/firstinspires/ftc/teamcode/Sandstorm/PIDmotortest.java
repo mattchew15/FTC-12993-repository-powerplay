@@ -118,11 +118,10 @@ public class PIDmotortest extends LinearOpMode {
                 telemetry.addData("turret pid output", outtake.returnPIDTurretOutput());
                 telemetry.addData("turret-target-reached?", outtake.turretTargetReached());
 
+                 */
                 telemetry.addData("IntakeArmPosition", outtake.getIntakeArmPos());
-                telemetry.addData("OuttakeArmPosition", outtake.getOuttakeArmPos());
                 telemetry.addData("IntakeLiftPosition", outtake.getIntakeLiftPos());
 
-                 */
                 location.update();
                 Pose2d poseEstimate = location.getPoseEstimate();
 

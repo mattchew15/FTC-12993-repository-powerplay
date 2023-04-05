@@ -218,6 +218,7 @@ public class TEN_CLOSE_HIGH extends LinearOpMode {
             sleep(20); // idk why
             outtake.OuttakeClawClose();
             outtake.IntakeClipOpen();
+            outtake.OuttakeArmReady();
         }
 
 

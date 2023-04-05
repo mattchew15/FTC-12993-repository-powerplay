@@ -36,6 +36,10 @@ public class Inputs {
     public boolean DriveToPositionToggleMode;
     public boolean ToggledDriveToPosition;
 
+    public boolean CycleUp;
+    public boolean CycleDown;
+    public int CycleState;
+
     public void resetMatchTimer(){matchTimer.reset();}
 
     public void inputsSetup(){ // must run this on init in dune drive
@@ -61,6 +65,37 @@ public class Inputs {
 
         ToggledDriveToPosition = false;
         DriveToPositionToggleMode = false;
+
+        CycleDown = false;
+        CycleUp = false;
+        CycleState = 0;
+    }
+
+    public void cycleToggleUp(boolean cyclebtnup, boolean cyclebtndown){
+        if (cyclebtnup) {
+            if (!CycleUp) {
+                CycleUp = true;
+                CycleState += 1;
+            }
+        }
+        else {
+            CycleUp = false;
+        }
+        if (cyclebtnup) {
+            if (!CycleDown) {
+                CycleDown = true;
+                CycleState += 1;
+            }
+        }
+        else {
+            CycleDown = false;
+        }
+        if (CycleState < 0){
+            CycleState = 0;
+        }
+        if (CycleState > 5){
+            CycleState = 5;
+        }
     }
 
     public void gamepadRumbleTimer (){
@@ -125,18 +160,6 @@ public class Inputs {
             ToggledDriveToPosition = false;
         }
     }
-
-    public void SlidesToggleUp(boolean cyclebtnup){
-        if (cyclebtnup) {
-            if (!IntakeToggleOut) {
-                IntakeToggleOut = true;
-                IntakeToggleOutState  = (IntakeToggleOutState  - 1) % 3;
-            }
-        }
-        else {
-            IntakeToggleOut = false;
-        }
-    }
     public void IntakeToggleOut (boolean intaketogglebtn){
         if (intaketogglebtn) {
             if (!IntakeToggleOut) {
@@ -148,6 +171,7 @@ public class Inputs {
             IntakeToggleOut = false;
         }
     }
+
     public void coneFlipOuttakeDownToggle(boolean togglebtn, boolean heightupbtn) {
         if (togglebtn) {
             if (!ToggledFlipConeHeight) {

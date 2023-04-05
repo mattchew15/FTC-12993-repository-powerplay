@@ -244,6 +244,7 @@ public class TEN_FAR_HIGH_ACTUAL extends LinearOpMode {
             sleep(20); // idk why
             outtake.OuttakeClawClose();
             outtake.IntakeClipOpen();
+            outtake.OuttakeArmReady();
         }
 
 

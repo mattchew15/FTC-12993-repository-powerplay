@@ -55,8 +55,8 @@ public class StormDrive extends LinearOpMode {
     final int IntakeSlideOutTicks = -700;
 
     final int LiftHighPosition = -752;
-    final int LiftMidPosition = -414;
-    final int LiftLowPosition = -40;
+    final int LiftMidPosition = -383;
+    final int LiftLowPosition = -27;
     final int LiftGroundPosition = -30;
 
     final int LiftUpperLimit = -810;
@@ -244,6 +244,7 @@ public class StormDrive extends LinearOpMode {
                 //drivebase.PowerToggle(gamepad1.left_stick_button);
                 //inputs.gamepadRumbleTimer();
                 telemetry.addData("LiftMotorPosition", outtake.liftPosition);
+                telemetry.addData("LiftTargetPosition", liftTargetPosition);
                 telemetry.addData("turretPosition", outtake.tickstoDegrees((int)Math.round(outtake.turretPosition))); // might be in the wrong degrees/other
                 inputs.manualResetToggleMode(gamepad2.left_stick_button);
                 telemetry.addData("intakeSlideMotor", outtake.intakeSlidePosition);
@@ -260,7 +261,7 @@ public class StormDrive extends LinearOpMode {
                 //telemetry.addData("intakeTouch", outtake.intakeClawTouchPressed());
                 //telemetry.addData("gamepad2RightStickYPastDeadZone", gamepad2RightStickYPastDeadZone());
                 //telemetry.addData("intake lift encoder", outtake.intakeLiftPosition);
-                //telemetry.addData("intake arm encoder", outtake.intakeArmPosition);
+                telemetry.addData("intake arm encoder", outtake.intakeArmPosition);
                 //telemetry.addData("intake slide motor battery draw", outtake.getIntakeSlideVoltage());
                 //telemetry.addData("lift motor battery draw", outtake.getLiftVoltage());
 
@@ -284,7 +285,7 @@ public class StormDrive extends LinearOpMode {
                 }
 
                 if (outtakePickupState == OuttakePickupState.READY){ // so it doesn't conflict when lift has to lift up to move counterspringing arm
-                    outtake.liftTo(0, outtake.liftPosition,1); // this might reduce the jitters at the start from kd - I Have no clue why
+                    outtake.liftToInternalPID(2,1); // this might reduce the jitters at the start from kd - I Have no clue why
                     liftTargetPosition = 0; // if lift target position is zero, then the transfer won't happen
                     inputs.GroundJunctionsToggleMode = false; // same with the ground junctions
                 }
@@ -335,20 +336,21 @@ public class StormDrive extends LinearOpMode {
             case LIFT_CONE:
                 outtake.IntakeClawClose();
                 drivebase.intakeSpin(0);
-                outtake.liftTo(0, outtake.liftPosition,1);
+                outtake.liftTo(BeaconScore? 6:3, outtake.liftPosition,1);
                 outtake.turretSpinInternalPID(0,1);
-                if (BeaconScore){
-                    BeaconScore = false;
-                }
                 if (GlobalTimer.milliseconds() - OuttakeTimer > 170){
                     outtake.IntakeLiftTransfer();
                     if (outtake.intakeLiftPosition > 254){ // this is actually the intake lift
                         outtake.IntakeArmTransfer();
-                        if ((outtake.intakeArmPosition > 192)){ // put the or statement here for the arm being in the right position
-                            if (outtake.liftTargetReached()){ // make sure height is selected before transferring - add intkae slides t hing
+                        if ((BeaconScore? GlobalTimer.milliseconds() - OuttakeTimer > 700 :outtake.intakeArmPosition > 196)){ // put the or statement here for the arm being in the right position
+                            if (GlobalTimer.milliseconds() - OuttakeTimer > 170){ // make sure height is selected before transferring - add intkae slides t hing
                                 outtake.OuttakeClawClose();
+                                outtake.BraceActive();
                                 outtakeState = OuttakeState.CLAW_GRIP_TRANSFER_START;
                                 OuttakeTimer = GlobalTimer.milliseconds(); // basically grabs in this state
+                                if (BeaconScore){
+                                    BeaconScore = false;
+                                }
                             }
                         }
                     }
@@ -357,7 +359,7 @@ public class StormDrive extends LinearOpMode {
                 break;
             case CLAW_GRIP_TRANSFER_START: // fix so if i don't go
                 intakeClipHoldorNotHold();
-                if ((outtake.intakeArmPosition > 192) && outtake.liftTargetReached() && GlobalTimer.milliseconds() - OuttakeTimer > 80){  // this is actually used as if you are transferring from intake out pickup there is a inbuilt delay - this is an old comment for when there was global timer = 0 - check if intake slidse are all the way in
+                if ((outtake.intakeArmPosition > 196) && outtake.liftTargetReached() && GlobalTimer.milliseconds() - OuttakeTimer > 80){  // this is actually used as if you are transferring from intake out pickup there is a inbuilt delay - this is an old comment for when there was global timer = 0 - check if intake slidse are all the way in
                     outtake.OuttakeClawClose();
                     outtakeState = OuttakeState.CLAW_GRIP_TRANSFER_END;
                     OuttakeTimer = GlobalTimer.milliseconds(); // reset timer
@@ -372,8 +374,9 @@ public class StormDrive extends LinearOpMode {
                 if (GlobalTimer.milliseconds() - OuttakeTimer > 200 || outtake.getIntakeClawPosition() == outtake.IntakeClawOpenHardPos){ // this is so that if the claw has already released don't waste time waiting
                     outtake.IntakeClawOpenHard();
                     if ((GlobalTimer.milliseconds() - OuttakeTimer > 300 || outtake.getIntakeClawPosition() == outtake.IntakeClawOpenHardPos) && ((liftTargetPosition != 0) || inputs.GroundJunctionsToggleMode)){ // make sure height is selected before transferring
-                        outtake.liftTo(-50, outtake.liftPosition, 1);
+                        outtake.liftTo(-10, outtake.liftPosition, 1);
                         outtake.OuttakeArmScore();
+                        outtake.BraceActive();
                         outtakeState = OuttakeState.HEIGHT_CHANGE_OUTTAKE_DEPOSIT;
                         intakeLiftSequence = IntakeLiftSequence.READY;
                         OuttakeTimer = GlobalTimer.milliseconds(); // reset timer
@@ -384,13 +387,16 @@ public class StormDrive extends LinearOpMode {
                 }
                 break;
             case HEIGHT_CHANGE_OUTTAKE_DEPOSIT:
+                outtake.turretSpin(0,outtake.turretPosition,1);
                 if (inputs.GroundJunctionsToggleMode){ // this runs the different sequence for ground junctions
                     GroundJunctions();
                     if (groundJunctionsDeposit == GroundJunctionDeposit.IDLE){ // if the sequence to drop to ground has finished
-                        if (!gamepad2RightStickYPastDeadZone() && !BeaconScore){
+                        if (!gamepad2RightStickYPastDeadZone()){
                             outtake.liftTo(liftTargetPosition, outtake.liftPosition,1);
-                            SlidesUpToggle(gamepad2.right_bumper);
-                            SlidesDownToggle(gamepad2.left_bumper);
+                            if (!BeaconScore){
+                                SlidesUpToggle(gamepad2.right_bumper);
+                                SlidesDownToggle(gamepad2.left_bumper);
+                            }
                         } else {
                             liftFineAdjust();
                         }
@@ -400,11 +406,12 @@ public class StormDrive extends LinearOpMode {
                     }
                 } else {
                     groundJunctionsDeposit = GroundJunctionDeposit.READY;
-                    outtake.turretSpin(turretTargetPosition,outtake.turretPosition,1);
-                    if (!gamepad2RightStickYPastDeadZone() && !BeaconScore){
+                    if (!gamepad2RightStickYPastDeadZone()){
                         outtake.liftTo(liftTargetPosition, outtake.liftPosition,1);
-                        SlidesUpToggle(gamepad2.right_bumper);
-                        SlidesDownToggle(gamepad2.left_bumper);
+                        if (!BeaconScore){
+                            SlidesUpToggle(gamepad2.right_bumper);
+                            SlidesDownToggle(gamepad2.left_bumper);
+                        }
                     } else {
                         liftFineAdjust();
                     }
@@ -415,7 +422,7 @@ public class StormDrive extends LinearOpMode {
                         OuttakeTimer = GlobalTimer.milliseconds(); // reset timer
                     }
                     outtake.OuttakeArmScore(); // so if you switch back from ground junction mode the arm will go out
-                    if (GlobalTimer.milliseconds()-OuttakeTimer > 120){
+                    if (GlobalTimer.milliseconds()-OuttakeTimer > 0){
                         outtake.BraceActive(); // this should happen at the same time as the outtake arm is going out so that its always parrallel to the ground
                     }
 
@@ -477,7 +484,7 @@ public class StormDrive extends LinearOpMode {
                 break;
             case RETURN:
                 // make sure to go to arm reset state for all subsystems
-                outtake.liftTo(0, outtake.liftPosition,1);
+                outtake.liftTo(4, outtake.liftPosition,1);
                 outtake.turretSpinInternalPID(0,1); // this has to be internal because we don't hold pos in main thing
                 drivebase.intakeSpin(-1);
                 IntakeShootOut(); // runs the return case for this
@@ -573,7 +580,7 @@ public class StormDrive extends LinearOpMode {
                     if (GlobalTimer.milliseconds() - IntakeOutTimer > 260){
                         outtake.IntakeArmTransfer();
                     }
-                    if (outtake.intakeSlidePosition > -5 && outtake.intakeArmPosition > 192) {
+                    if (outtake.intakeSlidePosition > -5 && outtake.intakeArmPosition > 196) {
                         IntakeReady = true;
                         if (IntakeReady){ // if the slides are all the way in
                             outtakeState = OuttakeState.CLAW_GRIP_TRANSFER_START; // main state machine takes it from here
@@ -597,7 +604,6 @@ public class StormDrive extends LinearOpMode {
                 break;
             case RETURN:
                 if (!BeaconScore){
-                    intakeClipHoldorNotHold();
                     if (outtake.intakeSlidePosition < -100){ // if the intake slides aren't in yet
                         outtake.IntakeSlideTo(0, outtake.intakeSlidePosition,1); // should conflict as its going to ready too
                         outtake.IntakeLiftReady();
@@ -618,7 +624,7 @@ public class StormDrive extends LinearOpMode {
                     }
                 } else if (BeaconScore) { // doesn't reset the arm if its holding another cone
                     outtakeState = OuttakeState.LIFT_CONE; // goes back to transfer
-                    OuttakeTimer = GlobalTimer.milliseconds() + 300; // offsets timer in the main state machine to give outtake time to return
+                    OuttakeTimer = GlobalTimer.milliseconds() + 500; // offsets timer in the main state machine to give outtake time to return
                 }
                 break;
         }
@@ -855,6 +861,7 @@ public class StormDrive extends LinearOpMode {
                     if (outtake.intakeLiftPosition > 254){ // this is actually the intake lift
                         outtake.IntakeArmConeHoldForTransfer();
                         BeaconScore = true;
+
                         }
                     }
                 break;
@@ -1053,12 +1060,28 @@ public class StormDrive extends LinearOpMode {
     }
 
     public void intakeClipHoldorNotHold(){
-        if (outtake.intakeSlidePosition > -2) {
+        if (outtake.intakeSlidePosition > -5) {
             outtake.IntakeClipHold(); // turn the intake slide pid running to pos off to save battery draw
             outtake.intakeSlideMotorRawControl(0);
         } else {
             outtake.IntakeClipOpen(); // this might break something when as the intake slides won't go in, but stops jittering
-            outtake.IntakeSlideTo(3, outtake.intakeSlidePosition,1);
+            outtake.IntakeSlideTo(4, outtake.intakeSlidePosition,1);
+        }
+    }
+    public void IntakeHeightChange(){
+        inputs.cycleToggleUp(gamepad2.right_bumper, gamepad2.left_bumper);
+        if (inputs.CycleState == 0){
+            outtake.IntakeLift5();
+        } else if (inputs.CycleState == 1){
+            outtake.IntakeLift4();
+        } else if (inputs.CycleState == 2){
+            outtake.IntakeLift3();
+        } else if (inputs.CycleState == 3){
+            outtake.IntakeLift2();
+        } else if (inputs.CycleState == 4){
+            outtake.IntakeLift1();
+        } else if (inputs.CycleState == 5){
+            outtake.IntakeLift5();
         }
     }
 
