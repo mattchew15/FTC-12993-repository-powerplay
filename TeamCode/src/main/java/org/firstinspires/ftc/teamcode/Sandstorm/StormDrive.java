@@ -52,7 +52,7 @@ public class StormDrive extends LinearOpMode {
     boolean four = false;
 
     // uses the ElapsedTime class from the SDK to create variable GlobalTimer
-    final int IntakeSlideOutTicks = -750; // make this max pull out distance
+    final int IntakeSlideOutTicks = -744; // make this max pull out distance
 
     final int LiftHighPosition = -752;
     final int LiftMidPosition = -383;
@@ -264,7 +264,8 @@ public class StormDrive extends LinearOpMode {
                 telemetry.addData("intake arm encoder", outtake.intakeArmPosition);
                 //telemetry.addData("intake slide motor battery draw", outtake.getIntakeSlideVoltage());
                 //telemetry.addData("lift motor battery draw", outtake.getLiftVoltage());
-
+                telemetry.addData("cycle state for intake lift", inputs.CycleState);
+                telemetry.addData("IntakeOut", IntakeReady);
                 telemetry.update();
             }
         }
@@ -303,13 +304,13 @@ public class StormDrive extends LinearOpMode {
                     }
                 }
 
-                if (gamepad1.b || gamepad2.b){
+                if ((gamepad1.b || gamepad2.b)){ // so that this doesn't do anything when intake is out, fine adjust
                     drivebase.intakeSpin(-0.8);
                 } else {
                     drivebase.intakeSpin(0);
                 }
 
-                if ((gamepad2.right_bumper || gamepad1.right_bumper) && !gamepadRightTriggersDown()){ // if the triggers are used for the cone arm dont go into intake
+                if ((gamepad2.right_bumper || gamepad1.right_bumper) && !gamepadRightTriggersDown() && IntakeReady){ // if the triggers are used for the cone arm dont go into intake
                     if (outtakePickupState == OuttakePickupState.READY){
                         outtakeState = OuttakeState.INTAKE;
                     }
@@ -520,6 +521,7 @@ public class StormDrive extends LinearOpMode {
             drivebase.intakeSpin(-1);
             BeaconScore = false; // if return do not do the beacon thing'
             inputs.CycleState = 0;
+            turretTargetPosition = 0;
         }
         if (inputs.ManualResetToggleMode){
             outtakeState = OuttakeState.MANUAL_ENCODER_RESET;
@@ -542,6 +544,7 @@ public class StormDrive extends LinearOpMode {
                 if (gamepad1.left_bumper || inputs.IntakeToggleOutState == 1) { // make sure this function isn't called in a case that it start unintentially
                     intakeout = IntakeOut.INTAKE_SHOOT_OUT; // this will start the timer and the inputs function will also go to 2 at the same time
                     IntakeOutTimer = GlobalTimer.milliseconds();
+                    IntakeReady = false;
                 }
                 break;
             case INTAKE_SHOOT_OUT:
@@ -566,7 +569,7 @@ public class StormDrive extends LinearOpMode {
                 if (GlobalTimer.milliseconds() - IntakeOutTimer > 200){ // wait for the claw to grab
                     outtake.IntakeLiftTransfer();
                     if (inputs.CycleState == 0){ // if the claw is not picking up from the stack
-                        intakeClipHoldorNotHold(10); // hard here
+                        intakeClipHoldorNotHold(6); // hard here
                         if (GlobalTimer.milliseconds() - IntakeOutTimer > 260){
                             outtake.IntakeArmTransfer();
                         }
@@ -581,8 +584,8 @@ public class StormDrive extends LinearOpMode {
                         }
                     } else { // if the thing is picking up from the stack
                         outtake.IntakeArmTransfer();
-                        if (outtake.intakeSlidePosition > IntakeSlideOutTicks + GlobalsCloseHighAuto.IntakeSlideBackFromStack - 10){ // if this is reached
-                            intakeClipHoldorNotHold(10); // hard here
+                        if (GlobalTimer.milliseconds() - IntakeOutTimer > 500){ // if this is reached
+                            intakeClipHoldorNotHold(6); // hard here
                             if (outtake.intakeSlidePosition > -4 && outtake.intakeArmPosition > 196) {
                                 IntakeReady = true;
                                 if (IntakeReady){ // if the slides are all the way in

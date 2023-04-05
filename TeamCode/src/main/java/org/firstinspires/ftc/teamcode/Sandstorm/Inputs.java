@@ -81,10 +81,10 @@ public class Inputs {
         else {
             CycleUp = false;
         }
-        if (cyclebtnup) {
+        if (cyclebtndown) {
             if (!CycleDown) {
                 CycleDown = true;
-                CycleState += 1;
+                CycleState -= 1;
             }
         }
         else {
