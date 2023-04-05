@@ -331,19 +331,19 @@ public class StormDrive extends LinearOpMode {
                     OuttakeTimer = GlobalTimer.milliseconds(); // reset timer
                     outtake.IntakeClawClose();
                 }
-                intakeClipHoldorNotHold();
+                intakeClipHoldorNotHold(4);
                 break;
             case LIFT_CONE:
                 outtake.IntakeClawClose();
                 drivebase.intakeSpin(0);
                 outtake.liftTo(BeaconScore? 6:3, outtake.liftPosition,1);
                 outtake.turretSpinInternalPID(0,1);
-                if (GlobalTimer.milliseconds() - OuttakeTimer > 170){
+                if (GlobalTimer.milliseconds() - OuttakeTimer > 105){ // old time was 170
                     outtake.IntakeLiftTransfer();
                     if (outtake.intakeLiftPosition > 254){ // this is actually the intake lift
                         outtake.IntakeArmTransfer();
                         if ((BeaconScore? GlobalTimer.milliseconds() - OuttakeTimer > 700 :outtake.intakeArmPosition > 196)){ // put the or statement here for the arm being in the right position
-                            if (GlobalTimer.milliseconds() - OuttakeTimer > 170){ // make sure height is selected before transferring - add intkae slides t hing
+                            if (GlobalTimer.milliseconds() - OuttakeTimer > 0){ //used to be lift target
                                 outtake.OuttakeClawClose();
                                 outtake.BraceActive();
                                 outtakeState = OuttakeState.CLAW_GRIP_TRANSFER_START;
@@ -355,10 +355,10 @@ public class StormDrive extends LinearOpMode {
                         }
                     }
                 }
-                intakeClipHoldorNotHold();
+                intakeClipHoldorNotHold(4);
                 break;
             case CLAW_GRIP_TRANSFER_START: // fix so if i don't go
-                intakeClipHoldorNotHold();
+                intakeClipHoldorNotHold(4);
                 if ((outtake.intakeArmPosition > 196) && outtake.liftTargetReached() && GlobalTimer.milliseconds() - OuttakeTimer > 80){  // this is actually used as if you are transferring from intake out pickup there is a inbuilt delay - this is an old comment for when there was global timer = 0 - check if intake slidse are all the way in
                     outtake.OuttakeClawClose();
                     outtakeState = OuttakeState.CLAW_GRIP_TRANSFER_END;
@@ -370,10 +370,10 @@ public class StormDrive extends LinearOpMode {
                 }
                 break;
             case CLAW_GRIP_TRANSFER_END: // fix so if i don't go
-                intakeClipHoldorNotHold();
-                if (GlobalTimer.milliseconds() - OuttakeTimer > 200 || outtake.getIntakeClawPosition() == outtake.IntakeClawOpenHardPos){ // this is so that if the claw has already released don't waste time waiting
+                intakeClipHoldorNotHold(4); // old timer values - 200 ms and 300 ms
+                if (GlobalTimer.milliseconds() - OuttakeTimer > 90 || outtake.getIntakeClawPosition() == outtake.IntakeClawOpenHardPos){ // this is so that if the claw has already released don't waste time waiting
                     outtake.IntakeClawOpenHard();
-                    if ((GlobalTimer.milliseconds() - OuttakeTimer > 300 || outtake.getIntakeClawPosition() == outtake.IntakeClawOpenHardPos) && ((liftTargetPosition != 0) || inputs.GroundJunctionsToggleMode)){ // make sure height is selected before transferring
+                    if ((GlobalTimer.milliseconds() - OuttakeTimer > 155 || outtake.getIntakeClawPosition() == outtake.IntakeClawOpenHardPos) && ((liftTargetPosition != 0) || inputs.GroundJunctionsToggleMode)){ // make sure height is selected before transferring
                         outtake.liftTo(-10, outtake.liftPosition, 1);
                         outtake.OuttakeArmScore();
                         outtake.BraceActive();
@@ -425,8 +425,7 @@ public class StormDrive extends LinearOpMode {
                     if (GlobalTimer.milliseconds()-OuttakeTimer > 0){
                         outtake.BraceActive(); // this should happen at the same time as the outtake arm is going out so that its always parrallel to the ground
                     }
-
-                    }
+                }
                 if (!BeaconScore){
                     if (GlobalTimer.milliseconds()-OuttakeTimer > 150){ // This is returning the intake
                         outtake.IntakeArmReady();
@@ -531,7 +530,7 @@ public class StormDrive extends LinearOpMode {
         switch (intakeout) {
             case READY:
                 //drivebase.intakeSpin(0);
-                intakeClipHoldorNotHold();
+                intakeClipHoldorNotHold(3);
                 //outtake.IntakeSlideTo(0, outtake.liftPosition, 1);
                 if (!BeaconScore){
                     outtake.IntakeArmReady();
@@ -543,18 +542,6 @@ public class StormDrive extends LinearOpMode {
                     IntakeOutTimer = GlobalTimer.milliseconds();
                 }
                 break;
-
-                /*
-            case INTAKE_INITIAL_LIFT:
-                outtake.IntakeLiftTransfer();
-                if (GlobalTimer.milliseconds() - IntakeOutTimer > 200) {
-                    if (inputs.IntakeToggleOutState == 2){
-                        intakeout = IntakeOut.INTAKE_SHOOT_OUT;
-                    }
-                }
-                break;
-
-                 */
             case INTAKE_SHOOT_OUT:
                 outtake.IntakeClipOpen(); // time for intake clip to open
                 if (GlobalTimer.milliseconds() - IntakeOutTimer > 150){
@@ -576,17 +563,16 @@ public class StormDrive extends LinearOpMode {
                 outtake.IntakeClawClose();
                 if (GlobalTimer.milliseconds() - IntakeOutTimer > 200){ // wait for the claw to grab
                     outtake.IntakeLiftTransfer();
-                    intakeClipHoldorNotHold();
+                    intakeClipHoldorNotHold(10); // hard here
                     if (GlobalTimer.milliseconds() - IntakeOutTimer > 260){
                         outtake.IntakeArmTransfer();
                     }
-                    if (outtake.intakeSlidePosition > -5 && outtake.intakeArmPosition > 196) {
+                    if (outtake.intakeSlidePosition > -4 && outtake.intakeArmPosition > 196) {
                         IntakeReady = true;
                         if (IntakeReady){ // if the slides are all the way in
                             outtakeState = OuttakeState.CLAW_GRIP_TRANSFER_START; // main state machine takes it from here
-                            OuttakeTimer = GlobalTimer.milliseconds() + 200; //offsets the timer
+                            OuttakeTimer = GlobalTimer.milliseconds() + 200; // this can be optimized
                             outtake.IntakeArmTransfer();
-                            //OuttakeTimer = GlobalTimer.milliseconds() - 500; // basically grabs in this state
                             intakeout = IntakeOut.IDLE; // main state machine must set everything to ready in a function
                         }
                     }
@@ -1059,13 +1045,13 @@ public class StormDrive extends LinearOpMode {
         }
     }
 
-    public void intakeClipHoldorNotHold(){
+    public void intakeClipHoldorNotHold(int slideToPosition){
         if (outtake.intakeSlidePosition > -5) {
             outtake.IntakeClipHold(); // turn the intake slide pid running to pos off to save battery draw
             outtake.intakeSlideMotorRawControl(0);
         } else {
             outtake.IntakeClipOpen(); // this might break something when as the intake slides won't go in, but stops jittering
-            outtake.IntakeSlideTo(4, outtake.intakeSlidePosition,1);
+            outtake.IntakeSlideTo(slideToPosition, outtake.intakeSlidePosition,1);
         }
     }
     public void IntakeHeightChange(){
