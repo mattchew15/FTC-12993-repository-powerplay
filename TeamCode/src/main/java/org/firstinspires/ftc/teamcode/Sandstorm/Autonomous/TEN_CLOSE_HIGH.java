@@ -22,7 +22,6 @@ import java.util.ArrayList;
 
 @Autonomous(name = "1+10 Close-High Auto", group = "Autonomous")
 public class TEN_CLOSE_HIGH extends LinearOpMode {
-
     GlobalsCloseHighAuto globalsCloseHighAuto = new GlobalsCloseHighAuto();
     int SideMultiplier = -1; // this multiplies everything that changes with the right side
     double AngleOffset = Math.toRadians(180); // this adds to every angle
@@ -103,7 +102,7 @@ public class TEN_CLOSE_HIGH extends LinearOpMode {
     }
     // Define our start pose
 
-    Pose2d startPose = new Pose2d(globalsCloseHighAuto.startPoseX * SideMultiplier, globalsCloseHighAuto.startPoseY, globalsCloseHighAuto.startPoseAngle + AngleOffset);
+    Pose2d startPose = new Pose2d(GlobalsCloseHighAuto.startPoseX * SideMultiplier, GlobalsCloseHighAuto.startPoseY, GlobalsCloseHighAuto.startPoseAngle + AngleOffset);
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -141,23 +140,23 @@ public class TEN_CLOSE_HIGH extends LinearOpMode {
         // trajectories that aren't changing should all be here
 
         Trajectory PreloadDrive = drive.trajectoryBuilder(startPose)
-                .lineToLinearHeading(new Pose2d(globalsCloseHighAuto.outconestackX, globalsCloseHighAuto.outconestackY, globalsCloseHighAuto.outconeStackRotation * SideMultiplier + AngleOffset))
+                .lineToLinearHeading(new Pose2d(GlobalsCloseHighAuto.outconestackX, GlobalsCloseHighAuto.outconestackY, GlobalsCloseHighAuto.outconeStackRotation * SideMultiplier + AngleOffset))
                 .build();
 
         Trajectory DriveOtherSide = drive.trajectoryBuilder(PreloadDrive.end())
-                .lineToLinearHeading(new Pose2d(globalsCloseHighAuto.outconestackX, globalsCloseHighAuto.outconestackY, globalsCloseHighAuto.outconeStackRotation * SideMultiplier + AngleOffset))
+                .lineToLinearHeading(new Pose2d(GlobalsCloseHighAuto.outconestackX, GlobalsCloseHighAuto.outconestackY, GlobalsCloseHighAuto.outconeStackRotation * SideMultiplier + AngleOffset))
                 .build();
 
         Trajectory ParkRight = drive.trajectoryBuilder(DriveOtherSide.end())
-                .lineTo(new Vector2d(SideMultiplier == 1 ? globalsCloseHighAuto.parkRight: globalsCloseHighAuto.parkLeft * SideMultiplier, globalsCloseHighAuto.outconestackY))
+                .lineTo(new Vector2d(SideMultiplier == 1 ? GlobalsCloseHighAuto.parkRight: GlobalsCloseHighAuto.parkLeft * SideMultiplier, GlobalsCloseHighAuto.outconestackY))
                 .build();
 
         Trajectory ParkLeft = drive.trajectoryBuilder(DriveOtherSide.end())
-                .lineTo(new Vector2d(SideMultiplier == 1 ? globalsCloseHighAuto.parkLeft: globalsCloseHighAuto.parkRight * SideMultiplier, globalsCloseHighAuto.outconestackY))
+                .lineTo(new Vector2d(SideMultiplier == 1 ? GlobalsCloseHighAuto.parkLeft: GlobalsCloseHighAuto.parkRight * SideMultiplier, GlobalsCloseHighAuto.outconestackY))
                 .build();
 
         Trajectory ParkCentre = drive.trajectoryBuilder(DriveOtherSide.end())
-                .lineTo(new Vector2d(globalsCloseHighAuto.parkCentre, globalsCloseHighAuto.outconestackY))
+                .lineTo(new Vector2d(GlobalsCloseHighAuto.parkCentre, GlobalsCloseHighAuto.outconestackY))
                 .build();
 
         while (!isStarted()) {
@@ -320,17 +319,17 @@ public class TEN_CLOSE_HIGH extends LinearOpMode {
                                     holdTurretPosition();
                                 }
                             } else {
-                                outtake.liftTo(globalsCloseHighAuto.LiftHighPosition, outtake.liftPosition, 1);
+                                outtake.liftTo(GlobalsCloseHighAuto.LiftHighPosition, outtake.liftPosition, 1);
                                 holdTurretPosition();
                             }
                         } else {
                             outtake.OuttakeSlideScoreDrop(); // drops down on pole a bit
                             outtake.OuttakeArmDeposit();
-                            outtake.liftTo(globalsCloseHighAuto.LiftHighPosition, outtake.liftPosition, 1);
+                            outtake.liftTo(GlobalsCloseHighAuto.LiftHighPosition, outtake.liftPosition, 1);
                             holdTurretPosition();
                         }
                     } else {
-                        outtake.liftTo(globalsCloseHighAuto.LiftHighPosition, outtake.liftPosition, 1);
+                        outtake.liftTo(GlobalsCloseHighAuto.LiftHighPosition, outtake.liftPosition, 1);
                         holdTurretPosition();
                     }
 
@@ -339,10 +338,10 @@ public class TEN_CLOSE_HIGH extends LinearOpMode {
                             autoTimer = GlobalTimer.milliseconds(); // reset timer not rly needed here
                             currentState = AutoState.AFTER_GRAB_OFF_STACK;
                         } else {
-                            outtake.IntakeSlideTo(globalsCloseHighAuto.IntakeSlideOutTicks, outtake.intakeSlidePosition, 0.5); // slower
+                            outtake.IntakeSlideTo(GlobalsCloseHighAuto.IntakeSlideOutTicks, outtake.intakeSlidePosition, 0.5); // slower
                         }
                     } else {
-                        outtake.IntakeSlideTo(globalsCloseHighAuto.IntakeSlideNotQuiteOutTicks, outtake.intakeSlidePosition, 0.8); // slower
+                        outtake.IntakeSlideTo(GlobalsCloseHighAuto.IntakeSlideNotQuiteOutTicks, outtake.intakeSlidePosition, 0.8); // slower
                     }
 
 
@@ -374,14 +373,14 @@ public class TEN_CLOSE_HIGH extends LinearOpMode {
                                         }
                                     }
                                 } else {
-                                    outtake.IntakeSlideTo(globalsCloseHighAuto.IntakeSlideBackFromStack, outtake.intakeSlidePosition, 0.6); // this pulls slides in while doing stuff
+                                    outtake.IntakeSlideTo(GlobalsCloseHighAuto.IntakeSlideBackFromStack, outtake.intakeSlidePosition, 0.6); // this pulls slides in while doing stuff
                                 }
                             }
                         } else {
-                            outtake.IntakeSlideTo(globalsCloseHighAuto.IntakeSlideOutTicks, outtake.intakeSlidePosition, 1); // slower
+                            outtake.IntakeSlideTo(GlobalsCloseHighAuto.IntakeSlideOutTicks, outtake.intakeSlidePosition, 1); // slower
                         }
                     } else {
-                        outtake.IntakeSlideTo(globalsCloseHighAuto.IntakeSlideOutTicks, outtake.intakeSlidePosition, 1); // slower
+                        outtake.IntakeSlideTo(GlobalsCloseHighAuto.IntakeSlideOutTicks, outtake.intakeSlidePosition, 1); // slower
                     }
                     break;
                 case TRANSFER_CONE:
@@ -402,7 +401,7 @@ public class TEN_CLOSE_HIGH extends LinearOpMode {
                             } else{
                                 outtake.IntakeArmReady();
                                 outtake.IntakeLift3();
-                                outtake.IntakeSlideTo(globalsCloseHighAuto.IntakeSlideNotQuiteOutTicks, outtake.intakeSlidePosition, 1);
+                                outtake.IntakeSlideTo(GlobalsCloseHighAuto.IntakeSlideNotQuiteOutTicks, outtake.intakeSlidePosition, 1);
 
                                 autoTimer = GlobalTimer.milliseconds(); // reset timer
                                 currentState = AutoState.OUTTAKE_CONE;
@@ -434,7 +433,7 @@ public class TEN_CLOSE_HIGH extends LinearOpMode {
                     outtake.turretSpin(0,outtake.turretPosition,1); // spin turret after
                     outtake.liftTo(0, outtake.liftPosition, 1);
                     //threshold is 1 inch, 2 degrees
-                    if ((drivebase.getDistanceFromPosition(globalsCloseHighAuto.outconestackXOtherSide * SideMultiplier, globalsCloseHighAuto.outconestackY, globalsCloseHighAuto.outconeStackRotationOtherSide * SideMultiplier + AngleOffset,xPosition,yPosition,headingPosition) < 1) && drivebase.getHeadingError() < Math.toRadians(Math.abs(2))){ // have to deal with the heading here, read telemetry for heading angle
+                    if ((drivebase.getDistanceFromPosition(GlobalsCloseHighAuto.outconestackXOtherSide * SideMultiplier, GlobalsCloseHighAuto.outconestackY, GlobalsCloseHighAuto.outconeStackRotationOtherSide * SideMultiplier + AngleOffset,xPosition,yPosition,headingPosition) < 1) && drivebase.getHeadingError() < Math.toRadians(Math.abs(2))){ // have to deal with the heading here, read telemetry for heading angle
                         autoTimer = GlobalTimer.milliseconds(); // reset timer
                         currentState = AutoState.OUTTAKE_CONE;
                         holdDrivebaseOtherSide(); // just so it runs it this loop and doesn't drift??
@@ -526,7 +525,7 @@ public class TEN_CLOSE_HIGH extends LinearOpMode {
 
     public void OuttakeCone(boolean Intake){
         if (Intake){ // if parameter is set to false it won't do the intake slides just outtake
-            outtake.IntakeSlideTo(globalsCloseHighAuto.IntakeSlideNotQuiteOutTicks, outtake.intakeSlidePosition, 1); // move to just before the stack
+            outtake.IntakeSlideTo(GlobalsCloseHighAuto.IntakeSlideNotQuiteOutTicks, outtake.intakeSlidePosition, 1); // move to just before the stack
             intakeLiftHeight();
             outtake.IntakeClawOpenHard();
             outtake.IntakeArmReady();
@@ -534,14 +533,14 @@ public class TEN_CLOSE_HIGH extends LinearOpMode {
             outtake.IntakeSlideTo(0, outtake.intakeSlidePosition,1); // move to just before the stack
         }
 
-        outtake.liftTo(globalsCloseHighAuto.LiftHighPosition, outtake.liftPosition, 1);
+        outtake.liftTo(GlobalsCloseHighAuto.LiftHighPosition, outtake.liftPosition, 1);
         outtake.OuttakeClawClose();
         outtake.OuttakeArmScoreAuto();
         outtake.BraceActiveAuto();
 
         holdTurretPosition();
 
-        if (outtake.liftPosition < globalsCloseHighAuto.LiftHighPosition+10){
+        if (outtake.liftPosition < GlobalsCloseHighAuto.LiftHighPosition+10){
             autoTimer = GlobalTimer.milliseconds(); // reset timer not rly needed here
             currentState = AutoState.GRAB_OFF_STACK;
             outtake.OuttakeArmScoreAuto();
@@ -561,21 +560,21 @@ public class TEN_CLOSE_HIGH extends LinearOpMode {
     }
     public void holdDrivebasePosition(){ // THE OUTCONESTACKROTATION SHOULD BE NEGATIVE
         if (!OtherSide){
-            drivebase.DriveToPositionAutonomous(globalsCloseHighAuto.outconestackX * SideMultiplier, globalsCloseHighAuto.outconestackY,-globalsCloseHighAuto.outconeStackRotation* SideMultiplier + AngleOffset,xPosition,yPosition,headingPosition, 1,1); // last values are translationalspeed, and rotational speed
+            drivebase.DriveToPositionAutonomous(GlobalsCloseHighAuto.outconestackX * SideMultiplier, GlobalsCloseHighAuto.outconestackY,-GlobalsCloseHighAuto.outconeStackRotation* SideMultiplier + AngleOffset,xPosition,yPosition,headingPosition, 1,1); // last values are translationalspeed, and rotational speed
         } else if (OtherSide){
             holdDrivebaseOtherSide();
         }
     }
 
     public void holdDrivebaseOtherSide(){ // inputs the raw heading instead of corrected heading
-        drivebase.DriveToPositionAutonomous(globalsCloseHighAuto.outconestackX * SideMultiplier, globalsCloseHighAuto.outconestackY,-globalsCloseHighAuto.outconeStackRotation* SideMultiplier + AngleOffset,xPosition,yPosition,headingPosition, 1,1); // last values are translationalspeed, and rotational speed
+        drivebase.DriveToPositionAutonomous(GlobalsCloseHighAuto.outconestackX * SideMultiplier, GlobalsCloseHighAuto.outconestackY,-GlobalsCloseHighAuto.outconeStackRotation* SideMultiplier + AngleOffset,xPosition,yPosition,headingPosition, 1,1); // last values are translationalspeed, and rotational speed
     }
 
     public void holdTurretPosition(){
         if (!OtherSide){
-            outtake.turretSpin(globalsCloseHighAuto.TurretLeftposition, outtake.turretPosition,1);
+            outtake.turretSpin(GlobalsCloseHighAuto.TurretLeftposition, outtake.turretPosition,1);
         } else {
-            outtake.turretSpin(globalsCloseHighAuto.TurretRightposition, outtake.turretPosition,1);
+            outtake.turretSpin(GlobalsCloseHighAuto.TurretRightposition, outtake.turretPosition,1);
         }
     }
 }

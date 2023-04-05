@@ -93,8 +93,8 @@ public class Inputs {
         if (CycleState < 0){
             CycleState = 0;
         }
-        if (CycleState > 5){
-            CycleState = 5;
+        if (CycleState > 4){
+            CycleState = 4;
         }
     }
 

@@ -52,7 +52,7 @@ public class StormDrive extends LinearOpMode {
     boolean four = false;
 
     // uses the ElapsedTime class from the SDK to create variable GlobalTimer
-    final int IntakeSlideOutTicks = -700;
+    final int IntakeSlideOutTicks = -750; // make this max pull out distance
 
     final int LiftHighPosition = -752;
     final int LiftMidPosition = -383;
@@ -499,10 +499,11 @@ public class StormDrive extends LinearOpMode {
                 outtake.liftMotorRawControl(gamepad2.right_stick_y);
                 outtake.turretMotorRawControl(gamepad2.left_stick_x);
                 outtake.intakeSlideMotorRawControl(gamepad2.left_trigger-gamepad2.right_trigger);
-                outtake.IntakeClawClose();
                 outtake.OuttakeClawOpenHard(); // shouuld be fine
+                outtake.OuttakeSlideReady();
                 outtake.IntakeLiftTransfer();
                 outtake.IntakeClipOpen();
+                outtake.IntakeClawClose();
                 drivebase.intakeSpin(0);
                 if (gamepad2.right_bumper){
                     outtake.encodersReset();
@@ -517,7 +518,8 @@ public class StormDrive extends LinearOpMode {
         if ((gamepad2.b && (outtakeState != OuttakeState.READY || intakeout != IntakeOut.READY || groundJunctionsDeposit != GroundJunctionDeposit.IDLE)) || (gamepad1.b && (outtakeState != OuttakeState.READY || intakeout != IntakeOut.READY || groundJunctionsDeposit != GroundJunctionDeposit.IDLE ))){ // so that it returns when intake is out
             outtakeState = OuttakeState.SUBSYSTEMS_SET_RETURN; // if b is pressed at any state then return to ready
             drivebase.intakeSpin(-1);
-            BeaconScore = false; // if return do not do the beacon thing
+            BeaconScore = false; // if return do not do the beacon thing'
+            inputs.CycleState = 0;
         }
         if (inputs.ManualResetToggleMode){
             outtakeState = OuttakeState.MANUAL_ENCODER_RESET;
@@ -549,7 +551,7 @@ public class StormDrive extends LinearOpMode {
                     // drivebase.intakeSpin(-0.4); // helps the slides go out
                     if (outtake.intakeSlidePosition < -100) {
                         outtake.IntakeClawOpenHard();
-                        outtake.IntakeLiftReady();
+                        IntakeHeightChange();
                         outtake.IntakeArmReady();
                     }
                     if (inputs.IntakeToggleOutState == 2){ // if gamepad2.leftbumper is pressed
@@ -563,17 +565,35 @@ public class StormDrive extends LinearOpMode {
                 outtake.IntakeClawClose();
                 if (GlobalTimer.milliseconds() - IntakeOutTimer > 200){ // wait for the claw to grab
                     outtake.IntakeLiftTransfer();
-                    intakeClipHoldorNotHold(10); // hard here
-                    if (GlobalTimer.milliseconds() - IntakeOutTimer > 260){
-                        outtake.IntakeArmTransfer();
-                    }
-                    if (outtake.intakeSlidePosition > -4 && outtake.intakeArmPosition > 196) {
-                        IntakeReady = true;
-                        if (IntakeReady){ // if the slides are all the way in
-                            outtakeState = OuttakeState.CLAW_GRIP_TRANSFER_START; // main state machine takes it from here
-                            OuttakeTimer = GlobalTimer.milliseconds() + 200; // this can be optimized
+                    if (inputs.CycleState == 0){ // if the claw is not picking up from the stack
+                        intakeClipHoldorNotHold(10); // hard here
+                        if (GlobalTimer.milliseconds() - IntakeOutTimer > 260){
                             outtake.IntakeArmTransfer();
-                            intakeout = IntakeOut.IDLE; // main state machine must set everything to ready in a function
+                        }
+                        if (outtake.intakeSlidePosition > -4 && outtake.intakeArmPosition > 196) {
+                            IntakeReady = true;
+                            if (IntakeReady){ // if the slides are all the way in
+                                outtakeState = OuttakeState.CLAW_GRIP_TRANSFER_START; // main state machine takes it from here
+                                OuttakeTimer = GlobalTimer.milliseconds() + 200; // this can be optimized
+                                outtake.IntakeArmTransfer();
+                                intakeout = IntakeOut.IDLE; // main state machine must set everything to ready in a function
+                            }
+                        }
+                    } else { // if the thing is picking up from the stack
+                        outtake.IntakeArmTransfer();
+                        if (outtake.intakeSlidePosition > IntakeSlideOutTicks + GlobalsCloseHighAuto.IntakeSlideBackFromStack - 10){ // if this is reached
+                            intakeClipHoldorNotHold(10); // hard here
+                            if (outtake.intakeSlidePosition > -4 && outtake.intakeArmPosition > 196) {
+                                IntakeReady = true;
+                                if (IntakeReady){ // if the slides are all the way in
+                                    outtakeState = OuttakeState.CLAW_GRIP_TRANSFER_START; // main state machine takes it from here
+                                    OuttakeTimer = GlobalTimer.milliseconds() + 200; // this can be optimized
+                                    outtake.IntakeArmTransfer();
+                                    intakeout = IntakeOut.IDLE; // main state machine must set everything to ready in a function
+                                }
+                            }
+                        } else {
+                            outtake.IntakeSlideTo(IntakeSlideOutTicks + GlobalsCloseHighAuto.IntakeSlideBackFromStack, outtake.intakeSlidePosition, 0.8);
                         }
                     }
                 } else {
@@ -676,7 +696,7 @@ public class StormDrive extends LinearOpMode {
         switch (flipConeArmState) {
             case OUTTAKE_FLIP_CONE_EXECUTE: // this case is basically when we want the command in toggle, otherwise we set it to idle case
                 if (gamepadRightTriggersDown()){ // if the trigger is pressed
-                    inputs.coneFlipOuttakeDownToggle(gamepad2.left_bumper||gamepad1.left_bumper, gamepad2.right_bumper||gamepad1.right_bumper);
+                    inputs.coneFlipOuttakeDownToggle(gamepad1.left_bumper, gamepad1.right_bumper);
                     // use if statements for this, state machine not needed
                     if (inputs.AboveConeHeight || inputs.FlipConeHeightState == 0){ // above cone height means if right bumper is pressed at any time return to this
                         outtake.ConeArmAboveCone();
@@ -1057,16 +1077,14 @@ public class StormDrive extends LinearOpMode {
     public void IntakeHeightChange(){
         inputs.cycleToggleUp(gamepad2.right_bumper, gamepad2.left_bumper);
         if (inputs.CycleState == 0){
-            outtake.IntakeLift5();
+            outtake.IntakeLiftReady();
         } else if (inputs.CycleState == 1){
-            outtake.IntakeLift4();
+            outtake.IntakeLift2();
         } else if (inputs.CycleState == 2){
             outtake.IntakeLift3();
         } else if (inputs.CycleState == 3){
-            outtake.IntakeLift2();
+            outtake.IntakeLift4();
         } else if (inputs.CycleState == 4){
-            outtake.IntakeLift1();
-        } else if (inputs.CycleState == 5){
             outtake.IntakeLift5();
         }
     }
