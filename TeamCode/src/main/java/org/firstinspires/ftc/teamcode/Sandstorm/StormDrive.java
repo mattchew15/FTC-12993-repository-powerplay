@@ -931,6 +931,7 @@ public class StormDrive extends LinearOpMode {
     public void driveToPosition(double xTarget, double yTarget, double headingTarget, double xPosition, double yPosition, double correctedHeading, double maxTranslationalSpeed, double maxRotationalSpeed, double rawHeading){
         inputs.driveToPositionToggle(gamepad1.dpad_right);
         if (inputs.DriveToPositionToggleMode){
+            inputs.CycleState = 0;
             drivebase.DriveToPosition(xTarget,yTarget,headingTarget,xPosition,yPosition,correctedHeading, maxTranslationalSpeed,maxRotationalSpeed); // last values are translationalspeed, and rotational speed
             if ((drivebase.getDistanceFromPosition(xTarget,yTarget,headingTarget,xPosition,yPosition,rawHeading) < distanceFromPointThreshold) && drivebase.getHeadingError() < Math.toRadians(Math.abs(3))){ // have to deal with the heading here, read telemetry for heading angle
                 if (inputs.IntakeToggleOutState == 0){ //so that it will only happen once
