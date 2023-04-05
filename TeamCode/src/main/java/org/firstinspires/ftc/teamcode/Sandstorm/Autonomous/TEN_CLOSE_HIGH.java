@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.Sandstorm.Autonomous;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.geometry.Vector2d;
 import com.acmerobotics.roadrunner.trajectory.Trajectory;
+import com.acmerobotics.roadrunner.util.Angle;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.util.ElapsedTime;
@@ -250,8 +251,7 @@ public class TEN_CLOSE_HIGH extends LinearOpMode {
 
             xPosition = poseEstimate.getX();
             yPosition = poseEstimate.getY();
-            headingPosition = poseEstimate.getHeading();
-            correctedHeading = inputs.angleWrap(headingPosition);
+            headingPosition = Angle.normDelta(poseEstimate.getHeading());
             outtake.outtakeReads();
 
             telemetry.addData("OtherSide", OtherSide);
@@ -433,14 +433,12 @@ public class TEN_CLOSE_HIGH extends LinearOpMode {
                     outtake.turretSpin(0,outtake.turretPosition,1); // spin turret after
                     outtake.liftTo(0, outtake.liftPosition, 1);
                     //threshold is 1 inch, 2 degrees
-
                     if ((drivebase.getDistanceFromPosition(globalsCloseHighAuto.outconestackXOtherSide * SideMultiplier, globalsCloseHighAuto.outconestackY, globalsCloseHighAuto.outconeStackRotationOtherSide * SideMultiplier + AngleOffset,xPosition,yPosition,headingPosition) < 1) && drivebase.getHeadingError() < Math.toRadians(Math.abs(2))){ // have to deal with the heading here, read telemetry for heading angle
                         autoTimer = GlobalTimer.milliseconds(); // reset timer
                         currentState = AutoState.OUTTAKE_CONE;
                         holdDrivebaseOtherSide(); // just so it runs it this loop and doesn't drift??
                         OtherSide = true; // indicates that we are going to do the other stack
                     }
-
                     break;
                 case OUTTAKE_CONE_NO_INTAKE_SLIDES:
                     OuttakeCone(false); // in a function so that i don't have to make 2 changes
@@ -562,14 +560,14 @@ public class TEN_CLOSE_HIGH extends LinearOpMode {
     }
     public void holdDrivebasePosition(){ // THE OUTCONESTACKROTATION SHOULD BE NEGATIVE
         if (!OtherSide){
-            drivebase.DriveToPositionAutonomous(globalsCloseHighAuto.outconestackX * SideMultiplier, globalsCloseHighAuto.outconestackY,-globalsCloseHighAuto.outconeStackRotation* SideMultiplier + AngleOffset,xPosition,yPosition,correctedHeading, 1,1); // last values are translationalspeed, and rotational speed
+            drivebase.DriveToPositionAutonomous(globalsCloseHighAuto.outconestackX * SideMultiplier, globalsCloseHighAuto.outconestackY,-globalsCloseHighAuto.outconeStackRotation* SideMultiplier + AngleOffset,xPosition,yPosition,headingPosition, 1,1); // last values are translationalspeed, and rotational speed
         } else if (OtherSide){
             holdDrivebaseOtherSide();
         }
     }
 
     public void holdDrivebaseOtherSide(){ // inputs the raw heading instead of corrected heading
-        drivebase.DriveToPositionAutonomous(globalsCloseHighAuto.outconestackX * SideMultiplier, globalsCloseHighAuto.outconestackY,-globalsCloseHighAuto.outconeStackRotation* SideMultiplier + AngleOffset,xPosition,yPosition,correctedHeading, 1,1); // last values are translationalspeed, and rotational speed
+        drivebase.DriveToPositionAutonomous(globalsCloseHighAuto.outconestackX * SideMultiplier, globalsCloseHighAuto.outconestackY,-globalsCloseHighAuto.outconeStackRotation* SideMultiplier + AngleOffset,xPosition,yPosition,headingPosition, 1,1); // last values are translationalspeed, and rotational speed
     }
 
     public void holdTurretPosition(){
@@ -578,7 +576,6 @@ public class TEN_CLOSE_HIGH extends LinearOpMode {
         } else {
             outtake.turretSpin(globalsCloseHighAuto.TurretRightposition, outtake.turretPosition,1);
         }
-
     }
 }
 

@@ -194,6 +194,7 @@ public class Inputs {
         // keep in mind that the result is in radians
         return radians;
     }
+
     public double angleWrapOtherSide(double radians) {
 
         while (radians > Math.PI) {

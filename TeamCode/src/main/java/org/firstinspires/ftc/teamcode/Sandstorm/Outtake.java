@@ -105,9 +105,8 @@ public class Outtake {  // no constructor for this class
         //OuttakeClawTouch = hwMap.get(DigitalChannel.class, "OuttakeTouch");
 
         IntakeArmPosition = hwMap.get(AnalogInput.class, "InSEncoder");
-      //  OuttakeArmPosition = hwMap.get(AnalogInput.class, "OutSEncoder");
+        //OuttakeArmPosition = hwMap.get(AnalogInput.class, "OutSEncoder");
         IntakeLiftPosition = hwMap.get(AnalogInput.class, "InLiftSEncoder");
-
     }
 
     public void hardwareSetup(){
