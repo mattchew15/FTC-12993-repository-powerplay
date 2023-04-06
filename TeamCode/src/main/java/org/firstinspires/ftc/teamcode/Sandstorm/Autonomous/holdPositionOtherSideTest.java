@@ -1,4 +1,7 @@
 package org.firstinspires.ftc.teamcode.Sandstorm.Autonomous;
+import static org.firstinspires.ftc.teamcode.Sandstorm.GlobalsCloseHighAuto.outconestackXOtherSide;
+import static org.firstinspires.ftc.teamcode.Sandstorm.GlobalsCloseHighAuto.outconestackY;
+
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.geometry.Vector2d;
 import com.acmerobotics.roadrunner.trajectory.Trajectory;
@@ -70,14 +73,8 @@ public class holdPositionOtherSideTest extends LinearOpMode {
     // Define our start pose
 
 
-    final double outconestackX = 42;
-    final double outconestackY = -17.7;
-    final double outconeStackRotation = Math.toRadians(-1.2);
 
-    final double outconestackXOtherSide = -outconestackX;
-    final double outconeStackRotationOtherSide = -outconeStackRotation + Math.toRadians(180) - 2 * Math.PI;
-
-    Pose2d startPose = new Pose2d(-outconestackX, outconestackY, Math.toRadians(0));
+    Pose2d startPose = new Pose2d(outconestackXOtherSide, outconestackY, Math.toRadians(0));
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -91,7 +88,7 @@ public class holdPositionOtherSideTest extends LinearOpMode {
         Setup();
         // Set inital pose
         drive.setPoseEstimate(startPose);
-        drive.turnAsync(180);
+        //drive.turnAsync(180);
 
 
         waitForStart();
@@ -128,7 +125,7 @@ public class holdPositionOtherSideTest extends LinearOpMode {
             switch (currentState) {
                 case TURN_OTHER_STACK:
                     // turns using my PID
-                    //holdDrivebaseOtherSide();
+                    holdDrivebaseOtherSide();
                     outtake.IntakeSlideTo(1,outtake.IntakeSlidePos(),1);
                     outtake.turretSpin(0,outtake.turretPos(),1); // spin turret after
                     outtake.liftTo(0, outtake.liftPos(), 1);
@@ -140,14 +137,18 @@ public class holdPositionOtherSideTest extends LinearOpMode {
                     break;
                 case TURN_FORWARDS:
                     // turns using my PID
+                    /*
                     holdDrivebase();
                     outtake.IntakeSlideTo(1,outtake.IntakeSlidePos(),1);
                     outtake.turretSpin(0,outtake.turretPos(),1); // spin turret after
                     outtake.liftTo(0, outtake.liftPos(), 1);
+                    */
+                    currentState = AutoState.TURN_OTHER_STACK;
+
                     //threshold is 1 inch, 2 degrees
-                    if (gamepad1.a){ // have to deal with the heading here, read telemetry for heading angle
-                        currentState = AutoState.TURN_OTHER_STACK;
-                    }
+                    //if (gamepad1.a){ // have to deal with the heading here, read telemetry for heading angle
+                      //  currentState = AutoState.TURN_OTHER_STACK;
+                    //}
                     break;
             }
             // Updates driving for trajectories
@@ -157,7 +158,7 @@ public class holdPositionOtherSideTest extends LinearOpMode {
 
     }
     public void holdDrivebaseOtherSide(){ // inputs the raw heading instead of corrected heading
-        drivebase.DriveToPositionAutonomous(outconestackXOtherSide,outconestackY,Math.toRadians(180),xPosition,yPosition,headingPosition, 1,1); // last values are translationalspeed, and rotational speed
+        drivebase.DriveToPositionAutonomous(outconestackXOtherSide,outconestackY,Math.toRadians(-1.2),xPosition,yPosition,headingPosition, 1,1); // last values are translationalspeed, and rotational speed
     }
     public void holdDrivebase(){ // inputs the raw heading instead of corrected heading
         drivebase.DriveToPositionAutonomous(outconestackXOtherSide,outconestackY,Math.toRadians(0),xPosition,yPosition,correctedHeading, 1,1); // last values are translationalspeed, and rotational speed
