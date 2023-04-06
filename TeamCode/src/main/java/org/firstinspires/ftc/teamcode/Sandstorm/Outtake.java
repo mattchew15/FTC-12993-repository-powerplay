@@ -41,8 +41,8 @@ public class Outtake {  // no constructor for this class
 
     //Servo Positions for outtake
     public static double OuttakeClawOpenPos = 0.58, OuttakeClawClosedPos = 0.45, OuttakeClawOpenHardPos = 0.7;
-    public static double OuttakeArmReadyPos = 0.732, OuttakeArmDepositPos = 0.095, OuttakeArmPickupPos = 0.095, OuttakeArmScorePos = 0.22, OuttakeArmScoreAutoPos = 0.26, OuttakeArmSlightlyTiltedUpPos = 0.3, OuttakeArmUprightPos = 0.57;
-    public static double BraceReadyPos = 0.55, BraceActivePos = 0.72, BraceActivePosAuto = 0.64, BraceTuckedPos = 0, BraceFlipConePos = 0.6;
+    public static double OuttakeArmReadyPos = 0.732, OuttakeArmDepositPos = 0.095, OuttakeArmPickupPos = 0.095, OuttakeArmScorePos = 0.22, OuttakeArmScoreAutoPos = 0.23, OuttakeArmSlightlyTiltedUpPos = 0.3, OuttakeArmUprightPos = 0.55;
+    public static double BraceReadyPos = 0.55,BraceReadyAutoPos = 0.25, BraceActivePos = 0.72, BraceActivePosAuto = 0.64, BraceTuckedPos = 0, BraceFlipConePos = 0.6;
     public static double OuttakeSlideReadyPos = 0.03, OuttakeSlideScorePos = 0.03, OuttakeSlideScoreDropPos = 0.16, OuttakeSlideGroundPos =  0.305, OuttakeSlideConeFlipPos = 0.18, OuttakeSlideAboveConePos = 0.245;
 
     // Servo Position for ConeArm
@@ -58,9 +58,9 @@ public class Outtake {  // no constructor for this class
     public static double IntakeHeight5 = 0.145, IntakeHeight4 = 0.241, IntakeHeight3 = 0.32, IntakeHeight2 = 0.39, IntakeHeight1 = 0.435;
 
     //editable dashboard variables must be public static - PID values for turret and lift that can be tuned
-    public static double TurretKp = 0.012, TurretKi = 0.000, TurretKd = 0.0004, TurretIntegralSumLimit = 1, TurretFeedforward = 0.3;
-    public static double LiftKp = 0.015, LiftKi = 0.0001, LiftKd = 0.00035, LiftIntegralSumLimit = 10, LiftKf = 0;
-    public static double intakeSlideKp = 0.015, intakeSlideKi = 0.00, intakeSlideKd = 0.0005, intakeSlideIntegralSumLimit = 10, intakeSlideKf = 0;
+    public static double TurretKp = 0.007, TurretKi = 0.000, TurretKd = 0.0002, TurretIntegralSumLimit = 1, TurretFeedforward = 0.3;
+    public static double LiftKp = 0.011, LiftKi = 0.000, LiftKd = 0.0003, LiftIntegralSumLimit = 10, LiftKf = 0;
+    public static double intakeSlideKp = 0.008, intakeSlideKi = 0.00, intakeSlideKd = 0.00038, intakeSlideIntegralSumLimit = 10, intakeSlideKf = 0;
 
     // New instance of PID class with editable variables
     PID turretPID = new PID(TurretKp,TurretKi,TurretKd,TurretIntegralSumLimit,TurretFeedforward);
@@ -323,6 +323,7 @@ public class Outtake {  // no constructor for this class
    // public void GetOuttakeArmPosition(){OuttakeArmServo.getPosition();}
 
     public void BraceReady(){OuttakeBraceServo.setPosition(BraceReadyPos);}
+    public void BraceReadyAuto(){OuttakeBraceServo.setPosition(BraceReadyAutoPos);}
     public void BraceActive(){OuttakeBraceServo.setPosition(BraceActivePos);}
     public void BraceTucked(){OuttakeBraceServo.setPosition(BraceTuckedPos);}
     public void BraceActiveAuto(){OuttakeBraceServo.setPosition(BraceActivePosAuto);}
@@ -337,7 +338,7 @@ public class Outtake {  // no constructor for this class
     public void GetOuttakeSlidePosition(){OuttakeSlideServo.getPosition();}
 
 
-    public double degreestoTicks(int degrees){
+    public double degreestoTicks(double degrees){
         return degrees * 11;
     }
     public double tickstoDegrees(int ticks){
@@ -360,8 +361,8 @@ public class Outtake {  // no constructor for this class
         LiftMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         LiftMotor.setPower(maxSpeed);
     }
-    public void turretSpinInternalPID(int rotations, double maxSpeed){
-        turretTarget = (int)Math.round(degreestoTicks(rotations)); // rounds whatever the double is to a whole number to make it an int
+    public void turretSpinInternalPID(double rotations, double maxSpeed){
+        turretTarget = degreestoTicks(rotations); // rounds whatever the double is to a whole number to make it an int
         TurretMotor.setTargetPosition((int)Math.round(turretTarget));
         TurretMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         TurretMotor.setPower(maxSpeed);

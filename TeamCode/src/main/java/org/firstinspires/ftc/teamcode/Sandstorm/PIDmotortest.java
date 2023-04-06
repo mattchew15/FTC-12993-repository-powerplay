@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.Sandstorm;
 
 // Old imports, some not needed
 import com.acmerobotics.roadrunner.geometry.Pose2d;
+import com.acmerobotics.roadrunner.util.Angle;
 import com.qualcomm.hardware.lynx.LynxModule;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
@@ -20,7 +21,7 @@ public class PIDmotortest extends LinearOpMode {
 
     final double xTarget = 0;
     final double yTarget = 0;
-    final double headingTarget = Math.toRadians(0);
+    final double headingTarget = Math.toRadians(180);
 
     //create new instances of class
     DriveBase drivebase = new DriveBase();
@@ -76,7 +77,7 @@ public class PIDmotortest extends LinearOpMode {
                 telemetry.addData("Loop Time", LoopTime/LoopTimeTimer.nanoseconds()); // should return loop time for previous loop
                 // Main loop. Run class methods here to do stuff
                 if(gamepad1.a){
-                    outtake.liftTo(-500, outtake.liftPosition, 1);
+                    outtake.liftTo(GlobalsCloseHighAuto.LiftHighPosition, outtake.liftPosition, 1);
                     outtake.OuttakeArmScoreAuto();
                 }
                 else if (gamepad1.b){
@@ -86,14 +87,14 @@ public class PIDmotortest extends LinearOpMode {
                 if (gamepad1.x){
                     outtake.IntakeSlideTo(0, outtake.intakeSlidePosition, 1);
                 } else if (gamepad1.y){
-                    outtake.IntakeSlideTo(-500, outtake.intakeSlidePosition, 1);
+                    outtake.IntakeSlideTo(GlobalsCloseHighAuto.IntakeSlideOutTicks, outtake.intakeSlidePosition, 1);
                 }
                 if (gamepad1.dpad_up){
                     outtake.turretSpin(0, outtake.turretPosition, 1);
                 } else if (gamepad1.dpad_right){
-                    outtake.turretSpin(8, outtake.turretPosition, 1);
+                    outtake.turretSpin(GlobalsCloseHighAuto.TurretLeftposition, outtake.turretPosition, 1);
                 }else if (gamepad1.dpad_left)
-                    outtake.turretSpin(-8, outtake.turretPosition, 1);
+                    outtake.turretSpin(GlobalsCloseHighAuto.TurretRightposition, outtake.turretPosition, 1);
                 if (gamepad1.right_bumper){
                     outtake.liftToInternalPID(-500, 1);
                 } else if (gamepad1.left_bumper){
@@ -122,18 +123,19 @@ public class PIDmotortest extends LinearOpMode {
                 telemetry.addData("IntakeArmPosition", outtake.getIntakeArmPos());
                 telemetry.addData("IntakeLiftPosition", outtake.getIntakeLiftPos());
 
+
                 location.update();
                 Pose2d poseEstimate = location.getPoseEstimate();
 
                 double xPosition = poseEstimate.getX();
                 double yPosition = poseEstimate.getY();
                 double headingPosition = poseEstimate.getHeading();
-                double correctedHeading = inputs.angleWrap(headingPosition); // do not do this twice
+                double correctedHeading = Angle.normDelta(headingPosition);
 
                 outtake.outtakeReads();
                 telemetry.addData("x", xPosition);
                 telemetry.addData("y", yPosition);
-                telemetry.addData("heading", headingPosition);
+
                 telemetry.addData("corrected heading", correctedHeading);
 
                 telemetry.addData("XError", drivebase.getXError());

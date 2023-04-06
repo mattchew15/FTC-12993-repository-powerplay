@@ -24,12 +24,12 @@ public class DriveBase {  // no constructor for this class
     //variable for the drivebase speed toggle;
     boolean PowerToggled;
     double PowerBase = 1;
-    double PowerBaseTurn = 0.85;
+    double PowerBaseTurn = 0.88;
     double PowerStrafe = 1.05;
 
     public static double DrivebaseXKp = 0.22, DrivebaseXKi = 0.00, DrivebaseXKd = 0.018, DrivebaseXIntegralSumLimit = 10, DrivebaseXKf = 0;
     public static double DrivebaseYKp = 0.22, DrivebaseYKi = 0.00, DrivebaseYKd = 0.018, DrivebaseYIntegralSumLimit = 10, DrivebaseYKf = 0;
-    public static double DrivebaseThetaKp = 2, DrivebaseThetaKi = 0.0008, DrivebaseThetaKd = 0.02, DrivebaseThetaIntegralSumLimit = 10, DrivebaseThetaKf = 0;
+    public static double DrivebaseThetaKp = 2.5, DrivebaseThetaKi = 0.0008, DrivebaseThetaKd = 0.022, DrivebaseThetaIntegralSumLimit = 10, DrivebaseThetaKf = 0;
 
 
     // should be able to use one instance of a drivebase pid because the x,y,z translation should all be the same
@@ -104,16 +104,16 @@ public class DriveBase {  // no constructor for this class
     public void DriveToPositionAutonomous(double xTarget, double yTarget, double thetaTarget, double xRobotPosition, double yRobotPosition, double robotTheta, double maxTranslationalSpeed, double maxRotationalSpeed){
         double x = drivebaseXPID.update(xTarget,xRobotPosition,maxTranslationalSpeed); // set a target, get the robots state, and set the max speed
         double y = -drivebaseYPID.update(yTarget,yRobotPosition,maxTranslationalSpeed);
-        double theta = drivebaseThetaPID.update(thetaTarget,-robotTheta,maxRotationalSpeed); // this pid should probably be different
+        double theta = -drivebaseThetaPID.update(thetaTarget,robotTheta,maxRotationalSpeed); // this pid should probably be different
         double x_rotated = x * Math.cos(robotTheta) - y * Math.sin(robotTheta);
         double y_rotated = x * Math.sin(robotTheta) + y * Math.cos(robotTheta);
 
         // x, y, theta input mixing
         double denominator = Math.max(Math.abs(x_rotated) + Math.abs(y_rotated) + Math.abs(robotTheta), 1);
-        FL.setPower((x_rotated + y_rotated + theta)/denominator);
-        BL.setPower((x_rotated - y_rotated + theta)/denominator);
-        FR.setPower((x_rotated - y_rotated - theta)/denominator);
-        BR.setPower((x_rotated + y_rotated - theta)/denominator);
+        FL.setPower((x_rotated + y_rotated + theta));
+        BL.setPower((x_rotated - y_rotated + theta));
+        FR.setPower((x_rotated - y_rotated - theta));
+        BR.setPower((x_rotated + y_rotated - theta));
     }
 
     public double getDistanceFromPosition(double xTarget, double yTarget, double thetaTarget, double xRobotPosition, double yRobotPosition, double robotTheta){

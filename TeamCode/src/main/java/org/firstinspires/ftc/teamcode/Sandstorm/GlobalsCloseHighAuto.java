@@ -7,14 +7,15 @@ import com.acmerobotics.roadrunner.geometry.Pose2d;
 public class GlobalsCloseHighAuto {
 
     // encoder positions
-    public static int IntakeSlideOutTicks = -586;
-    public static int LiftHighPosition = -699;
+    public static int IntakeSlideOutTicks = -596;
+    public static int LiftHighPosition = -704;
+    public static int LiftHighPosition10 = -717;
 
-    public static double TurretLeftposition = -8.5;
+    public static double TurretLeftposition = -5.55;
     public static double TurretRightposition = -TurretLeftposition;
 
-    public static int IntakeSlideNotQuiteOutTicks = IntakeSlideOutTicks + 80;
-    public static int IntakeSlideBackFromStack = IntakeSlideOutTicks + 68;
+    public static int IntakeSlideNotQuiteOutTicks = IntakeSlideOutTicks + 90;
+    public static int IntakeSlideBackFromStack = IntakeSlideOutTicks + 66;
 
     // webcam names
     public String WebCamLeftName  = "WebcamLeft";
@@ -31,10 +32,10 @@ public class GlobalsCloseHighAuto {
     // add 180 to angles
 
     public static double outconestackXOtherSide = -outconestackX;
-    public static double outconeStackRotationOtherSide = -3;
+    public static double outconeStackRotationOtherSide = Math.toRadians(180);
 
-    public static double parkLeft = -64;
-    public static double parkRight = -8;
+    public static double parkLeft = -61;
+    public static double parkRight = -11.5;
     public static double parkCentre = -35;
 
     // starting position

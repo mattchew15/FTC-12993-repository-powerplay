@@ -16,7 +16,8 @@ public class meepmeep {
                 .setConstraints(60, 60, Math.toRadians(180), Math.toRadians(180), 15)
                 .followTrajectorySequence(drive ->
                         drive.trajectorySequenceBuilder(new Pose2d(34, -17.5, Math.toRadians(0)))
-
+                                .lineToLinearHeading(new Pose2d(-27, -17, 0))
+                                .splineToSplineHeading(new Pose2d(-42,-17.7, Math.toRadians(180)),Math.toRadians(0))
                                 .build()
                 );
 
