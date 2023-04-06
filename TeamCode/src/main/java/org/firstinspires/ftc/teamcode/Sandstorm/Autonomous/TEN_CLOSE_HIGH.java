@@ -315,8 +315,8 @@ public class TEN_CLOSE_HIGH extends LinearOpMode {
 
                 case GRAB_OFF_STACK:
                     holdDrivebasePosition(); // dropping cone
-                    dropCone(170);
-                    if (GlobalTimer.milliseconds() - autoTimer < 170){
+                    dropCone(160);
+                    if (GlobalTimer.milliseconds() - autoTimer < 160){
                         outtake.liftTo(GlobalsCloseHighAuto.LiftHighPosition, outtake.liftPosition, 1);
                         holdTurretPosition();
                     }
@@ -353,7 +353,7 @@ public class TEN_CLOSE_HIGH extends LinearOpMode {
                             }
                             if (GlobalTimer.milliseconds()-autoTimer > 110){
                                 outtake.IntakeArmTransfer();
-                                if ((outtake.getIntakeArmPos() > 130) && GlobalTimer.milliseconds()-autoTimer > 175){ // this reads the position of the intake arm
+                                if ((outtake.getIntakeArmPos() > 127) && GlobalTimer.milliseconds()-autoTimer > 175){ // this reads the position of the intake arm
                                     outtake.IntakeSlideInternalPID(2,1);
                                     if (outtake.intakeSlidePosition > -13 && outtake.intakeArmPosition > 195){ // this controls when the claw closes
                                         outtake.BraceActive();
@@ -365,7 +365,7 @@ public class TEN_CLOSE_HIGH extends LinearOpMode {
                                         }
                                     }
                                 } else {
-                                    outtake.IntakeSlideInternalPID(globalsCloseHighAuto.IntakeSlideBackFromStack, 0.5); // this pulls slides in while doing stuff
+                                    outtake.IntakeSlideInternalPID(globalsCloseHighAuto.IntakeSlideBackFromStack, 0.6); // this pulls slides in while doing stuff
                                 }
                             }
                         } else {
@@ -441,8 +441,8 @@ public class TEN_CLOSE_HIGH extends LinearOpMode {
                     break;
                 case RETRACT_SLIDES:
                     holdDrivebasePosition();
-                    dropCone(170);
-                    if (GlobalTimer.milliseconds() - autoTimer < 170){
+                    dropCone(160);
+                    if (GlobalTimer.milliseconds() - autoTimer < 160){
                         outtake.liftToInternalPID(GlobalsCloseHighAuto.LiftHighPosition, 1);
                         holdTurretPosition();
                     }
@@ -481,8 +481,8 @@ public class TEN_CLOSE_HIGH extends LinearOpMode {
 
     }
     public void dropCone(int waitBeforeRetract){
-        if (GlobalTimer.milliseconds() - autoTimer > 40){ // small wait
-            if (GlobalTimer.milliseconds() - autoTimer > 90){
+        if (GlobalTimer.milliseconds() - autoTimer > 0){ // small wait
+            if (GlobalTimer.milliseconds() - autoTimer > 65){
                 outtake.OuttakeClawOpenHard();
                 if (GlobalTimer.milliseconds() - autoTimer > waitBeforeRetract){
                     outtake.BraceReadyAuto(); // might need a new position for this
@@ -537,7 +537,7 @@ public class TEN_CLOSE_HIGH extends LinearOpMode {
             outtake.IntakeSlideInternalPID(0,1); // move to just before the stack
         }
 
-        outtake.liftToInternalPID(GlobalsCloseHighAuto.LiftHighPosition10,1);
+        outtake.liftTo(GlobalsCloseHighAuto.LiftHighPosition10,outtake.liftPosition,1);
         outtake.OuttakeClawClose();
         outtake.OuttakeArmScoreAuto();
         outtake.BraceActiveAuto();
