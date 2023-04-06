@@ -28,11 +28,12 @@ public class GlobalsCloseHighAuto {
     public static double startPoseAngle = Math.toRadians(0);
     public static double outconestackX = 42;
     public static double outconestackY = -17.7;
+    public static double outconestackYOtherSide = -17.2;
     public static double outconeStackRotation = Math.toRadians(-1.2);
     // add 180 to angles
 
     public static double outconestackXOtherSide = -outconestackX;
-    public static double outconeStackRotationOtherSide = Math.toRadians(180);
+    public static double outconeStackRotationOtherSide = Math.toRadians(178);
 
     public static double parkLeft = -61;
     public static double parkRight = -11.5;

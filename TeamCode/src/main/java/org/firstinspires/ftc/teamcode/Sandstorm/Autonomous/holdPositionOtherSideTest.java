@@ -91,7 +91,7 @@ public class holdPositionOtherSideTest extends LinearOpMode {
         Setup();
         // Set inital pose
         drive.setPoseEstimate(startPose);
-
+        drive.turnAsync(180);
 
 
         waitForStart();
@@ -109,11 +109,6 @@ public class holdPositionOtherSideTest extends LinearOpMode {
             xPosition = poseEstimate.getX();
             yPosition = poseEstimate.getY();
             headingPosition = poseEstimate.getHeading(); // returns raw heading position
-            if (!OtherSide){
-                headingPosition = poseEstimate.getHeading(); // returns raw heading position
-            } else if (OtherSide){
-                headingPosition = poseEstimate.getHeading(); //+ Math.toRadians(180); // returns raw heading position
-            }
             correctedHeading = inputs.angleWrap(headingPosition);
             correctedHeadingOtherSide = inputs.angleWrapOtherSide(headingPosition);
             telemetry.addData("OtherSide", OtherSide);
@@ -133,7 +128,7 @@ public class holdPositionOtherSideTest extends LinearOpMode {
             switch (currentState) {
                 case TURN_OTHER_STACK:
                     // turns using my PID
-                    holdDrivebaseOtherSide();
+                    //holdDrivebaseOtherSide();
                     outtake.IntakeSlideTo(1,outtake.IntakeSlidePos(),1);
                     outtake.turretSpin(0,outtake.turretPos(),1); // spin turret after
                     outtake.liftTo(0, outtake.liftPos(), 1);

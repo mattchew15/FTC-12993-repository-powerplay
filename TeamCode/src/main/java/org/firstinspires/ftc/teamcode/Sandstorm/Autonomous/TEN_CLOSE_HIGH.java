@@ -1,6 +1,8 @@
 package org.firstinspires.ftc.teamcode.Sandstorm.Autonomous;
+import static org.firstinspires.ftc.teamcode.Sandstorm.GlobalsCloseHighAuto.outconeStackRotationOtherSide;
 import static org.firstinspires.ftc.teamcode.Sandstorm.GlobalsCloseHighAuto.outconestackXOtherSide;
 import static org.firstinspires.ftc.teamcode.Sandstorm.GlobalsCloseHighAuto.outconestackY;
+import static org.firstinspires.ftc.teamcode.Sandstorm.GlobalsCloseHighAuto.outconestackYOtherSide;
 
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.geometry.Vector2d;
@@ -147,7 +149,13 @@ public class TEN_CLOSE_HIGH extends LinearOpMode {
                 .build();
 
         Trajectory DriveOtherSide = drive.trajectoryBuilder(PreloadDrive.end())
-                .lineToLinearHeading(new Pose2d(outconestackXOtherSide, -17, 0 + AngleOffset))
+                .lineToLinearHeading(new Pose2d(-22*SideMultiplier, outconestackY, 0 + AngleOffset))
+
+                //.splineToSplineHeading(new Pose2d(-22 * SideMultiplier,-17, Math.toRadians(0)+AngleOffset),Math.toRadians(0)+AngleOffset)
+                //.splineToSplineHeading(new Pose2d(outconestackXOtherSide * SideMultiplier,outconestackY, Math.toRadians(180)),Math.toRadians(0))
+                .build();
+        Trajectory DriveAndTurn = drive.trajectoryBuilder(DriveOtherSide.end())
+                .lineToLinearHeading(new Pose2d(outconestackXOtherSide*SideMultiplier, outconestackY, outconeStackRotationOtherSide + AngleOffset))
                 .build();
 
         Trajectory ParkRight = drive.trajectoryBuilder(DriveOtherSide.end())
@@ -303,9 +311,9 @@ public class TEN_CLOSE_HIGH extends LinearOpMode {
                     
                 case OUTTAKE_CONE:
                     holdDrivebasePosition();
-                    if (GlobalTimer.milliseconds() - autoTimer > 0){
+                    //if (!OtherSide){
                         OuttakeCone(true); // next state is grab off
-                    }
+                    //}
                     break;
 
                 case GRAB_OFF_STACK:
@@ -344,7 +352,7 @@ public class TEN_CLOSE_HIGH extends LinearOpMode {
                                 outtake.IntakeArmTransfer();
                                 if ((outtake.getIntakeArmPos() > 138) && GlobalTimer.milliseconds()-autoTimer > 150){ // this reads the position of the intake arm
                                     outtake.IntakeSlideInternalPID(2,1);
-                                    if (outtake.intakeSlidePosition > -11 && outtake.intakeArmPosition > 195){ // this controls when the claw closes
+                                    if (outtake.intakeSlidePosition > -13 && outtake.intakeArmPosition > 195){ // this controls when the claw closes
                                         outtake.BraceActive();
                                         if (numCycles == 5){
                                             autoTimer = GlobalTimer.milliseconds(); // reset timer not rly needed here
@@ -405,20 +413,18 @@ public class TEN_CLOSE_HIGH extends LinearOpMode {
                             outtake.IntakeArmReady();
                             outtake.IntakeLift3();
                             autoTimer = GlobalTimer.milliseconds(); // reset timer
-                            drive.setPoseEstimate(new Pose2d(xPosition,yPosition, headingPosition));
                             currentState = AutoState.TURN_OTHER_STACK;
-                            // offsets the heading to avoid the annoying angle wrap glitch
+                            drive.followTrajectoryAsync(DriveAndTurn);
                         }
                     }
                     break;
                 case TURN_OTHER_STACK:
-                    // turns using my PID
-                    holdDrivebaseOtherSide();
+                    //holdDrivebaseOtherSide();
                     outtake.IntakeSlideInternalPID(1,1);
                     outtake.turretSpinInternalPID(0,1); // spin turret after
                     outtake.liftToInternalPID(0, 1);
                     //threshold is 1 inch, 2 degrees
-                    if ((drivebase.getDistanceFromPosition(outconestackXOtherSide * SideMultiplier, outconestackY, GlobalsCloseHighAuto.outconeStackRotationOtherSide * SideMultiplier + AngleOffset,xPosition,yPosition,headingPosition) < 1) && drivebase.getHeadingError() < Math.toRadians(Math.abs(1.3))){ // have to deal with the heading here, read telemetry for heading angle
+                    if (!drive.isBusy()){ // have to deal with the heading here, read telemetry for heading angle
                         autoTimer = GlobalTimer.milliseconds(); // reset timer
                         currentState = AutoState.OUTTAKE_CONE;
                         holdDrivebaseOtherSide(); // just so it runs it this loop and doesn't drift??
@@ -569,7 +575,7 @@ public class TEN_CLOSE_HIGH extends LinearOpMode {
     }
 
     public void holdDrivebaseOtherSide(){ // inputs the raw heading instead of corrected heading
-        drivebase.DriveToPositionAutonomous(outconestackXOtherSide * SideMultiplier,outconestackY,GlobalsCloseHighAuto.outconeStackRotationOtherSide * SideMultiplier + AngleOffset,xPosition,yPosition,headingPosition, 1,1); // last values are translationalspeed, and rotational speed
+        drivebase.DriveToPositionAutonomous(outconestackXOtherSide * SideMultiplier,outconestackY,Math.toRadians(180) * SideMultiplier + AngleOffset,xPosition,yPosition,headingPosition, 1,1); // last values are translationalspeed, and rotational speed
     }
 
     public void holdTurretPosition(){
