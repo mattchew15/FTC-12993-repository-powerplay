@@ -40,6 +40,8 @@ public class StormDrive extends LinearOpMode {
     double yPosition;
     double headingPosition;
     double correctedHeading;
+    double dt;
+    double prev_time;
 
     boolean one = true;
     boolean two = false;
@@ -48,6 +50,7 @@ public class StormDrive extends LinearOpMode {
 
     // uses the ElapsedTime class from the SDK to create variable GlobalTimer
     final int IntakeSlideOutTicks = -744; // make this max pull out distance
+    final int IntakeLiftHeightThreshold = 265;
 
     final int LiftHighPosition = -752;
     final int LiftMidPosition = -383;
@@ -74,6 +77,7 @@ public class StormDrive extends LinearOpMode {
     boolean BeaconScore; // if this variable is true the intake will not reset but it will hold the cone
     boolean SlidesToggleUp;
     boolean SlidesToggleDown;
+    boolean HoldHeadingPosition;
 
     // these variables are for the target positions for the lift and stuff, they may change throughout the program sequence
     int liftTargetPosition;
@@ -222,17 +226,24 @@ public class StormDrive extends LinearOpMode {
                 yPosition = poseEstimate.getY();
                 headingPosition = poseEstimate.getHeading();
                 correctedHeading = inputs.angleWrap(headingPosition);
+                dt = System.currentTimeMillis() - prev_time;
+                prev_time = System.currentTimeMillis();
+                telemetry.addData("Loop Time", dt);
+
 
                 telemetry.addData("x", xPosition);
                 telemetry.addData("y", yPosition);
                 telemetry.addData("heading", headingPosition);
                 telemetry.addData("corrected heading", correctedHeading);
+                //make a mode that can be removed
+              //  if (!inputs.DriveToPositionToggleMode){ // this line of code basically holds heading if the intake extension is out
+                    drivebase.Drive(gamepad1.left_stick_y,gamepad1.left_stick_x,intakeout == IntakeOut.INTAKE_SHOOT_OUT && gamepad1.left_trigger < 0.13? gamepad1.right_stick_x: gamepad1.right_stick_x);// TO HOLD PID HEADING+ holdHeading()
 
-                if (!inputs.DriveToPositionToggleMode){ // this line of code basically holds heading if the intake extension is out
-                    drivebase.Drive(gamepad1.left_stick_y,gamepad1.left_stick_x,intakeout == IntakeOut.INTAKE_SHOOT_OUT? gamepad1.right_stick_x+drivebase.holdHeading(0,headingPosition,1): gamepad1.right_stick_x);
-                }
                 if (gamepad1.dpad_left){
                     location.setPoseEstimate(resetPose);
+                }
+                if (gamepad1RightStickXBeingUsed()){
+                    HoldHeadingPosition = false; // if the gamepad sticks are moved then stop the automatic driving
                 }
 
                 //drivebase.motorDirectionTest(gamepad1.left_stick_y, gamepad1.left_stick_x,gamepad1.right_stick_x,gamepad1.right_stick_y);
@@ -251,7 +262,7 @@ public class StormDrive extends LinearOpMode {
                 telemetry.addData("Outtake Pickup state", outtakePickupState);
                 telemetry.addData("Ground Junctions deposit state", groundJunctionsDeposit);
                 telemetry.addData("IntakeLiftSequence", intakeLiftSequence);
-                telemetry.addData("GroundJunctionsToggleMode", inputs.GroundJunctionsToggleMode);
+                telemetry.addData("GroundJunctionToggleMode", inputs.GroundJunctionsToggleMode);
                 telemetry.addData("BeaconScore", BeaconScore);
                 //telemetry.addData("intakeTouch", outtake.intakeClawTouchPressed());
                 //telemetry.addData("gamepad2RightStickYPastDeadZone", gamepad2RightStickYPastDeadZone());
@@ -269,7 +280,7 @@ public class StormDrive extends LinearOpMode {
         switch (outtakeState) {
             case READY:
                 BeaconScore = false; // this is fine because it never reaches the ready stage when scoring beacon
-                driveToPosition(xTarget,yTarget,headingTarget,xPosition,yPosition,correctedHeading, 1,1, headingPosition);
+                //driveToPosition(xTarget,yTarget,headingTarget,xPosition,yPosition,correctedHeading, 1,1, headingPosition);
                 if (intakeout == IntakeOut.READY && !BeaconScore){ // this should reduce any conflicting commands with the intakeshoot out thing
                     outtake.IntakeClawClose();
                     outtake.IntakeArmReady();
@@ -292,9 +303,9 @@ public class StormDrive extends LinearOpMode {
                     outtake.OuttakeSlideReady();
                     outtake.OuttakeClawOpen();
                     if (GlobalTimer.milliseconds() - OuttakeTimer > 20){ // this might not return if b is pressed when its picking up cones or something - need to test
-                        outtake.BraceReady();
                         if (GlobalTimer.milliseconds() - OuttakeTimer > 500){
                             outtake.OuttakeArmReady();
+                            outtake.BraceReady();
                         }
                     }
                 }
@@ -332,16 +343,14 @@ public class StormDrive extends LinearOpMode {
             case LIFT_CONE:
                 outtake.IntakeClawClose();
                 drivebase.intakeSpin(0);
-                outtake.liftTo(BeaconScore? 6:3, outtake.liftPosition,1);
+                outtake.liftToInternalPID(BeaconScore? 7:3,1);
                 outtake.turretSpinInternalPID(0,1);
                 if (GlobalTimer.milliseconds() - OuttakeTimer > 105){ // old time was 170
                     outtake.IntakeLiftTransfer();
-                    if (outtake.intakeLiftPosition > 254){ // this is actually the intake lift
+                    if (outtake.intakeLiftPosition > IntakeLiftHeightThreshold){ // this is actually the intake lift
                         outtake.IntakeArmTransfer();
-                        if ((BeaconScore? GlobalTimer.milliseconds() - OuttakeTimer > 700 :outtake.intakeArmPosition > 196)){ // put the or statement here for the arm being in the right position
+                        if ((BeaconScore? GlobalTimer.milliseconds() - OuttakeTimer > 700 :outtake.intakeArmPosition > 197)){ // put the or statement here for the arm being in the right position
                             if (GlobalTimer.milliseconds() - OuttakeTimer > 0){ //used to be lift target
-                                outtake.OuttakeClawClose();
-                                outtake.BraceActive();
                                 outtakeState = OuttakeState.CLAW_GRIP_TRANSFER_START;
                                 OuttakeTimer = GlobalTimer.milliseconds(); // basically grabs in this state
                                 if (BeaconScore){
@@ -355,12 +364,13 @@ public class StormDrive extends LinearOpMode {
                 break;
             case CLAW_GRIP_TRANSFER_START: // fix so if i don't go
                 intakeClipHoldorNotHold(4);
-                if ((outtake.intakeArmPosition > 196) && outtake.liftTargetReached() && GlobalTimer.milliseconds() - OuttakeTimer > 80){  // this is actually used as if you are transferring from intake out pickup there is a inbuilt delay - this is an old comment for when there was global timer = 0 - check if intake slidse are all the way in
+                if ((outtake.intakeArmPosition > 197) && outtake.liftPosition > -21 && outtake.intakeLiftPosition > 275 && GlobalTimer.milliseconds() - OuttakeTimer > 80){  // this is actually used as if you are transferring from intake out pickup there is a inbuilt delay - this is an old comment for when there was global timer = 0 - check if intake slidse are all the way in
                     outtake.OuttakeClawClose();
+                    outtake.BraceActive();
                     outtakeState = OuttakeState.CLAW_GRIP_TRANSFER_END;
                     OuttakeTimer = GlobalTimer.milliseconds(); // reset timer
-                } else {
-                    outtake.liftTo(3, outtake.liftPosition,1);
+                } else if (!outtake.liftTargetReached()){
+                    outtake.liftTo(10, outtake.liftPosition,1); // give it an extra nudge
                     outtake.turretSpin(0,outtake.turretPosition,1);
                     //outtake.IntakeSlideInternalPID(1,1);
                 }
@@ -476,6 +486,7 @@ public class StormDrive extends LinearOpMode {
                 if (BeaconScore){
                     IntakeReady = false;
                 }
+                HoldHeadingPosition = false;
                 break;
             case RETURN:
                 // make sure to go to arm reset state for all subsystems
@@ -540,12 +551,13 @@ public class StormDrive extends LinearOpMode {
                     intakeout = IntakeOut.INTAKE_SHOOT_OUT; // this will start the timer and the inputs function will also go to 2 at the same time
                     IntakeOutTimer = GlobalTimer.milliseconds();
                     IntakeReady = false;
+                    HoldHeadingPosition = true;
                 }
                 break;
             case INTAKE_SHOOT_OUT:
                 outtake.IntakeClipOpen(); // time for intake clip to open
                 if (GlobalTimer.milliseconds() - IntakeOutTimer > 150){
-                    outtake.IntakeSlideTo(IntakeSlideOutTicks, outtake.intakeSlidePosition, 1);
+                    outtake.IntakeSlideTo(IntakeSlideOutTicks,outtake.intakeSlidePosition, 1);
                     // drivebase.intakeSpin(-0.4); // helps the slides go out
                     if (outtake.intakeSlidePosition < -100) {
                         outtake.IntakeClawOpenHard();
@@ -564,8 +576,8 @@ public class StormDrive extends LinearOpMode {
                 if (GlobalTimer.milliseconds() - IntakeOutTimer > 200){ // wait for the claw to grab
                     outtake.IntakeLiftTransfer();
                     if (inputs.CycleState == 0){ // if the claw is not picking up from the stack
-                        intakeClipHoldorNotHold(5); // hard here
-                        if (GlobalTimer.milliseconds() - IntakeOutTimer > 260){
+                        intakeClipHoldorNotHold(6); // hard here
+                        if (outtake.intakeLiftPosition > IntakeLiftHeightThreshold){
                             outtake.IntakeArmTransfer();
                         }
                         if (outtake.intakeSlidePosition > -4 && outtake.intakeArmPosition > 196) {
@@ -577,10 +589,11 @@ public class StormDrive extends LinearOpMode {
                                 intakeout = IntakeOut.IDLE; // main state machine must set everything to ready in a function
                             }
                         }
-                    } else { // if the thing is picking up from the stack
+                    } /*
+                    else { // if the thing is picking up from the stack
                         outtake.IntakeArmTransfer();
                         if (GlobalTimer.milliseconds() - IntakeOutTimer > 500){ // if this is reached
-                            intakeClipHoldorNotHold(5); // hard here
+                            intakeClipHoldorNotHold(6); // hard here
                             if (outtake.intakeSlidePosition > -4 && outtake.intakeArmPosition > 196) {
                                 IntakeReady = true;
                                 if (IntakeReady){ // if the slides are all the way in
@@ -594,6 +607,7 @@ public class StormDrive extends LinearOpMode {
                             outtake.IntakeSlideTo(IntakeSlideOutTicks + GlobalsCloseHighAuto.IntakeSlideBackFromStack, outtake.intakeSlidePosition, 0.8);
                         }
                     }
+                    */
                 } else {
                     outtake.IntakeClipOpen();
                 }
@@ -664,7 +678,7 @@ public class StormDrive extends LinearOpMode {
                 if (GlobalTimer.milliseconds() - ConeDepositTimer > 100){
                     outtake.OuttakeClawOpenHard();
                     if (GlobalTimer.milliseconds() - ConeDepositTimer > 100){
-                        outtake.BraceReady(); // might need a new position for this
+                        outtake.BraceReadyAuto(); // might need a new position for this
                         if (GlobalTimer.milliseconds() - ConeDepositTimer > 350){
                             outtake.liftTo(0, outtake.liftPosition, 1);
                             outtake.turretSpin(0, outtake.turretPosition,1);
@@ -678,7 +692,7 @@ public class StormDrive extends LinearOpMode {
             case ARM_RESET:
                 outtake.liftTo(0, outtake.liftPosition, 1);
                 outtake.turretSpin(0, outtake.turretPosition,1);
-                outtake.BraceReady();
+                //outtake.BraceReady();
                 outtake.OuttakeClawOpen();
                 outtake.OuttakeArmReady();
                 outtake.OuttakeSlideReady();
@@ -862,7 +876,7 @@ public class StormDrive extends LinearOpMode {
                 outtake.IntakeClawClose();
                 if (GlobalTimer.milliseconds() - IntakeLeftSequenceTimer > 170){
                     outtake.IntakeLiftTransfer();
-                    if (outtake.intakeLiftPosition > 254){ // this is actually the intake lift
+                    if (outtake.intakeLiftPosition > IntakeLiftHeightThreshold){ // this is actually the intake lift
                         outtake.IntakeArmConeHoldForTransfer();
                         BeaconScore = true;
 
@@ -943,9 +957,25 @@ public class StormDrive extends LinearOpMode {
 
         }
     }
+    public double holdHeading(){
+            if (HoldHeadingPosition){
+               return drivebase.holdHeading(0,correctedHeading,1);
+            } else {
+                return 0;
+            }
+    }
+
     public boolean gamepad1SticksBeingUsed(){
         double gamepadThresholdDistance = 0.13;
         if (gamepad1.right_stick_x > gamepadThresholdDistance || gamepad1.right_stick_x < -gamepadThresholdDistance || gamepad1.left_stick_y > gamepadThresholdDistance || gamepad1.left_stick_y < -gamepadThresholdDistance || gamepad1.left_stick_x > gamepadThresholdDistance || gamepad1.left_stick_x < -gamepadThresholdDistance) { // makes the deadzone for the controller more
+            return true;
+        } else {
+            return false;
+        }
+    }
+    public boolean gamepad1RightStickXBeingUsed(){
+        double gamepadThresholdDistance = 0.17;
+        if (gamepad1.right_stick_x > gamepadThresholdDistance || gamepad1.right_stick_x < -gamepadThresholdDistance) { // makes the deadzone for the controller more
             return true;
         } else {
             return false;

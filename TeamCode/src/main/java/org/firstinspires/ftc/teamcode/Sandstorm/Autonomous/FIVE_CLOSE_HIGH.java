@@ -4,6 +4,7 @@ import static org.firstinspires.ftc.teamcode.Sandstorm.GlobalsCloseHighAuto.outc
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.geometry.Vector2d;
 import com.acmerobotics.roadrunner.trajectory.Trajectory;
+import com.qualcomm.hardware.lynx.LynxModule;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.util.ElapsedTime;
@@ -44,6 +45,8 @@ public class FIVE_CLOSE_HIGH extends LinearOpMode {
     double xPosition;
     double yPosition;
     double headingPosition;
+    double dt;
+    double prev_time;
 
     // create class instances
     Outtake outtake = new Outtake();
@@ -106,6 +109,10 @@ public class FIVE_CLOSE_HIGH extends LinearOpMode {
 
     @Override
     public void runOpMode() throws InterruptedException {
+        for (LynxModule module : hardwareMap.getAll(LynxModule.class)) { // turns on bulk reads cannot read or write to the same motor mor ethan once or it will issues multiple bulk reads
+            module.setBulkCachingMode(LynxModule.BulkCachingMode.AUTO);
+        } //
+
         int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
         camera = OpenCvCameraFactory.getInstance().createWebcam(hardwareMap.get(WebcamName.class, webcamname), cameraMonitorViewId);
         aprilTagDetectionPipeline = new AprilTagDetectionPipeline(tagsize, fx, fy, cx, cy);
@@ -244,6 +251,9 @@ public class FIVE_CLOSE_HIGH extends LinearOpMode {
             Pose2d poseEstimate = drive.getPoseEstimate();
 
             // Print pose to telemetry
+            dt = System.currentTimeMillis() - prev_time;
+            prev_time = System.currentTimeMillis();
+            telemetry.addData("Loop Time", dt);
 
             xPosition = poseEstimate.getX();
             yPosition = poseEstimate.getY();

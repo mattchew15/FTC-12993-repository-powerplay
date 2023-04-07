@@ -96,9 +96,9 @@ public class PIDmotortest extends LinearOpMode {
                 }else if (gamepad1.dpad_left)
                     outtake.turretSpin(GlobalsCloseHighAuto.TurretRightposition, outtake.turretPosition, 1);
                 if (gamepad1.right_bumper){
-                    outtake.liftToInternalPID(-500, 1);
+                    outtake.turretSpinInternalPID(-23, 1);
                 } else if (gamepad1.left_bumper){
-                    outtake.liftToInternalPID(0, 1);
+                    outtake.turretSpinInternalPID(0, 1);
                 }
 
                 if (gamepad1.right_stick_button){
