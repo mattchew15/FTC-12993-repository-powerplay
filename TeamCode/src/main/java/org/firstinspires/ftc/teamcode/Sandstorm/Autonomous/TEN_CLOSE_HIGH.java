@@ -8,6 +8,7 @@ import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.geometry.Vector2d;
 import com.acmerobotics.roadrunner.trajectory.Trajectory;
 import com.acmerobotics.roadrunner.util.Angle;
+import com.outoftheboxrobotics.photoncore.PhotonCore;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.util.ElapsedTime;
@@ -57,6 +58,8 @@ public class TEN_CLOSE_HIGH extends LinearOpMode {
     AprilTagDetectionPipeline aprilTagDetectionPipeline;
 
     static final double FEET_PER_METER = 3.28084;
+    double prev_time = System.currentTimeMillis();
+    double dt;
 
     // Lens intrinsics
     // UNITS ARE PIXELS
@@ -228,6 +231,8 @@ public class TEN_CLOSE_HIGH extends LinearOpMode {
             outtake.OuttakeArmReady(); // prevents it from doing that thing with lose ppm protection
         }
 
+        PhotonCore.enable(); // not sure if this will make it better
+        //PhotonCore.EXPANSION_HUB = null;
 
         waitForStart();
         if (isStopRequested()) return;
@@ -254,6 +259,9 @@ public class TEN_CLOSE_HIGH extends LinearOpMode {
         while (opModeIsActive() && !isStopRequested()) {
             // Read pose
             Pose2d poseEstimate = drive.getPoseEstimate();
+            dt = System.currentTimeMillis() - prev_time;
+            prev_time = System.currentTimeMillis();
+            telemetry.addData("Loop Time", dt);
 
             // Print pose to telemetry
 
@@ -353,7 +361,7 @@ public class TEN_CLOSE_HIGH extends LinearOpMode {
                             }
                             if (GlobalTimer.milliseconds()-autoTimer > 110){
                                 outtake.IntakeArmTransfer();
-                                if ((outtake.getIntakeArmPos() > 127) && GlobalTimer.milliseconds()-autoTimer > 175){ // this reads the position of the intake arm
+                                if ((outtake.intakeArmPosition > 127) && GlobalTimer.milliseconds()-autoTimer > 175){ // this reads the position of the intake arm
                                     outtake.IntakeSlideInternalPID(2,1);
                                     if (outtake.intakeSlidePosition > -13 && outtake.intakeArmPosition > 195){ // this controls when the claw closes
                                         outtake.BraceActive();

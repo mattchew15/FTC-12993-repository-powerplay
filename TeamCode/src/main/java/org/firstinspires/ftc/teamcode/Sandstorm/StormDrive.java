@@ -1,9 +1,6 @@
 package org.firstinspires.ftc.teamcode.Sandstorm;
 
 // Old imports, some not needed
-import static org.firstinspires.ftc.robotcore.external.BlocksOpModeCompanion.gamepad1;
-import static org.firstinspires.ftc.robotcore.external.BlocksOpModeCompanion.gamepad2;
-import static org.firstinspires.ftc.robotcore.external.BlocksOpModeCompanion.hardwareMap;
 
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.qualcomm.hardware.lynx.LynxModule;
@@ -12,8 +9,6 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
-import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
-import org.firstinspires.ftc.teamcode.Dune.DuneDrive;
 import org.firstinspires.ftc.teamcode.drive.StandardTrackingWheelLocalizer;
 
 
@@ -233,8 +228,8 @@ public class StormDrive extends LinearOpMode {
                 telemetry.addData("heading", headingPosition);
                 telemetry.addData("corrected heading", correctedHeading);
 
-                if (!inputs.DriveToPositionToggleMode){
-                    drivebase.Drive(gamepad1.left_stick_y,gamepad1.left_stick_x,gamepad1.right_stick_x);
+                if (!inputs.DriveToPositionToggleMode){ // this line of code basically holds heading if the intake extension is out
+                    drivebase.Drive(gamepad1.left_stick_y,gamepad1.left_stick_x,intakeout == IntakeOut.INTAKE_SHOOT_OUT? gamepad1.right_stick_x+drivebase.holdHeading(0,headingPosition,1): gamepad1.right_stick_x);
                 }
                 if (gamepad1.dpad_left){
                     location.setPoseEstimate(resetPose);
@@ -371,7 +366,7 @@ public class StormDrive extends LinearOpMode {
                 }
                 break;
             case CLAW_GRIP_TRANSFER_END: // fix so if i don't go
-                intakeClipHoldorNotHold(4); // old timer values - 200 ms and 300 ms
+                intakeClipHoldorNotHold(3); // old timer values - 200 ms and 300 ms
                 if (GlobalTimer.milliseconds() - OuttakeTimer > 90 || outtake.getIntakeClawPosition() == outtake.IntakeClawOpenHardPos){ // this is so that if the claw has already released don't waste time waiting
                     outtake.IntakeClawOpenHard();
                     if ((GlobalTimer.milliseconds() - OuttakeTimer > 155 || outtake.getIntakeClawPosition() == outtake.IntakeClawOpenHardPos) && ((liftTargetPosition != 0) || inputs.GroundJunctionsToggleMode)){ // make sure height is selected before transferring
@@ -569,7 +564,7 @@ public class StormDrive extends LinearOpMode {
                 if (GlobalTimer.milliseconds() - IntakeOutTimer > 200){ // wait for the claw to grab
                     outtake.IntakeLiftTransfer();
                     if (inputs.CycleState == 0){ // if the claw is not picking up from the stack
-                        intakeClipHoldorNotHold(6); // hard here
+                        intakeClipHoldorNotHold(5); // hard here
                         if (GlobalTimer.milliseconds() - IntakeOutTimer > 260){
                             outtake.IntakeArmTransfer();
                         }
@@ -585,7 +580,7 @@ public class StormDrive extends LinearOpMode {
                     } else { // if the thing is picking up from the stack
                         outtake.IntakeArmTransfer();
                         if (GlobalTimer.milliseconds() - IntakeOutTimer > 500){ // if this is reached
-                            intakeClipHoldorNotHold(6); // hard here
+                            intakeClipHoldorNotHold(5); // hard here
                             if (outtake.intakeSlidePosition > -4 && outtake.intakeArmPosition > 196) {
                                 IntakeReady = true;
                                 if (IntakeReady){ // if the slides are all the way in
@@ -1075,7 +1070,7 @@ public class StormDrive extends LinearOpMode {
             outtake.intakeSlideMotorRawControl(0);
         } else {
             outtake.IntakeClipOpen(); // this might break something when as the intake slides won't go in, but stops jittering
-            outtake.IntakeSlideTo(slideToPosition, outtake.intakeSlidePosition,1);
+            outtake.IntakeSlideInternalPID(slideToPosition,1);
         }
     }
     public void IntakeHeightChange(){

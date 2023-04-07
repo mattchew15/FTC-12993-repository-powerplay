@@ -1,15 +1,10 @@
 package org.firstinspires.ftc.teamcode.Sandstorm;
 
 import com.acmerobotics.dashboard.config.Config;
-import com.qualcomm.hardware.bosch.BNO055IMU;
-import com.qualcomm.hardware.bosch.JustLoggingAccelerationIntegrator;
-import com.qualcomm.hardware.lynx.LynxModule;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
-import com.qualcomm.robotcore.hardware.Servo;
 
-import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 import org.firstinspires.ftc.teamcode.Dune.PID;
 
 @Config // Allows dashboard to tune
@@ -114,6 +109,11 @@ public class DriveBase {  // no constructor for this class
         BL.setPower((x_rotated - y_rotated + theta));
         FR.setPower((x_rotated - y_rotated - theta));
         BR.setPower((x_rotated + y_rotated - theta));
+    }
+
+    public double holdHeading(double thetaTarget, double robotTheta, double maxRotationalSpeed){
+        double thetaOutput = -drivebaseThetaPID.update(thetaTarget,robotTheta,maxRotationalSpeed); // this pid should probably be different
+        return thetaOutput;
     }
 
     public double getDistanceFromPosition(double xTarget, double yTarget, double thetaTarget, double xRobotPosition, double yRobotPosition, double robotTheta){
