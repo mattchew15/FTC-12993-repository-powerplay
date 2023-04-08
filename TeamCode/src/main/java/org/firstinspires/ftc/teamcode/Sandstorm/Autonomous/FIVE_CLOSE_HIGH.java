@@ -353,7 +353,7 @@ public class FIVE_CLOSE_HIGH extends LinearOpMode {
                             outtake.IntakeLiftTransfer();
                             if (GlobalTimer.milliseconds()-autoTimer > 230){
                                 outtake.IntakeArmTransfer();
-                                if ((outtake.getIntakeArmPos() > 150) && GlobalTimer.milliseconds()-autoTimer > 400){ // this reads the position of the intake arm
+                                if ((outtake.getIntakeArmPos() > 150) && GlobalTimer.milliseconds()-autoTimer > 500){ // this reads the position of the intake arm
                                     outtake.IntakeSlideInternalPID(2,1);
                                     if (outtake.intakeSlidePosition > -2 && outtake.getIntakeArmPos() > 195){ // this controls when the claw closes
                                         autoTimer = GlobalTimer.milliseconds(); // reset timer not rly needed here
@@ -362,7 +362,7 @@ public class FIVE_CLOSE_HIGH extends LinearOpMode {
                                         outtake.BraceActive();
                                     }
                                 } else {
-                                    outtake.IntakeSlideInternalPID(globalsCloseHighAuto.IntakeSlideBackFromStack, 0.4); // this pulls slides in while doing stuff
+                                    outtake.IntakeSlideInternalPID(globalsCloseHighAuto.IntakeSlideBackFromStack, 0.35); // this pulls slides in while doing stuff
                                 }
                             }
                         } else {

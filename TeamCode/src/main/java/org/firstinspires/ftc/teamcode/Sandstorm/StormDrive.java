@@ -53,9 +53,9 @@ public class StormDrive extends LinearOpMode {
     final int IntakeSlideOutTicks = -744; // make this max pull out distance
     final int IntakeLiftHeightThreshold = 265;
 
-    final int LiftHighPosition = -740;
-    final int LiftMidPosition = -383;
-    final int LiftLowPosition = -27;
+    final int LiftHighPosition = -752;
+    final int LiftMidPosition = -378;
+    final int LiftLowPosition = -26;
     final int LiftGroundPosition = -30;
 
     final int LiftUpperLimit = -810;

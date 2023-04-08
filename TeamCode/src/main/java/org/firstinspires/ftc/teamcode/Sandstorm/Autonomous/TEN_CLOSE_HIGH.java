@@ -343,8 +343,6 @@ public class TEN_CLOSE_HIGH extends LinearOpMode {
                     } else {
                         outtake.IntakeSlideTo(GlobalsCloseHighAuto.IntakeSlideNotQuiteOutTicks, outtake.intakeSlidePosition, 1); // slower
                     }
-
-
                     break;
                 case AFTER_GRAB_OFF_STACK: // grabs off the stack
                     outtake.OuttakeClawOpen();

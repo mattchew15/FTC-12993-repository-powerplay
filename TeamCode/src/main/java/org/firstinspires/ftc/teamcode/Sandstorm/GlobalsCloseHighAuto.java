@@ -17,7 +17,7 @@ public class GlobalsCloseHighAuto {
     public static double TurretLeftPositionInternalPid = -21;
 
     public static int IntakeSlideNotQuiteOutTicks = IntakeSlideOutTicks + 88;
-    public static int IntakeSlideBackFromStack = IntakeSlideOutTicks + 69;
+    public static int IntakeSlideBackFromStack = IntakeSlideOutTicks + 68;
 
     // webcam names
     public String WebCamLeftName  = "WebcamLeft";
