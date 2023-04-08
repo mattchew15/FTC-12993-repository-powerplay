@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode.Sandstorm;
 // Old imports, some not needed
 
 import com.acmerobotics.roadrunner.geometry.Pose2d;
+import com.outoftheboxrobotics.photoncore.PhotonCore;
 import com.qualcomm.hardware.lynx.LynxModule;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
@@ -52,7 +53,7 @@ public class StormDrive extends LinearOpMode {
     final int IntakeSlideOutTicks = -744; // make this max pull out distance
     final int IntakeLiftHeightThreshold = 265;
 
-    final int LiftHighPosition = -752;
+    final int LiftHighPosition = -740;
     final int LiftMidPosition = -383;
     final int LiftLowPosition = -27;
     final int LiftGroundPosition = -30;
@@ -201,9 +202,11 @@ public class StormDrive extends LinearOpMode {
         // this is basically init, all setup, hardware classes etc get initialized here
         drivebase.Drivebase_init(hardwareMap);
         outtake.Outtake_init(hardwareMap);
-        for (LynxModule module : hardwareMap.getAll(LynxModule.class)) { // turns on bulk reads cannot read or write to the same motor mor ethan once or it will issues multiple bulk reads
-            module.setBulkCachingMode(LynxModule.BulkCachingMode.AUTO);
-        } //
+        //for (LynxModule module : hardwareMap.getAll(LynxModule.class)) { // turns on bulk reads cannot read or write to the same motor mor ethan once or it will issues multiple bulk reads
+         //   module.setBulkCachingMode(LynxModule.BulkCachingMode.AUTO);
+       // } //
+        PhotonCore.enable(); // this should do bulk reads - if it doesn't try both
+
         StandardTrackingWheelLocalizer location = new StandardTrackingWheelLocalizer(hardwareMap);
 
         // waits for user to press start on driverhub
@@ -292,7 +295,7 @@ public class StormDrive extends LinearOpMode {
                 }
 
                 if (outtakePickupState == OuttakePickupState.READY){ // so it doesn't conflict when lift has to lift up to move counterspringing arm
-                    outtake.liftToInternalPID(2,1); // this might reduce the jitters at the start from kd - I Have no clue why
+                    outtake.liftToInternalPID(0,1); // this might reduce the jitters at the start from kd - I Have no clue why
                     liftTargetPosition = 0; // if lift target position is zero, then the transfer won't happen
                     inputs.GroundJunctionsToggleMode = false; // same with the ground junctions
                 }
@@ -331,7 +334,7 @@ public class StormDrive extends LinearOpMode {
             case INTAKE:
                 drivebase.intakeSpin(1); // spin the intake
                 outtake.IntakeClawOpen();
-                outtake.liftTo(0, outtake.liftPosition,1);
+                outtake.liftTo(1, outtake.liftPosition,1);
                 // no need to put ready stuff on because there will be nothing conflicting with it
                 if (outtake.intakeClawTouchPressed() || gamepad2.left_bumper){
                     outtakeState = OuttakeState.LIFT_CONE;
@@ -343,7 +346,7 @@ public class StormDrive extends LinearOpMode {
             case LIFT_CONE:
                 outtake.IntakeClawClose();
                 drivebase.intakeSpin(0);
-                outtake.liftToInternalPID(BeaconScore? 7:3,1);
+                outtake.liftTo(BeaconScore? 7:3, outtake.liftPosition,1);
                 outtake.turretSpinInternalPID(0,1);
                 if (GlobalTimer.milliseconds() - OuttakeTimer > 105){ // old time was 170
                     outtake.IntakeLiftTransfer();
@@ -364,13 +367,13 @@ public class StormDrive extends LinearOpMode {
                 break;
             case CLAW_GRIP_TRANSFER_START: // fix so if i don't go
                 intakeClipHoldorNotHold(4);
-                if ((outtake.intakeArmPosition > 197) && outtake.liftPosition > -21 && outtake.intakeLiftPosition > 275 && GlobalTimer.milliseconds() - OuttakeTimer > 80){  // this is actually used as if you are transferring from intake out pickup there is a inbuilt delay - this is an old comment for when there was global timer = 0 - check if intake slidse are all the way in
+                if ((outtake.intakeArmPosition > 197) && outtake.intakeLiftPosition > 275 && GlobalTimer.milliseconds() - OuttakeTimer > 80){  // this is actually used as if you are transferring from intake out pickup there is a inbuilt delay - this is an old comment for when there was global timer = 0 - check if intake slidse are all the way in
                     outtake.OuttakeClawClose();
                     outtake.BraceActive();
                     outtakeState = OuttakeState.CLAW_GRIP_TRANSFER_END;
                     OuttakeTimer = GlobalTimer.milliseconds(); // reset timer
-                } else if (!outtake.liftTargetReached()){
-                    outtake.liftTo(10, outtake.liftPosition,1); // give it an extra nudge
+                } else if (outtake.liftPosition < -9){
+                    outtake.liftTo(500, outtake.liftPosition,1); // give it an extra nudge
                     outtake.turretSpin(0,outtake.turretPosition,1);
                     //outtake.IntakeSlideInternalPID(1,1);
                 }

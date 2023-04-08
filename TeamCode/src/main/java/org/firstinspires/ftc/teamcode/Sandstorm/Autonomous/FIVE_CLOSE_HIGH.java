@@ -1,9 +1,11 @@
 package org.firstinspires.ftc.teamcode.Sandstorm.Autonomous;
+import static org.firstinspires.ftc.teamcode.Sandstorm.GlobalsCloseHighAuto.TurretLeftPositionInternalPid;
 import static org.firstinspires.ftc.teamcode.Sandstorm.GlobalsCloseHighAuto.outconestackY;
 
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.geometry.Vector2d;
 import com.acmerobotics.roadrunner.trajectory.Trajectory;
+import com.outoftheboxrobotics.photoncore.PhotonCore;
 import com.qualcomm.hardware.lynx.LynxModule;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
@@ -73,6 +75,7 @@ public class FIVE_CLOSE_HIGH extends LinearOpMode {
 
 
     enum AutoState {
+        DELAY,
         PRELOAD_DRIVE,
         OUTTAKE_CONE_AFTER_PRELOAD,
         OUTTAKE_CONE,
@@ -97,7 +100,7 @@ public class FIVE_CLOSE_HIGH extends LinearOpMode {
         outtake.hardwareSetup();
         drivebase.motorsSetup();
         inputs.inputsSetup(); // hopefully won't conflict
-        currentState = AutoState.PRELOAD_DRIVE; // this go here?
+        currentState = AutoState.DELAY; // this go here?
         autoTimer = 0;
         numCycles = 0;
         slowerVelocityConstraint = 12;
@@ -109,9 +112,7 @@ public class FIVE_CLOSE_HIGH extends LinearOpMode {
 
     @Override
     public void runOpMode() throws InterruptedException {
-        for (LynxModule module : hardwareMap.getAll(LynxModule.class)) { // turns on bulk reads cannot read or write to the same motor mor ethan once or it will issues multiple bulk reads
-            module.setBulkCachingMode(LynxModule.BulkCachingMode.AUTO);
-        } //
+        PhotonCore.enable();
 
         int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
         camera = OpenCvCameraFactory.getInstance().createWebcam(hardwareMap.get(WebcamName.class, webcamname), cameraMonitorViewId);
@@ -243,8 +244,7 @@ public class FIVE_CLOSE_HIGH extends LinearOpMode {
         }
 
         // runs instantly once
-        drive.followTrajectoryAsync(PreloadDrive);
-        autoTimer = GlobalTimer.milliseconds(); // reset timer not rly needed here
+        autoTimer = GlobalTimer.milliseconds();
 
         while (opModeIsActive() && !isStopRequested()) {
             // Read pose
@@ -287,6 +287,16 @@ public class FIVE_CLOSE_HIGH extends LinearOpMode {
             outtake.ConeArmReady();
             // main switch statement logic
             switch (currentState) {
+                case DELAY:
+                    outtake.OuttakeClawClose();
+                    outtake.IntakeClipOpen();
+                    outtake.OuttakeArmReady();
+                    if (GlobalTimer.milliseconds() - autoTimer > 6000){
+                        autoTimer = GlobalTimer.milliseconds(); // reset timer not rly needed here
+                        currentState = AutoState.PRELOAD_DRIVE;
+                        drive.followTrajectoryAsync(PreloadDrive);
+                    }
+                    break;
                 case PRELOAD_DRIVE:
                     outtake.IntakeSlideInternalPID(0,1); // might break something
                     outtake.liftToInternalPID(0,1);
@@ -313,7 +323,7 @@ public class FIVE_CLOSE_HIGH extends LinearOpMode {
                 case GRAB_OFF_STACK:
                     holdDrivebasePosition(); // dropping cone
                     dropCone(300);
-                    if (GlobalTimer.milliseconds() - autoTimer < 300){
+                    if (GlobalTimer.milliseconds() - autoTimer > 300){
                         outtake.liftToInternalPID(GlobalsCloseHighAuto.LiftHighPosition, 1);
                         holdTurretPosition();
                     }
@@ -343,7 +353,7 @@ public class FIVE_CLOSE_HIGH extends LinearOpMode {
                             outtake.IntakeLiftTransfer();
                             if (GlobalTimer.milliseconds()-autoTimer > 230){
                                 outtake.IntakeArmTransfer();
-                                if ((outtake.getIntakeArmPos() > 150) && GlobalTimer.milliseconds()-autoTimer > 270){ // this reads the position of the intake arm
+                                if ((outtake.getIntakeArmPos() > 150) && GlobalTimer.milliseconds()-autoTimer > 400){ // this reads the position of the intake arm
                                     outtake.IntakeSlideInternalPID(2,1);
                                     if (outtake.intakeSlidePosition > -2 && outtake.getIntakeArmPos() > 195){ // this controls when the claw closes
                                         autoTimer = GlobalTimer.milliseconds(); // reset timer not rly needed here
@@ -395,7 +405,7 @@ public class FIVE_CLOSE_HIGH extends LinearOpMode {
                 case RETRACT_SLIDES:
                     holdDrivebasePosition();
                     dropCone(300);
-                    if (GlobalTimer.milliseconds() - autoTimer < 300){
+                    if (GlobalTimer.milliseconds() - autoTimer > 300){
                         outtake.liftToInternalPID(GlobalsCloseHighAuto.LiftHighPosition, 1);
                         holdTurretPosition();
                     }
@@ -523,7 +533,7 @@ public class FIVE_CLOSE_HIGH extends LinearOpMode {
         drivebase.DriveToPositionAutonomous(globalsCloseHighAuto.outconestackX * SideMultiplier, globalsCloseHighAuto.outconestackY,globalsCloseHighAuto.outconeStackRotation* SideMultiplier + AngleOffset,xPosition,yPosition,correctedHeading, 1,1); // last values are translationalspeed, and rotational speed
     }
     public void holdTurretPosition(){
-        outtake.turretSpin(globalsCloseHighAuto.TurretLeftposition * SideMultiplier, outtake.turretPosition,1);
+        outtake.turretSpinInternalPID(TurretLeftPositionInternalPid * SideMultiplier,1);
     }
 }
 

@@ -8,11 +8,13 @@ public class GlobalsCloseHighAuto {
 
     // encoder positions
     public static int IntakeSlideOutTicks = -600;
-    public static int LiftHighPosition = -685;
+    public static int LiftHighPosition = -698;
     public static int LiftHighPosition10 = -760;
 
     public static double TurretLeftposition = -5.55;
     public static double TurretRightposition = -TurretLeftposition;
+
+    public static double TurretLeftPositionInternalPid = -21;
 
     public static int IntakeSlideNotQuiteOutTicks = IntakeSlideOutTicks + 88;
     public static int IntakeSlideBackFromStack = IntakeSlideOutTicks + 69;
@@ -28,7 +30,7 @@ public class GlobalsCloseHighAuto {
     public static double startPoseAngle = Math.toRadians(0);
     public static double outconestackX = 42;
     public static double outconestackY = -17.7;
-    public static double outconestackYOtherSide = -16.9;
+    public static double outconestackYOtherSide = -16.85;
     public static double outconeStackRotation = Math.toRadians(-1.2);
     // add 180 to angles
 

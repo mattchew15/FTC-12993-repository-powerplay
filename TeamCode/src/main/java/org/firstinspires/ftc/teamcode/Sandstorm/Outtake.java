@@ -39,7 +39,7 @@ public class Outtake {  // no constructor for this class
 
     //Servo Positions for outtake
     public static double OuttakeClawOpenPos = 0.58, OuttakeClawClosedPos = 0.45, OuttakeClawOpenHardPos = 0.7;
-    public static double OuttakeArmReadyPos = 0.732, OuttakeArmDepositPos = 0.095, OuttakeArmPickupPos = 0.095, OuttakeArmScorePos = 0.22, OuttakeArmScoreAutoPos = 0.24, OuttakeArmSlightlyTiltedUpPos = 0.3, OuttakeArmUprightPos = 0.53;
+    public static double OuttakeArmReadyPos = 0.732, OuttakeArmDepositPos = 0.095, OuttakeArmPickupPos = 0.095, OuttakeArmScorePos = 0.22, OuttakeArmScoreAutoPos = 0.23, OuttakeArmSlightlyTiltedUpPos = 0.3, OuttakeArmUprightPos = 0.53;
     public static double BraceReadyPos = 0.55,BraceReadyAutoPos = 0.25, BraceActivePos = 0.72, BraceActivePosAuto = 0.64, BraceTuckedPos = 0, BraceFlipConePos = 0.6;
     public static double OuttakeSlideReadyPos = 0.03, OuttakeSlideScorePos = 0.03, OuttakeSlideScoreDropPos = 0.16, OuttakeSlideGroundPos =  0.305, OuttakeSlideConeFlipPos = 0.18, OuttakeSlideAboveConePos = 0.245;
 
@@ -57,8 +57,8 @@ public class Outtake {  // no constructor for this class
 
     //editable dashboard variables must be public static - PID values for turret and lift that can be tuned
     public static double TurretKp = 0.007, TurretKi = 0.000, TurretKd = 0.0002, TurretIntegralSumLimit = 1, TurretFeedforward = 0.3;
-    public static double LiftKp = 0.011, LiftKi = 0.000, LiftKd = 0.0003, LiftIntegralSumLimit = 10, LiftKf = 0;
-    public static double intakeSlideKp = 0.008, intakeSlideKi = 0.00, intakeSlideKd = 0.00038, intakeSlideIntegralSumLimit = 10, intakeSlideKf = 0;
+    public static double LiftKp = 0.015, LiftKi = 0.0001, LiftKd = 0.00006, LiftIntegralSumLimit = 10, LiftKf = 0;
+    public static double intakeSlideKp = 0.01, intakeSlideKi = 0.00, intakeSlideKd = 0.00038, intakeSlideIntegralSumLimit = 10, intakeSlideKf = 0;
 
     // New instance of PID class with editable variables
     PID turretPID = new PID(TurretKp,TurretKi,TurretKd,TurretIntegralSumLimit,TurretFeedforward);

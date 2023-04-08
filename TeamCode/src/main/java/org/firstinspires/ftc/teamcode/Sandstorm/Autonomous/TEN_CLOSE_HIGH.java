@@ -9,6 +9,7 @@ import com.acmerobotics.roadrunner.geometry.Vector2d;
 import com.acmerobotics.roadrunner.trajectory.Trajectory;
 import com.acmerobotics.roadrunner.util.Angle;
 //import com.outoftheboxrobotics.photoncore.PhotonCore;
+import com.outoftheboxrobotics.photoncore.PhotonCore;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.util.ElapsedTime;
@@ -114,6 +115,9 @@ public class TEN_CLOSE_HIGH extends LinearOpMode {
 
     @Override
     public void runOpMode() throws InterruptedException {
+
+        PhotonCore.enable();
+
         int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
         camera = OpenCvCameraFactory.getInstance().createWebcam(hardwareMap.get(WebcamName.class, webcamname), cameraMonitorViewId);
         aprilTagDetectionPipeline = new AprilTagDetectionPipeline(tagsize, fx, fy, cx, cy);
@@ -159,11 +163,11 @@ public class TEN_CLOSE_HIGH extends LinearOpMode {
                 .build();
 
         Trajectory ParkRight = drive.trajectoryBuilder(DriveOtherSide.end())
-                .lineToLinearHeading(new Pose2d(SideMultiplier == 1 ? GlobalsCloseHighAuto.parkRight: GlobalsCloseHighAuto.parkLeft * SideMultiplier, outconestackY,Math.toRadians(5)))
+                .lineToLinearHeading(new Pose2d(SideMultiplier == 1 ? GlobalsCloseHighAuto.parkRight: GlobalsCloseHighAuto.parkLeft * SideMultiplier, -18.2,Math.toRadians(5)))
                 .build();
 
         Trajectory ParkLeft = drive.trajectoryBuilder(DriveOtherSide.end())
-                .lineToLinearHeading(new Pose2d(SideMultiplier == 1 ? GlobalsCloseHighAuto.parkLeft: GlobalsCloseHighAuto.parkRight * SideMultiplier, outconestackY,Math.toRadians(5)))
+                .lineToLinearHeading(new Pose2d(SideMultiplier == 1 ? -45: GlobalsCloseHighAuto.parkRight * SideMultiplier, -16,Math.toRadians(0)))
                 .build();
 
         Trajectory ParkCentre = drive.trajectoryBuilder(DriveOtherSide.end())
@@ -323,13 +327,13 @@ public class TEN_CLOSE_HIGH extends LinearOpMode {
 
                 case GRAB_OFF_STACK:
                     holdDrivebasePosition(); // dropping cone
-                    dropCone(120);
-                    if (GlobalTimer.milliseconds() - autoTimer < 120){
+                    dropCone(200);
+                    if (GlobalTimer.milliseconds() - autoTimer > 200){
                         outtake.liftTo(GlobalsCloseHighAuto.LiftHighPosition, outtake.liftPosition, 1);
                         holdTurretPosition();
                     }
 
-                    if (GlobalTimer.milliseconds() - autoTimer > 200) { // time taken to drop cone
+                    if (GlobalTimer.milliseconds() - autoTimer > 220) { // time taken to drop cone
                         if (outtake.intakeClawTouchPressed() || GlobalTimer.milliseconds() - autoTimer > 300){
                             autoTimer = GlobalTimer.milliseconds(); // reset timer not rly needed here
                             currentState = AutoState.AFTER_GRAB_OFF_STACK;
@@ -377,10 +381,10 @@ public class TEN_CLOSE_HIGH extends LinearOpMode {
                                 }
                             }
                         } else {
-                            outtake.IntakeSlideInternalPID(globalsCloseHighAuto.IntakeSlideOutTicks, 1); // slower
+                            outtake.IntakeSlideInternalPID(globalsCloseHighAuto.IntakeSlideOutTicks, 0.8); // slower
                         }
                     } else {
-                        outtake.IntakeSlideInternalPID(globalsCloseHighAuto.IntakeSlideOutTicks, 1); // slower
+                        outtake.IntakeSlideInternalPID(globalsCloseHighAuto.IntakeSlideOutTicks, 0.8); // slower
                     }
                     break;
                 case TRANSFER_CONE:
@@ -436,7 +440,7 @@ public class TEN_CLOSE_HIGH extends LinearOpMode {
                     outtake.turretSpinInternalPID(0,1); // spin turret after
                     outtake.liftToInternalPID(0, 1);
                     //threshold is 1 inch, 2 degrees
-                    if (Math.abs(drivebase.getHeadingError()) < Math.toRadians(1)){ // have to deal with the heading here, read telemetry for heading angle
+                    if (Math.abs(drivebase.getHeadingError()) < Math.toRadians(0.9)){ // have to deal with the heading here, read telemetry for heading angle
                         autoTimer = GlobalTimer.milliseconds(); // reset timer
                         currentState = AutoState.OUTTAKE_CONE;
                         holdDrivebaseOtherSide(); // just so it runs it this loop and doesn't drift??
@@ -449,12 +453,12 @@ public class TEN_CLOSE_HIGH extends LinearOpMode {
                     break;
                 case RETRACT_SLIDES:
                     holdDrivebasePosition();
-                    dropCone(120);
-                    if (GlobalTimer.milliseconds() - autoTimer < 120){
+                    dropCone(200);
+                    if (GlobalTimer.milliseconds() - autoTimer > 200){
                         outtake.liftToInternalPID(GlobalsCloseHighAuto.LiftHighPosition, 1);
                         holdTurretPosition();
                     }
-                    if (GlobalTimer.milliseconds()-autoTimer > 450){
+                    if (GlobalTimer.milliseconds()-autoTimer > 300){
                         currentState = AutoState.PARK;
                     }
                     break;
@@ -468,7 +472,7 @@ public class TEN_CLOSE_HIGH extends LinearOpMode {
                         currentState = AutoState.IDLE;
                     }
                     else{
-                        drive.followTrajectoryAsync(ParkCentre);
+                        //drive.followTrajectoryAsync(ParkCentre);
                         currentState = AutoState.IDLE; // doesn't have to drive anywhere, already in position hopefully
                     }
 
@@ -477,7 +481,7 @@ public class TEN_CLOSE_HIGH extends LinearOpMode {
                 case IDLE:
                     telemetry.addLine("WWWWWWWWWWW");
                     outtake.turretSpin(0,outtake.turretPosition,1); // spin turret after
-                    outtake.liftTo(0, outtake.liftPosition, 1);
+                    outtake.liftToInternalPID(0, 1);
                     outtake.IntakeSlideTo(1,outtake.intakeSlidePosition,1);
                     break;
 
@@ -489,13 +493,12 @@ public class TEN_CLOSE_HIGH extends LinearOpMode {
 
     }
     public void dropCone(int waitBeforeRetract){
-        if (GlobalTimer.milliseconds() - autoTimer > 80){ // small wait
+        if (GlobalTimer.milliseconds() - autoTimer > 135){ // small wait
             outtake.OuttakeArmDeposit();
-            if (GlobalTimer.milliseconds() - autoTimer > 100){
+            if (GlobalTimer.milliseconds() - autoTimer > 150){
                 outtake.OuttakeClawOpenHard();
                 outtake.OuttakeSlideScoreDrop(); // drops down on pole a bit
                 if (GlobalTimer.milliseconds() - autoTimer > waitBeforeRetract){
-                    outtake.BraceReadyAuto(); // might need a new position for this
                     outtake.liftToInternalPID(2, 1);
                     outtake.OuttakeSlideReady(); // drops down on pole a bit
                     if (GlobalTimer.milliseconds() - autoTimer > 200){
@@ -586,12 +589,12 @@ public class TEN_CLOSE_HIGH extends LinearOpMode {
     }
 
     public void holdDrivebaseOtherSide(){ // this 3 is negative
-        drivebase.DriveToPositionAutonomous(outconestackXOtherSide * SideMultiplier,outconestackYOtherSide,Math.toRadians(18) * SideMultiplier + AngleOffset,xPosition,yPosition,correctedHeading, 1,1); // last values are translationalspeed, and rotational speed
+        drivebase.DriveToPositionAutonomous(outconestackXOtherSide * SideMultiplier,outconestackYOtherSide,Math.toRadians(14) * SideMultiplier + AngleOffset,xPosition,yPosition,correctedHeading, 1,1); // last values are translationalspeed, and rotational speed
     }
 
     public void holdTurretPosition(){
         if (!OtherSide){
-            outtake.turretSpinInternalPID(-20,1);
+            outtake.turretSpinInternalPID(-21,1);
         } else {
             outtake.turretSpinInternalPID(22.5, 1);
         }
