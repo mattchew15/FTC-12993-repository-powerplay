@@ -1,13 +1,10 @@
 package org.firstinspires.ftc.teamcode.Sandstorm.Autonomous;
-import static org.firstinspires.ftc.teamcode.Sandstorm.GlobalsCloseHighAuto.outconeStackRotationOtherSide;
 import static org.firstinspires.ftc.teamcode.Sandstorm.GlobalsCloseHighAuto.outconestackXOtherSide;
 import static org.firstinspires.ftc.teamcode.Sandstorm.GlobalsCloseHighAuto.outconestackY;
 import static org.firstinspires.ftc.teamcode.Sandstorm.GlobalsCloseHighAuto.outconestackYOtherSide;
 
 import com.acmerobotics.roadrunner.geometry.Pose2d;
-import com.acmerobotics.roadrunner.geometry.Vector2d;
 import com.acmerobotics.roadrunner.trajectory.Trajectory;
-import com.acmerobotics.roadrunner.util.Angle;
 //import com.outoftheboxrobotics.photoncore.PhotonCore;
 import com.outoftheboxrobotics.photoncore.PhotonCore;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;

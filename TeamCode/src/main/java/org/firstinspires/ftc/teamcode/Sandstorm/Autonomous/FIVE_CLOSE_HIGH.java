@@ -6,7 +6,6 @@ import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.geometry.Vector2d;
 import com.acmerobotics.roadrunner.trajectory.Trajectory;
 import com.outoftheboxrobotics.photoncore.PhotonCore;
-import com.qualcomm.hardware.lynx.LynxModule;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.util.ElapsedTime;
@@ -52,7 +51,7 @@ public class FIVE_CLOSE_HIGH extends LinearOpMode {
     double prev_time;
 
     // create class instances
-    Outtake outtake = new Outtake();
+    Outtake outtake;
     DriveBase drivebase = new DriveBase();
     SampleMecanumDrive drive;
     PositionHoldPID positionHoldPID = new PositionHoldPID();
@@ -139,6 +138,7 @@ public class FIVE_CLOSE_HIGH extends LinearOpMode {
 
 
         // initialize hardware
+        outtake = new Outtake();
         outtake.Outtake_init(hardwareMap);
         drivebase.Drivebase_init(hardwareMap); // this might conflict with road runner
         drive = new SampleMecanumDrive(hardwareMap); // road drive class
@@ -229,6 +229,7 @@ public class FIVE_CLOSE_HIGH extends LinearOpMode {
 
 
         waitForStart();
+        drive.startIMUThread(this);
         if (isStopRequested()) return;
 
         // open cv changes the state at the start depending on cone rotation
@@ -248,8 +249,8 @@ public class FIVE_CLOSE_HIGH extends LinearOpMode {
 
         // runs instantly once
         autoTimer = GlobalTimer.milliseconds();
-        //camera.stopStreaming();
-        camera.closeCameraDevice();
+        camera.stopStreaming();
+        //camera.closeCameraDevice();
 
         while (opModeIsActive() && !isStopRequested()) {
             // Read pose

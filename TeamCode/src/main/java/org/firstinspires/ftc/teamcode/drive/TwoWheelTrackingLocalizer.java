@@ -64,6 +64,7 @@ public class TwoWheelTrackingLocalizer extends TwoTrackingWheelLocalizer {
         ));
 
         this.drive = drive;
+        this.outtake = outtake;
 
         parallelEncoder = new Encoder(hardwareMap.get(DcMotorEx.class, "FR"));
         perpendicularEncoder = new Encoder(hardwareMap.get(DcMotorEx.class, "BR"));
@@ -79,8 +80,8 @@ public class TwoWheelTrackingLocalizer extends TwoTrackingWheelLocalizer {
 
     @Override
     public double getHeading() {
-        //return drive.getRawExternalHeading(); // this is chnaged
-        return outtake.getAngle();
+        //return drive.getRawExternalHeading(); // this is changed
+        return drive.getAngle();
     }
 
     @Override

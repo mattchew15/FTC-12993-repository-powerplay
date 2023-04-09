@@ -40,13 +40,6 @@ public class Outtake {  // no constructor for this class
     AnalogInput IntakeArmPosition;
     AnalogInput IntakeLiftPosition;
 
-    private final Object imuLock = new Object();
-    @GuardedBy("imuLock") // idk what this does
-    public BNO055IMU imu;
-    private Thread imuThread;
-    private double imuAngle = 0;
-    private double imuOffset = 0;
-
     //Servo Positions for outtake
     public static double OuttakeClawOpenPos = 0.58, OuttakeClawClosedPos = 0.45, OuttakeClawOpenHardPos = 0.7;
     public static double OuttakeArmReadyPos = 0.732, OuttakeArmDepositPos = 0.095, OuttakeArmPickupPos = 0.095, OuttakeArmScorePos = 0.22, OuttakeArmScoreAutoPos = 0.23, OuttakeArmSlightlyTiltedUpPos = 0.3, OuttakeArmUprightPos = 0.53;
@@ -115,30 +108,11 @@ public class Outtake {  // no constructor for this class
         IntakeArmPosition = hwMap.get(AnalogInput.class, "InSEncoder");
         //OuttakeArmPosition = hwMap.get(AnalogInput.class, "OutSEncoder");
         IntakeLiftPosition = hwMap.get(AnalogInput.class, "InLiftSEncoder");
-
-        // this is changed
-        synchronized (imuLock) {
-            imu = hwMap.get(BNO055IMU.class, "imu");
-            BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
-            parameters.angleUnit = BNO055IMU.AngleUnit.RADIANS;
-            imu.initialize(parameters);
-        }
     }
 
-    public double getAngle() {
-        return imuAngle - imuOffset;
-    }
 
-    public void startIMUThread(LinearOpMode opMode) {
-            imuThread = new Thread(() -> {
-                while (!opMode.isStopRequested() && opMode.opModeIsActive()) {
-                    synchronized (imuLock) {
-                        imuAngle = imu.getAngularOrientation().firstAngle;
-                    }
-                }
-            });
-            imuThread.start();
-    }
+
+
 
     public void hardwareSetup(){
         TurretMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
