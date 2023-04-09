@@ -16,6 +16,7 @@ import org.firstinspires.ftc.teamcode.Sandstorm.DriveBase;
 import org.firstinspires.ftc.teamcode.Sandstorm.GlobalsCloseHighAuto;
 import org.firstinspires.ftc.teamcode.Sandstorm.Inputs;
 import org.firstinspires.ftc.teamcode.Sandstorm.Outtake;
+import org.firstinspires.ftc.teamcode.drive.PositionHoldPID;
 import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
 import org.openftc.apriltag.AprilTagDetection;
 import org.openftc.easyopencv.OpenCvCamera;
@@ -26,7 +27,7 @@ import java.util.ArrayList;
 
 @Autonomous(name = "1+5 Close-High Auto", group = "Autonomous")
 public class FIVE_CLOSE_HIGH extends LinearOpMode {
-
+    PositionHoldPID positionHoldPID = new PositionHoldPID();
     GlobalsCloseHighAuto globalsCloseHighAuto = new GlobalsCloseHighAuto();
     int SideMultiplier = 1; // this multiplies everything that changes with the right side
     double AngleOffset = Math.toRadians(0); // this adds to every angle
@@ -56,6 +57,7 @@ public class FIVE_CLOSE_HIGH extends LinearOpMode {
     Inputs inputs = new Inputs();
     OpenCvCamera camera;
     AprilTagDetectionPipeline aprilTagDetectionPipeline;
+    SampleMecanumDrive drive;
 
     static final double FEET_PER_METER = 3.28084;
 
@@ -138,7 +140,7 @@ public class FIVE_CLOSE_HIGH extends LinearOpMode {
         // initialize hardware
         outtake.Outtake_init(hardwareMap);
         drivebase.Drivebase_init(hardwareMap); // this might conflict with road runner
-        SampleMecanumDrive drive = new SampleMecanumDrive(hardwareMap); // road drive class
+        drive = new SampleMecanumDrive(hardwareMap); // road drive class
 
         // functions runs on start
         Setup();
@@ -224,7 +226,6 @@ public class FIVE_CLOSE_HIGH extends LinearOpMode {
             outtake.OuttakeArmReady();
         }
 
-
         waitForStart();
         if (isStopRequested()) return;
 
@@ -245,6 +246,7 @@ public class FIVE_CLOSE_HIGH extends LinearOpMode {
 
         // runs instantly once
         autoTimer = GlobalTimer.milliseconds();
+        camera.stopStreaming();
 
         while (opModeIsActive() && !isStopRequested()) {
             // Read pose
@@ -291,21 +293,21 @@ public class FIVE_CLOSE_HIGH extends LinearOpMode {
                     outtake.OuttakeClawClose();
                     outtake.IntakeClipOpen();
                     outtake.OuttakeArmReady();
-                    if (GlobalTimer.milliseconds() - autoTimer > 6000){
+                    if (GlobalTimer.milliseconds() - autoTimer > 0){
                         autoTimer = GlobalTimer.milliseconds(); // reset timer not rly needed here
                         currentState = AutoState.PRELOAD_DRIVE;
                         drive.followTrajectoryAsync(PreloadDrive);
                     }
                     break;
                 case PRELOAD_DRIVE:
-                    outtake.IntakeSlideInternalPID(0,1); // might break something
-                    outtake.liftToInternalPID(0,1);
-                    outtake.turretSpinInternalPID(0,1);
-                    outtake.OuttakeSlideReady();
-                    outtake.OuttakeClawClose();
-                    outtake.OuttakeArmUpright();
-                    outtake.IntakeClawOpen();
-                    outtake.IntakeLift5();
+                      outtake.IntakeSlideInternalPID(0,1); // might break something
+                      outtake.liftToInternalPID(0,1);
+                      outtake.turretSpinInternalPID(0,1);
+                      outtake.OuttakeSlideReady();
+                      outtake.OuttakeClawClose();
+                      outtake.OuttakeArmUpright();
+                      outtake.IntakeClawOpen();
+                      outtake.IntakeLift5();
                     if (!drive.isBusy()){
                         autoTimer = GlobalTimer.milliseconds(); // reset timer not rly needed here
                         currentState = AutoState.OUTTAKE_CONE;
@@ -315,7 +317,7 @@ public class FIVE_CLOSE_HIGH extends LinearOpMode {
 
                 case OUTTAKE_CONE:
                     holdDrivebasePosition();
-                    if (GlobalTimer.milliseconds() - autoTimer > 0){
+                    if (true){
                         OuttakeCone(true); // next state is grab off
                     }
                     break;
@@ -411,7 +413,7 @@ public class FIVE_CLOSE_HIGH extends LinearOpMode {
                         outtake.liftToInternalPID(GlobalsCloseHighAuto.LiftHighPosition, 1);
                         holdTurretPosition();
                     }
-                    if (GlobalTimer.milliseconds()-autoTimer > 600){
+                    if (GlobalTimer.milliseconds()-autoTimer > 750){
                         currentState = AutoState.PARK;
                     }
                     break;
@@ -468,7 +470,7 @@ public class FIVE_CLOSE_HIGH extends LinearOpMode {
 
     public void OuttakeCone(boolean Intake){
         if (Intake){ // if parameter is set to false it won't do the intake slides just outtake
-            outtake.IntakeSlideInternalPID(globalsCloseHighAuto.IntakeSlideNotQuiteOutTicks, 1); // move to just before the stack
+            outtake.IntakeSlideTo(globalsCloseHighAuto.IntakeSlideNotQuiteOutTicks,outtake.intakeSlidePosition, 1); // move to just before the stack
             intakeLiftHeight();
             outtake.IntakeClawOpenHard();
             outtake.IntakeArmReady();
@@ -533,9 +535,11 @@ public class FIVE_CLOSE_HIGH extends LinearOpMode {
     }
     public void holdDrivebasePosition(){ // THE OUTCONESTACKROTATION SHOULD BE NEGATIVE
         drivebase.DriveToPositionAutonomous(globalsCloseHighAuto.outconestackX * SideMultiplier, globalsCloseHighAuto.outconestackY,globalsCloseHighAuto.outconeStackRotation* SideMultiplier + AngleOffset,xPosition,yPosition,correctedHeading, 1,1); // last values are translationalspeed, and rotational speed
+       // positionHoldPID.returnMotorPowers(globalsCloseHighAuto.outconestackX * SideMultiplier, globalsCloseHighAuto.outconestackY,globalsCloseHighAuto.outconeStackRotation* SideMultiplier + AngleOffset,xPosition,yPosition,correctedHeading, 1,1);
+       // drive.setMotorPowers(positionHoldPID.FL_Power,positionHoldPID.BL_Power,positionHoldPID.BR_Power,positionHoldPID.FR_Power); // should reduce the number of writes for motors
     }
     public void holdTurretPosition(){
-        outtake.turretSpinInternalPID(TurretLeftPositionInternalPid * SideMultiplier,1);
+        outtake.turretSpin(GlobalsCloseHighAuto.TurretLeftposition * SideMultiplier,outtake.turretPosition,1);
     }
 }
 

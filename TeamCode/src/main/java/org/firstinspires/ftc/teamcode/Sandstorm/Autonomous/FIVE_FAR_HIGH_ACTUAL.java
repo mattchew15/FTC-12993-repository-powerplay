@@ -17,8 +17,8 @@ import org.openftc.easyopencv.OpenCvCameraRotation;
 import java.util.ArrayList;
 
 
-@Autonomous(name = "1+10 Far High Auto", group = "Autonomous")
-public class TEN_FAR_HIGH_ACTUAL extends LinearOpMode {
+@Autonomous(name = "1+5 Far High Auto", group = "Autonomous")
+public class FIVE_FAR_HIGH_ACTUAL extends LinearOpMode {
 
     // class members
     ElapsedTime GlobalTimer;
@@ -109,11 +109,11 @@ public class TEN_FAR_HIGH_ACTUAL extends LinearOpMode {
 
     final double PreloadDriveX = 42;
     final double PreloadDriveY = -17.7;
-    final double PreloadDriveRotation = Math.toRadians(-1);
+    final double PreloadDriveRotation = Math.toRadians(0);
 
     final double outconestackX = 36;
     final double outconestackY = -17.7;
-    final double outconeStackRotation = Math.toRadians(-1.2);
+    final double outconeStackRotation = Math.toRadians(0);
 
     final double outconestackXOtherSide = -outconestackX;
     final double outconeStackRotationOtherSide = -3;
@@ -168,7 +168,7 @@ public class TEN_FAR_HIGH_ACTUAL extends LinearOpMode {
                 .build();
 
         Trajectory DriveIntoStack = drive.trajectoryBuilder(DriveOutStackAfterPreload.end()) //
-                .lineToLinearHeading(new Pose2d(36, outconestackY, Math.toRadians(0)))
+                .lineToLinearHeading(new Pose2d(42, outconestackY, Math.toRadians(0)))
                 .build();
 
 
@@ -181,7 +181,7 @@ public class TEN_FAR_HIGH_ACTUAL extends LinearOpMode {
                 .build();
 
         Trajectory ParkCentre = drive.trajectoryBuilder(OutConePose)
-                .lineTo(new Vector2d(35,outconestackY))
+                .lineTo(new Vector2d(30,outconestackY))
                 .build();
 
         while (!isStarted()) {
@@ -267,6 +267,7 @@ public class TEN_FAR_HIGH_ACTUAL extends LinearOpMode {
         // runs instantly once
         drive.followTrajectoryAsync(PreloadDrive);
         autoTimer = GlobalTimer.milliseconds(); // reset timer not rly needed here
+        camera.stopStreaming();
 
         while (opModeIsActive() && !isStopRequested()) {
             // Read pose
@@ -309,7 +310,7 @@ public class TEN_FAR_HIGH_ACTUAL extends LinearOpMode {
             switch (currentState) {
                 case PRELOAD_DRIVE:
                     outtake.IntakeSlideInternalPID(0,1); // might break something
-                    outtake.liftTo(0, outtake.liftPosition,1);
+                    outtake.liftToInternalPID(0, 1);
                     outtake.turretSpinInternalPID(0,1);
                     outtake.OuttakeSlideReady();
                     outtake.OuttakeClawClose();
@@ -344,7 +345,7 @@ public class TEN_FAR_HIGH_ACTUAL extends LinearOpMode {
                         outtake.IntakeSlideTo(0, outtake.intakeSlidePosition,1); // move to just before the stack
                     }
 
-                    outtake.liftTo(LiftHighPosition, outtake.liftPosition, 1);
+                    outtake.liftToInternalPID(LiftHighPosition,  1);
                     outtake.OuttakeClawClose();
                     outtake.OuttakeArmScoreAuto();
                     outtake.BraceActiveAuto();
@@ -370,7 +371,7 @@ public class TEN_FAR_HIGH_ACTUAL extends LinearOpMode {
                             outtake.OuttakeClawOpenHard();
                             if (GlobalTimer.milliseconds() - autoTimer > 135){
                                 outtake.BraceReady(); // might need a new position for this
-                                outtake.liftTo(2, outtake.liftPosition, 1);
+                                outtake.liftToInternalPID(2, 1);
                                 if (GlobalTimer.milliseconds() - autoTimer > 250){
                                     if (numCycles == 5){
                                         outtake.turretSpin(0, outtake.turretPosition,0.8);
@@ -388,17 +389,17 @@ public class TEN_FAR_HIGH_ACTUAL extends LinearOpMode {
                                     holdTurretPosition();
                                 }
                             } else {
-                                outtake.liftTo(LiftHighPosition, outtake.liftPosition, 1);
+                                outtake.liftToInternalPID(LiftHighPosition, 1);
                                 holdTurretPosition();
                             }
                         } else {
                             outtake.OuttakeSlideScoreDrop(); // drops down on pole a bit
                             outtake.OuttakeArmDeposit();
-                            outtake.liftTo(LiftHighPosition, outtake.liftPosition, 1);
+                            outtake.liftToInternalPID(LiftHighPosition, 1);
                             holdTurretPosition();
                         }
                     } else {
-                        outtake.liftTo(LiftHighPosition, outtake.liftPosition, 1);
+                        outtake.liftToInternalPID(LiftHighPosition, 1);
                         holdTurretPosition();
                     }
                     break;
@@ -420,7 +421,7 @@ public class TEN_FAR_HIGH_ACTUAL extends LinearOpMode {
                     outtake.OuttakeClawOpen();
                     outtake.OuttakeArmReady();
                     outtake.turretSpinInternalPID(0,1);
-                    outtake.liftTo(2, outtake.liftPosition, 1);
+                    outtake.liftToInternalPID(2, 1);
                     if (GlobalTimer.milliseconds() - autoTimer > 0){
                         outtake.IntakeClawClose();
                         if (GlobalTimer.milliseconds() - autoTimer > 200){
@@ -428,7 +429,7 @@ public class TEN_FAR_HIGH_ACTUAL extends LinearOpMode {
                             if (GlobalTimer.milliseconds()-autoTimer > 230){
                                 outtake.IntakeArmTransfer();
                                 if ((outtake.getIntakeArmPos() > 150)){ // this reads the position of the intake arm
-                                    outtake.IntakeSlideTo(3,outtake.intakeSlidePosition,1);
+                                    outtake.IntakeSlideInternalPID(3,1);
                                     if (outtake.intakeSlidePosition > -9){ // this controls when the claw closes
                                         autoTimer = GlobalTimer.milliseconds(); // reset timer not rly needed here
                                         currentState = AutoState.TRANSFER_CONE;
@@ -440,9 +441,9 @@ public class TEN_FAR_HIGH_ACTUAL extends LinearOpMode {
                     }
                     break;
                 case TRANSFER_CONE:
-                    outtake.IntakeSlideTo(4,outtake.intakeSlidePosition,1); // so it holds in when transferring
+                    outtake.IntakeSlideInternalPID(4,1); // so it holds in when transferring
                     outtake.turretSpin(0,outtake.turretPosition,1); // spin turret after
-                    outtake.liftTo(2, outtake.liftPosition, 1);
+                    outtake.liftToInternalPID(2, 1);
                     outtake.OuttakeClawClose();
                     if (GlobalTimer.milliseconds()-autoTimer > 100){
                         outtake.IntakeClawOpenHard();
@@ -468,7 +469,7 @@ public class TEN_FAR_HIGH_ACTUAL extends LinearOpMode {
                 case RETRACT_SLIDES:
                     outtake.OuttakeClawOpen();
                     outtake.OuttakeArmReady();
-                    outtake.liftTo(2, outtake.liftPosition, 1);
+                    outtake.liftToInternalPID(2, 1);
                     outtake.turretSpin(0, outtake.turretPosition,0.8);
                     outtake.IntakeSlideTo(0, outtake.intakeSlidePosition, 1); // move to just before the stack
                     if (outtake.liftTargetReached()){
@@ -498,8 +499,9 @@ public class TEN_FAR_HIGH_ACTUAL extends LinearOpMode {
                 case IDLE:
                     telemetry.addLine("WWWWWWWWWWW");
                     outtake.turretSpin(0,outtake.turretPosition,1); // spin turret after
-                    outtake.liftTo(0, outtake.liftPosition, 1);
-                    outtake.IntakeSlideTo(1,outtake.intakeSlidePosition,1);
+                    outtake.liftToInternalPID(0, 1);
+                    outtake.IntakeSlideInternalPID(1,1);
+                    outtake.turretSpinInternalPID(0,1);
                     break;
 
             }
@@ -554,19 +556,6 @@ public class TEN_FAR_HIGH_ACTUAL extends LinearOpMode {
 
     public void holdDrivebasePositionOuttake(){ // THE OUTCONESTACKROTATION SHOULD BE NEGATIVE
         drivebase.DriveToPositionAutonomous(outconestackX,outconestackY,-outconeStackRotation,xPosition,yPosition,correctedHeading, 1,1); // last values are translationalspeed, and rotational speed
-    }
-
-    public double slidedeacceleration(double slideError, double deaccelerationThreshold, double deaccelerationRate, double maxSpeed, double minSpeeed){
-        if (Math.abs(slideError) < deaccelerationThreshold){
-            if (slideError * deaccelerationRate/deaccelerationThreshold > minSpeeed){
-                return slideError * deaccelerationRate/deaccelerationThreshold;
-            } else {
-                return minSpeeed;
-            }
-        }
-        else {
-            return maxSpeed;
-        }
     }
 
     public void holdTurretPosition(){

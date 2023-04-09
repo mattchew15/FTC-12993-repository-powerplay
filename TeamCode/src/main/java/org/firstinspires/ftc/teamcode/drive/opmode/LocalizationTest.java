@@ -25,7 +25,6 @@ public class LocalizationTest extends LinearOpMode {
         drive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
         waitForStart();
-        drive.startIMUThread(this);
 
         while (!isStopRequested()) {
             drive.setWeightedDrivePower(
