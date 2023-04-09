@@ -322,13 +322,13 @@ public class FIVE_CLOSE_HIGH extends LinearOpMode {
 
                 case GRAB_OFF_STACK:
                     holdDrivebasePosition(); // dropping cone
-                    dropCone(300);
-                    if (GlobalTimer.milliseconds() - autoTimer > 300){
+                    dropCone(350);
+                    if (GlobalTimer.milliseconds() - autoTimer > 350){
                         outtake.liftToInternalPID(GlobalsCloseHighAuto.LiftHighPosition, 1);
                         holdTurretPosition();
                     }
 
-                    if (GlobalTimer.milliseconds() - autoTimer > 300) { // time taken to drop cone
+                    if (GlobalTimer.milliseconds() - autoTimer > 370) { // time taken to drop cone
                         if (outtake.intakeClawTouchPressed() || GlobalTimer.milliseconds() - autoTimer > 600){ // outtake.intakeClawTouchPressed() || GlobalTimer.milliseconds() - autoTimer > 680
                             autoTimer = GlobalTimer.milliseconds(); // reset timer not rly needed here
                             currentState = AutoState.AFTER_GRAB_OFF_STACK;
@@ -350,20 +350,22 @@ public class FIVE_CLOSE_HIGH extends LinearOpMode {
                     if (GlobalTimer.milliseconds() - autoTimer > 0){
                         outtake.IntakeClawClose();
                         if (GlobalTimer.milliseconds() - autoTimer > 200){
-                            outtake.IntakeLiftTransfer();
                             if (GlobalTimer.milliseconds()-autoTimer > 230){
                                 outtake.IntakeArmTransfer();
-                                if ((outtake.getIntakeArmPos() > 150) && GlobalTimer.milliseconds()-autoTimer > 400){ // this reads the position of the intake arm
+                                if ((numCycles==1? outtake.intakeArmPosition > 175: outtake.intakeArmPosition > 150) && GlobalTimer.milliseconds()-autoTimer > 600){ // this reads the position of the intake arm
                                     outtake.IntakeSlideInternalPID(2,1);
-                                    if (outtake.intakeSlidePosition > -2 && outtake.getIntakeArmPos() > 195){ // this controls when the claw closes
+                                    outtake.IntakeLiftTransfer();
+                                    if (outtake.intakeSlidePosition > -2 && outtake.intakeArmPosition > 195){ // this controls when the claw closes
                                         autoTimer = GlobalTimer.milliseconds(); // reset timer not rly needed here
                                         currentState = AutoState.TRANSFER_CONE;
                                         outtake.OuttakeClawClose();
                                         outtake.BraceActive();
                                     }
-                                } else {
-                                    outtake.IntakeSlideInternalPID(globalsCloseHighAuto.IntakeSlideBackFromStack, 0.4); // this pulls slides in while doing stuff
+                                } else{
+                                    outtake.IntakeSlideInternalPID(globalsCloseHighAuto.IntakeSlideBackFromStack, 0.36); // this pulls slides in while doing stuff
                                 }
+                            } else {
+                                outtake.IntakeLift5();
                             }
                         } else {
                             outtake.IntakeSlideInternalPID(globalsCloseHighAuto.IntakeSlideOutTicks, 1); // slower
@@ -404,8 +406,8 @@ public class FIVE_CLOSE_HIGH extends LinearOpMode {
                     break;
                 case RETRACT_SLIDES:
                     holdDrivebasePosition();
-                    dropCone(300);
-                    if (GlobalTimer.milliseconds() - autoTimer > 300){
+                    dropCone(350);
+                    if (GlobalTimer.milliseconds() - autoTimer > 350){
                         outtake.liftToInternalPID(GlobalsCloseHighAuto.LiftHighPosition, 1);
                         holdTurretPosition();
                     }
@@ -499,13 +501,13 @@ public class FIVE_CLOSE_HIGH extends LinearOpMode {
     }
     public void dropCone(int waitBeforeRetract){
         holdDrivebasePosition(); // dropping cone
-        if (GlobalTimer.milliseconds() - autoTimer > 120){ // small wait
-            if (GlobalTimer.milliseconds() - autoTimer > 190){
+        if (GlobalTimer.milliseconds() - autoTimer > 200){ // small wait
+            if (GlobalTimer.milliseconds() - autoTimer > 280){
                 outtake.OuttakeClawOpenHard();
                 if (GlobalTimer.milliseconds() - autoTimer > waitBeforeRetract){
                     outtake.BraceReadyAuto(); // might need a new position for this
                     outtake.liftToInternalPID(2, 1);
-                    if (GlobalTimer.milliseconds() - autoTimer > 350){
+                    if (GlobalTimer.milliseconds() - autoTimer > 400){
                         outtake.turretSpinInternalPID(0, 0.8);
                         outtake.OuttakeSlideReady(); // drops down on pole a bit
                     } else {

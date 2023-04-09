@@ -53,9 +53,9 @@ public class StormDrive extends LinearOpMode {
     final int IntakeSlideOutTicks = -744; // make this max pull out distance
     final int IntakeLiftHeightThreshold = 265;
 
-    final int LiftHighPosition = -740;
-    final int LiftMidPosition = -383;
-    final int LiftLowPosition = -27;
+    final int LiftHighPosition = -752;
+    final int LiftMidPosition = -378;
+    final int LiftLowPosition = -26;
     final int LiftGroundPosition = -30;
 
     final int LiftUpperLimit = -810;
@@ -566,7 +566,7 @@ public class StormDrive extends LinearOpMode {
                     // drivebase.intakeSpin(-0.4); // helps the slides go out
                     if (outtake.intakeSlidePosition < -100) {
                         outtake.IntakeClawOpenHard();
-                        IntakeHeightChange();
+                        outtake.IntakeLiftReady();
                         outtake.IntakeArmReady();
                     }
                     if (inputs.IntakeToggleOutState == 2){ // if gamepad2.leftbumper is pressed
@@ -1050,8 +1050,8 @@ public class StormDrive extends LinearOpMode {
         if (SlidesUpBtn) {
             if (!SlidesToggleUp) {
                 SlidesToggleUp = true;
-                if (liftTargetPosition > LiftUpperLimit + 85){
-                    liftTargetPosition -= 85; // increases by 50 every time
+                if (liftTargetPosition > LiftUpperLimit + 50){
+                    liftTargetPosition -= 100; // increases by 50 every time
                 }
             }
         }
@@ -1063,8 +1063,8 @@ public class StormDrive extends LinearOpMode {
         if (SlidesDownBtn) {
             if (!SlidesToggleDown) {
                 SlidesToggleDown = true;
-                if (liftTargetPosition < -80){
-                    liftTargetPosition += 85; // decreases by 50 every time
+                if (liftTargetPosition < -50){
+                    liftTargetPosition += 100; // decreases by 50 every time
                 }
             }
         }
