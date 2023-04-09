@@ -349,7 +349,8 @@ public class FIVE_CLOSE_HIGH extends LinearOpMode {
                     if (GlobalTimer.milliseconds() - autoTimer > 0){
                         outtake.IntakeClawClose();
                         if (GlobalTimer.milliseconds() - autoTimer > 200){
-                            if (GlobalTimer.milliseconds()-autoTimer > 230){
+                            outtake.IntakeArmConeHoldForTransfer();
+                            if (outtake.intakeLiftPosition > 275){
                                 outtake.IntakeArmTransfer();
                                 if ((numCycles==1? outtake.intakeArmPosition > 175: outtake.intakeArmPosition > 150) && GlobalTimer.milliseconds()-autoTimer > 600){ // this reads the position of the intake arm
                                     outtake.IntakeSlideInternalPID(2,1);
@@ -410,7 +411,7 @@ public class FIVE_CLOSE_HIGH extends LinearOpMode {
                         outtake.liftToInternalPID(GlobalsCloseHighAuto.LiftHighPosition, 1);
                         holdTurretPosition();
                     }
-                    if (outtake.liftTargetReached()){ // better than a wait
+                    if (GlobalTimer.milliseconds() - autoTimer > 750){ // lifttarget reached doesn't work, is instantly true
                         currentState = AutoState.PARK;
                     }
                     break;

@@ -43,7 +43,7 @@ public class Outtake {  // no constructor for this class
     //Servo Positions for outtake
     public static double OuttakeClawOpenPos = 0.58, OuttakeClawClosedPos = 0.45, OuttakeClawOpenHardPos = 0.7;
     public static double OuttakeArmReadyPos = 0.732, OuttakeArmDepositPos = 0.095, OuttakeArmPickupPos = 0.095, OuttakeArmScorePos = 0.22, OuttakeArmScoreAutoPos = 0.23, OuttakeArmSlightlyTiltedUpPos = 0.3, OuttakeArmUprightPos = 0.53;
-    public static double BraceReadyPos = 0.55,BraceReadyAutoPos = 0.25, BraceActivePos = 0.72, BraceActivePosAuto = 0.64, BraceTuckedPos = 0, BraceFlipConePos = 0.6;
+    public static double BraceReadyPos = 0.55,BraceReadyAutoPos = 0.23, BraceActivePos = 0.72, BraceActivePosAuto = 0.64, BraceTuckedPos = 0, BraceFlipConePos = 0.6;
     public static double OuttakeSlideReadyPos = 0.03, OuttakeSlideScorePos = 0.03, OuttakeSlideScoreDropPos = 0.16, OuttakeSlideGroundPos =  0.305, OuttakeSlideConeFlipPos = 0.18, OuttakeSlideAboveConePos = 0.245;
 
     // Servo Position for ConeArm
@@ -52,7 +52,7 @@ public class Outtake {  // no constructor for this class
 
     //Servo Positions for Intake
     public static double IntakeClawOpenPos = 0.675, IntakeClawClosedPos = 0.733, IntakeClawOpenHardPos = 0.57;
-    public static double IntakeArmReadyPos = 0.908, IntakeArmTransferPos = 0.448, IntakeArmCOneHoldForTransferPos = 0.6;
+    public static double IntakeArmReadyPos = 0.908, IntakeArmTransferPos = 0.448, IntakeArmCOneHoldForTransferPos = 0.65;
     public static double IntakeLiftReadyPos = 0.43, IntakeLiftTransferPos = 0.212;
 
     //Servo Positions for Stack Height
