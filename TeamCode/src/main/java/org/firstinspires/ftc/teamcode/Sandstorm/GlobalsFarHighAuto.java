@@ -4,21 +4,18 @@ import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 
 @Config
-public class GlobalsCloseHighAuto {
+public class GlobalsFarHighAuto {
 
     // encoder positions
-    public static int IntakeSlideOutTicks = -605;
+    public static int IntakeSlideOutTicks = -745; // this is max
     public static int LiftHighPosition = -695;
-    public static int LiftHighPosition10 = -760;
+    public static int LiftHighPosition10 = -760; // not needed - this is to make lift faster for 1+10
 
     public static double TurretLeftposition = -5.55;
-    public static double TurretRightposition = -TurretLeftposition;
+    public static double TurretRightposition = -TurretLeftposition; // use turret right position
 
     public static double TurretLeftPositionInternalPid = -21;
-
-    public static int IntakeSlideNotQuiteOutTicks = IntakeSlideOutTicks + 105;
-
-    public static int IntakeSlideBackFromStack = IntakeSlideOutTicks + 80;
+    public static double TurretRightPositionInternalPid = -TurretLeftPositionInternalPid;
 
     // webcam names
     public String WebCamLeftName  = "WebcamLeft";
@@ -28,14 +25,18 @@ public class GlobalsCloseHighAuto {
     public static double startPoseX = 34;
     public static double startPoseY = -69;
     public static double startPoseAngle = Math.toRadians(0);
-    public static double outconestackX = 42;
-    public static double outconestackY = -17.7;
-    public static double outconestackYOtherSide = -16.85;
-    public static double outconeStackRotation = Math.toRadians(-1.2);
-    // add 180 to angles
 
-    public static double outconestackXOtherSide = -40.8;
-    public static double outconeStackRotationOtherSide = Math.toRadians(170);
+    public static double PreloadDriveX = 34;
+    public static double PreloadDriveY = -17.7;
+    public static double PreloadDriveRotation = Math.toRadians(0);
+
+    public static double inconestackX = 35;
+    public static double inconestackY = -17.7;
+    public static double inStackRotation = Math.toRadians(-1.2);
+
+    public static double outconestackX = 16;
+    public static double outconestackY = -17.7;
+    public static double outconeStackRotation = Math.toRadians(-1.2);
 
     public static double parkLeft = -61;
     public static double parkRight = -11.5;

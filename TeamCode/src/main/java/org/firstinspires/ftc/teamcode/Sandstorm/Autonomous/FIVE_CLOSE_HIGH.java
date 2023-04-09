@@ -27,7 +27,7 @@ import java.util.ArrayList;
 
 @Autonomous(name = "1+5 Close-High Auto", group = "Autonomous")
 public class FIVE_CLOSE_HIGH extends LinearOpMode {
-    PositionHoldPID positionHoldPID = new PositionHoldPID();
+
     GlobalsCloseHighAuto globalsCloseHighAuto = new GlobalsCloseHighAuto();
     int SideMultiplier = 1; // this multiplies everything that changes with the right side
     double AngleOffset = Math.toRadians(0); // this adds to every angle
@@ -36,9 +36,6 @@ public class FIVE_CLOSE_HIGH extends LinearOpMode {
     // class members
     ElapsedTime GlobalTimer;
     double autoTimer;
-
-    boolean outakeResetReady;
-    boolean outakeOutReady;
 
     int numCycles;
     int SignalRotation;
@@ -413,7 +410,7 @@ public class FIVE_CLOSE_HIGH extends LinearOpMode {
                         outtake.liftToInternalPID(GlobalsCloseHighAuto.LiftHighPosition, 1);
                         holdTurretPosition();
                     }
-                    if (GlobalTimer.milliseconds()-autoTimer > 750){
+                    if (outtake.liftTargetReached()){ // better than a wait
                         currentState = AutoState.PARK;
                     }
                     break;
@@ -519,7 +516,6 @@ public class FIVE_CLOSE_HIGH extends LinearOpMode {
             } else {
                 outtake.OuttakeSlideScoreDrop(); // drops down on pole a bit
                 outtake.OuttakeArmDeposit();
-
             }
         }
     }
