@@ -50,8 +50,8 @@ public class StandardTrackingWheelLocalizerGyro extends ThreeTrackingWheelLocali
     public static double X_MULTIPLIER = 1.0491; // Multiplier in the X direction
     public static double Y_MULTIPLIER = 1.02852425433; // Multiplier in the Y direction
 
-    public static double MIN_IMU_UPDATE_INTERVAL = 0.5;
-    public static double MIN_STABLE_HEADING_TIME = 0.2;
+    public static double MIN_IMU_UPDATE_INTERVAL = 0.1;
+    public static double MIN_STABLE_HEADING_TIME = 0.05;
     public static double HEADING_EPSILON = toRadians(0.5);
 
     private BNO055IMU imu;

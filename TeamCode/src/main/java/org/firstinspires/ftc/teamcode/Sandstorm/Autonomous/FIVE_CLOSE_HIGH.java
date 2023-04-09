@@ -115,9 +115,7 @@ public class FIVE_CLOSE_HIGH extends LinearOpMode {
 
     @Override
     public void runOpMode() throws InterruptedException {
-        PhotonCore.CONTROL_HUB.setBulkCachingMode(LynxModule.BulkCachingMode.AUTO);
-        PhotonCore.experimental.setMaximumParallelCommands(8);
-        PhotonCore.enable();
+        PhotonCore.enable(); // don't use both photon and bulk read
 
         int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
         camera = OpenCvCameraFactory.getInstance().createWebcam(hardwareMap.get(WebcamName.class, webcamname), cameraMonitorViewId);
@@ -228,7 +226,7 @@ public class FIVE_CLOSE_HIGH extends LinearOpMode {
             outtake.IntakeClipOpen();
             outtake.OuttakeArmReady();
         }
-        outtake.startIMUThread(this);
+
 
         waitForStart();
         if (isStopRequested()) return;
@@ -250,6 +248,8 @@ public class FIVE_CLOSE_HIGH extends LinearOpMode {
 
         // runs instantly once
         autoTimer = GlobalTimer.milliseconds();
+        //camera.stopStreaming();
+        camera.closeCameraDevice();
 
         while (opModeIsActive() && !isStopRequested()) {
             // Read pose
@@ -264,7 +264,7 @@ public class FIVE_CLOSE_HIGH extends LinearOpMode {
             yPosition = poseEstimate.getY();
             headingPosition = poseEstimate.getHeading();
             correctedHeading = inputs.angleWrap(headingPosition);
-            outtake.outtakeReads();
+            //outtake.outtakeReads();
 
             telemetry.addData("x", xPosition);
             telemetry.addData("y", yPosition);
@@ -289,28 +289,28 @@ public class FIVE_CLOSE_HIGH extends LinearOpMode {
 
             telemetry.addData("number of cycles:", numCycles);
 
-            outtake.ConeArmReady();
+            //outtake.ConeArmReady();
             // main switch statement logic
             switch (currentState) {
                 case DELAY:
                     outtake.OuttakeClawClose();
                     outtake.IntakeClipOpen();
                     outtake.OuttakeArmReady();
-                    if (GlobalTimer.milliseconds() - autoTimer > 6000){
+                    if (GlobalTimer.milliseconds() - autoTimer > 0){
                         autoTimer = GlobalTimer.milliseconds(); // reset timer not rly needed here
                         currentState = AutoState.PRELOAD_DRIVE;
                         drive.followTrajectoryAsync(PreloadDrive);
                     }
                     break;
                 case PRELOAD_DRIVE:
-                    outtake.IntakeSlideInternalPID(0,1); // might break something
-                    outtake.liftToInternalPID(0,1);
-                    outtake.turretSpinInternalPID(0,1);
-                    outtake.OuttakeSlideReady();
-                    outtake.OuttakeClawClose();
-                    outtake.OuttakeArmUpright();
-                    outtake.IntakeClawOpen();
-                    outtake.IntakeLift5();
+                   // outtake.IntakeSlideInternalPID(0,1); // might break something
+                   // outtake.liftToInternalPID(0,1);
+                   // outtake.turretSpinInternalPID(0,1);
+                   // outtake.OuttakeSlideReady();
+                   // outtake.OuttakeClawClose();
+                   // outtake.OuttakeArmUpright();
+                   // outtake.IntakeClawOpen();
+                   // outtake.IntakeLift5();
                     if (!drive.isBusy()){
                         autoTimer = GlobalTimer.milliseconds(); // reset timer not rly needed here
                         currentState = AutoState.OUTTAKE_CONE;
@@ -320,7 +320,7 @@ public class FIVE_CLOSE_HIGH extends LinearOpMode {
 
                 case OUTTAKE_CONE:
                     holdDrivebasePosition();
-                    if (GlobalTimer.milliseconds() - autoTimer > 0){
+                    if (false){
                         OuttakeCone(true); // next state is grab off
                     }
                     break;
@@ -522,6 +522,7 @@ public class FIVE_CLOSE_HIGH extends LinearOpMode {
             } else {
                 outtake.OuttakeSlideScoreDrop(); // drops down on pole a bit
                 outtake.OuttakeArmDeposit();
+
             }
         }
     }
