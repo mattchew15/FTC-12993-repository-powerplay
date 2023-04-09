@@ -29,7 +29,7 @@ public class GlobalsCloseHighAuto {
     public static double startPoseX = 34;
     public static double startPoseY = -69;
     public static double startPoseAngle = Math.toRadians(0);
-    public static double outconestackX = 40;
+    public static double outconestackX = 42;
     public static double outconestackY = -17.7;
     public static double outconestackYOtherSide = -16.85;
     public static double outconeStackRotation = Math.toRadians(-1.2);

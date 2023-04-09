@@ -6,6 +6,7 @@ import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.geometry.Vector2d;
 import com.acmerobotics.roadrunner.trajectory.Trajectory;
 import com.outoftheboxrobotics.photoncore.PhotonCore;
+import com.qualcomm.hardware.lynx.LynxModule;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.util.ElapsedTime;
@@ -50,7 +51,7 @@ public class FIVE_CLOSE_HIGH extends LinearOpMode {
     double prev_time;
 
     // create class instances
-    Outtake outtake;
+    Outtake outtake = new Outtake();
     DriveBase drivebase = new DriveBase();
     Inputs inputs = new Inputs();
     OpenCvCamera camera;
@@ -111,7 +112,7 @@ public class FIVE_CLOSE_HIGH extends LinearOpMode {
 
     @Override
     public void runOpMode() throws InterruptedException {
-        PhotonCore.enable(); // don't use both photon and bulk read
+        PhotonCore.enable();
 
         int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
         camera = OpenCvCameraFactory.getInstance().createWebcam(hardwareMap.get(WebcamName.class, webcamname), cameraMonitorViewId);
@@ -135,7 +136,6 @@ public class FIVE_CLOSE_HIGH extends LinearOpMode {
 
 
         // initialize hardware
-        outtake = new Outtake();
         outtake.Outtake_init(hardwareMap);
         drivebase.Drivebase_init(hardwareMap); // this might conflict with road runner
         SampleMecanumDrive drive = new SampleMecanumDrive(hardwareMap); // road drive class
@@ -226,7 +226,6 @@ public class FIVE_CLOSE_HIGH extends LinearOpMode {
 
 
         waitForStart();
-        drive.startIMUThread(this);
         if (isStopRequested()) return;
 
         // open cv changes the state at the start depending on cone rotation
@@ -246,8 +245,6 @@ public class FIVE_CLOSE_HIGH extends LinearOpMode {
 
         // runs instantly once
         autoTimer = GlobalTimer.milliseconds();
-        camera.stopStreaming();
-        //camera.closeCameraDevice();
 
         while (opModeIsActive() && !isStopRequested()) {
             // Read pose
@@ -262,7 +259,7 @@ public class FIVE_CLOSE_HIGH extends LinearOpMode {
             yPosition = poseEstimate.getY();
             headingPosition = poseEstimate.getHeading();
             correctedHeading = inputs.angleWrap(headingPosition);
-            //outtake.outtakeReads();
+            outtake.outtakeReads();
 
             telemetry.addData("x", xPosition);
             telemetry.addData("y", yPosition);
@@ -287,28 +284,28 @@ public class FIVE_CLOSE_HIGH extends LinearOpMode {
 
             telemetry.addData("number of cycles:", numCycles);
 
-            //outtake.ConeArmReady();
+            outtake.ConeArmReady();
             // main switch statement logic
             switch (currentState) {
                 case DELAY:
                     outtake.OuttakeClawClose();
                     outtake.IntakeClipOpen();
                     outtake.OuttakeArmReady();
-                    if (GlobalTimer.milliseconds() - autoTimer > 0){
+                    if (GlobalTimer.milliseconds() - autoTimer > 6000){
                         autoTimer = GlobalTimer.milliseconds(); // reset timer not rly needed here
                         currentState = AutoState.PRELOAD_DRIVE;
                         drive.followTrajectoryAsync(PreloadDrive);
                     }
                     break;
                 case PRELOAD_DRIVE:
-                   // outtake.IntakeSlideInternalPID(0,1); // might break something
-                   // outtake.liftToInternalPID(0,1);
-                   // outtake.turretSpinInternalPID(0,1);
-                   // outtake.OuttakeSlideReady();
-                   // outtake.OuttakeClawClose();
-                   // outtake.OuttakeArmUpright();
-                   // outtake.IntakeClawOpen();
-                   // outtake.IntakeLift5();
+                    outtake.IntakeSlideInternalPID(0,1); // might break something
+                    outtake.liftToInternalPID(0,1);
+                    outtake.turretSpinInternalPID(0,1);
+                    outtake.OuttakeSlideReady();
+                    outtake.OuttakeClawClose();
+                    outtake.OuttakeArmUpright();
+                    outtake.IntakeClawOpen();
+                    outtake.IntakeLift5();
                     if (!drive.isBusy()){
                         autoTimer = GlobalTimer.milliseconds(); // reset timer not rly needed here
                         currentState = AutoState.OUTTAKE_CONE;
@@ -318,7 +315,7 @@ public class FIVE_CLOSE_HIGH extends LinearOpMode {
 
                 case OUTTAKE_CONE:
                     holdDrivebasePosition();
-                    if (false){
+                    if (GlobalTimer.milliseconds() - autoTimer > 0){
                         OuttakeCone(true); // next state is grab off
                     }
                     break;

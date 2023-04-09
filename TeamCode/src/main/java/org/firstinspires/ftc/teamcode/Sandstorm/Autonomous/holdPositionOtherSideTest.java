@@ -3,16 +3,23 @@ import static org.firstinspires.ftc.teamcode.Sandstorm.GlobalsCloseHighAuto.outc
 import static org.firstinspires.ftc.teamcode.Sandstorm.GlobalsCloseHighAuto.outconestackY;
 
 import com.acmerobotics.roadrunner.geometry.Pose2d;
-import com.outoftheboxrobotics.photoncore.PhotonCore;
+import com.acmerobotics.roadrunner.geometry.Vector2d;
+import com.acmerobotics.roadrunner.trajectory.Trajectory;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.util.ElapsedTime;
-
+import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.teamcode.Sandstorm.DriveBase;
 import org.firstinspires.ftc.teamcode.Sandstorm.Inputs;
 import org.firstinspires.ftc.teamcode.Sandstorm.Outtake;
+import org.firstinspires.ftc.teamcode.Sandstorm.StormDrive;
 import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
+import org.firstinspires.ftc.teamcode.drive.StandardTrackingWheelLocalizer;
+import org.openftc.apriltag.AprilTagDetection;
 import org.openftc.easyopencv.OpenCvCamera;
+import org.openftc.easyopencv.OpenCvCameraFactory;
+import org.openftc.easyopencv.OpenCvCameraRotation;
+import java.util.ArrayList;
 
 
 @Autonomous(name = "Hold Position Other Side Test", group = "Autonomous")
@@ -33,8 +40,6 @@ public class holdPositionOtherSideTest extends LinearOpMode {
     double xPosition;
     double yPosition;
     double headingPosition;
-    double dt;
-    double prev_time;
 
     // create class instances
     Outtake outtake = new Outtake();
@@ -43,6 +48,7 @@ public class holdPositionOtherSideTest extends LinearOpMode {
     OpenCvCamera camera;
 
     enum AutoState {
+
         TURN_OTHER_STACK,
         TURN_FORWARDS
     }
@@ -72,7 +78,7 @@ public class holdPositionOtherSideTest extends LinearOpMode {
 
     @Override
     public void runOpMode() throws InterruptedException {
-        PhotonCore.enable();
+
         // initialize hardware
         outtake.Outtake_init(hardwareMap);
         drivebase.Drivebase_init(hardwareMap); // this might conflict with road runner
@@ -96,11 +102,6 @@ public class holdPositionOtherSideTest extends LinearOpMode {
             Pose2d poseEstimate = drive.getPoseEstimate();
 
             // Print pose to telemetry
-
-            dt = System.currentTimeMillis() - prev_time;
-            prev_time = System.currentTimeMillis();
-            telemetry.addData("Loop Time", dt);
-            //outtake.outtakeReads();
 
             xPosition = poseEstimate.getX();
             yPosition = poseEstimate.getY();
@@ -157,7 +158,7 @@ public class holdPositionOtherSideTest extends LinearOpMode {
 
     }
     public void holdDrivebaseOtherSide(){ // inputs the raw heading instead of corrected heading
-        drivebase.DriveToPositionAutonomous(outconestackXOtherSide,outconestackY,Math.toRadians(-1.2),xPosition,yPosition,correctedHeading, 1,1); // last values are translationalspeed, and rotational speed
+        drivebase.DriveToPositionAutonomous(outconestackXOtherSide,outconestackY,Math.toRadians(-1.2),xPosition,yPosition,headingPosition, 1,1); // last values are translationalspeed, and rotational speed
     }
     public void holdDrivebase(){ // inputs the raw heading instead of corrected heading
         drivebase.DriveToPositionAutonomous(outconestackXOtherSide,outconestackY,Math.toRadians(0),xPosition,yPosition,correctedHeading, 1,1); // last values are translationalspeed, and rotational speed

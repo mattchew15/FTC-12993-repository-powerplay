@@ -312,12 +312,14 @@ public class StormDrive extends LinearOpMode {
                         }
                     }
                 }
-                //can't move on teleop init
+                /* can't move on teleop init
                 if ((gamepad1.b || gamepad2.b)){ // so that this doesn't do anything when intake is out, fine adjust
                     drivebase.intakeSpin(-0.8);
                 } else {
                     drivebase.intakeSpin(0);
                 }
+
+                 */
 
                 if ((gamepad2.right_bumper || gamepad1.right_bumper) && !gamepadRightTriggersDown() && IntakeReady){ // if the triggers are used for the cone arm dont go into intake
                     if (outtakePickupState == OuttakePickupState.READY){
