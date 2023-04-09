@@ -115,6 +115,8 @@ public class FIVE_CLOSE_HIGH extends LinearOpMode {
 
     @Override
     public void runOpMode() throws InterruptedException {
+        PhotonCore.CONTROL_HUB.setBulkCachingMode(LynxModule.BulkCachingMode.AUTO);
+        PhotonCore.experimental.setMaximumParallelCommands(8);
         PhotonCore.enable();
 
         int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
@@ -226,7 +228,7 @@ public class FIVE_CLOSE_HIGH extends LinearOpMode {
             outtake.IntakeClipOpen();
             outtake.OuttakeArmReady();
         }
-
+        outtake.startIMUThread(this);
 
         waitForStart();
         if (isStopRequested()) return;
@@ -520,7 +522,6 @@ public class FIVE_CLOSE_HIGH extends LinearOpMode {
             } else {
                 outtake.OuttakeSlideScoreDrop(); // drops down on pole a bit
                 outtake.OuttakeArmDeposit();
-
             }
         }
     }

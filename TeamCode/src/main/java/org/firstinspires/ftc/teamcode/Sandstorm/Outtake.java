@@ -1,6 +1,9 @@
 package org.firstinspires.ftc.teamcode.Sandstorm;
+import androidx.annotation.GuardedBy;
 
+import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.acmerobotics.dashboard.config.Config;
+import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.AnalogInput;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
@@ -36,6 +39,13 @@ public class Outtake {  // no constructor for this class
     private DigitalChannel OuttakeClawTouch;
     AnalogInput IntakeArmPosition;
     AnalogInput IntakeLiftPosition;
+
+    private final Object imuLock = new Object();
+    @GuardedBy("imuLock") // idk what this does
+    public BNO055IMU imu;
+    private Thread imuThread;
+    private double imuAngle = 0;
+    private double imuOffset = 0;
 
     //Servo Positions for outtake
     public static double OuttakeClawOpenPos = 0.58, OuttakeClawClosedPos = 0.45, OuttakeClawOpenHardPos = 0.7;
@@ -105,6 +115,29 @@ public class Outtake {  // no constructor for this class
         IntakeArmPosition = hwMap.get(AnalogInput.class, "InSEncoder");
         //OuttakeArmPosition = hwMap.get(AnalogInput.class, "OutSEncoder");
         IntakeLiftPosition = hwMap.get(AnalogInput.class, "InLiftSEncoder");
+
+        // this is changed
+        synchronized (imuLock) {
+            imu = hwMap.get(BNO055IMU.class, "imu");
+            BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
+            parameters.angleUnit = BNO055IMU.AngleUnit.RADIANS;
+            imu.initialize(parameters);
+        }
+    }
+
+    public double getAngle() {
+        return imuAngle - imuOffset;
+    }
+
+    public void startIMUThread(LinearOpMode opMode) {
+            imuThread = new Thread(() -> {
+                while (!opMode.isStopRequested() && opMode.opModeIsActive()) {
+                    synchronized (imuLock) {
+                        imuAngle = imu.getAngularOrientation().firstAngle;
+                    }
+                }
+            });
+            imuThread.start();
     }
 
     public void hardwareSetup(){
