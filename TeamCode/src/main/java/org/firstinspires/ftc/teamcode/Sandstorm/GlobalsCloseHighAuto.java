@@ -7,8 +7,8 @@ import com.acmerobotics.roadrunner.geometry.Pose2d;
 public class GlobalsCloseHighAuto {
 
     // encoder positions
-    public static int IntakeSlideOutTicks = -600;
-    public static int LiftHighPosition = -698;
+    public static int IntakeSlideOutTicks = -605;
+    public static int LiftHighPosition = -695;
     public static int LiftHighPosition10 = -760;
 
     public static double TurretLeftposition = -5.55;
@@ -16,8 +16,9 @@ public class GlobalsCloseHighAuto {
 
     public static double TurretLeftPositionInternalPid = -21;
 
-    public static int IntakeSlideNotQuiteOutTicks = IntakeSlideOutTicks + 88;
-    public static int IntakeSlideBackFromStack = IntakeSlideOutTicks + 68;
+    public static int IntakeSlideNotQuiteOutTicks = IntakeSlideOutTicks + 105;
+
+    public static int IntakeSlideBackFromStack = IntakeSlideOutTicks + 80;
 
     // webcam names
     public String WebCamLeftName  = "WebcamLeft";

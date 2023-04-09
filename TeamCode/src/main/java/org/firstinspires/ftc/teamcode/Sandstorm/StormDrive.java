@@ -564,7 +564,7 @@ public class StormDrive extends LinearOpMode {
                     // drivebase.intakeSpin(-0.4); // helps the slides go out
                     if (outtake.intakeSlidePosition < -100) {
                         outtake.IntakeClawOpenHard();
-                        IntakeHeightChange();
+                        outtake.IntakeLiftReady();
                         outtake.IntakeArmReady();
                     }
                     if (inputs.IntakeToggleOutState == 2){ // if gamepad2.leftbumper is pressed
@@ -1048,8 +1048,8 @@ public class StormDrive extends LinearOpMode {
         if (SlidesUpBtn) {
             if (!SlidesToggleUp) {
                 SlidesToggleUp = true;
-                if (liftTargetPosition > LiftUpperLimit + 85){
-                    liftTargetPosition -= 85; // increases by 50 every time
+                if (liftTargetPosition > LiftUpperLimit + 50){
+                    liftTargetPosition -= 100; // increases by 50 every time
                 }
             }
         }
@@ -1061,8 +1061,8 @@ public class StormDrive extends LinearOpMode {
         if (SlidesDownBtn) {
             if (!SlidesToggleDown) {
                 SlidesToggleDown = true;
-                if (liftTargetPosition < -80){
-                    liftTargetPosition += 85; // decreases by 50 every time
+                if (liftTargetPosition < -50){
+                    liftTargetPosition += 100; // decreases by 50 every time
                 }
             }
         }
