@@ -16,6 +16,8 @@ import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
  */
 @TeleOp(group = "drive")
 public class LocalizationTest extends LinearOpMode {
+    double dt;
+    double prev_time;
     @Override
     public void runOpMode() throws InterruptedException {
         SampleMecanumDrive drive = new SampleMecanumDrive(hardwareMap);
@@ -34,7 +36,9 @@ public class LocalizationTest extends LinearOpMode {
             );
 
             drive.update();
-
+            dt = System.currentTimeMillis() - prev_time;
+            prev_time = System.currentTimeMillis();
+            telemetry.addData("Loop Time", dt);
             Pose2d poseEstimate = drive.getPoseEstimate();
             telemetry.addData("x", poseEstimate.getX());
             telemetry.addData("y", poseEstimate.getY());
