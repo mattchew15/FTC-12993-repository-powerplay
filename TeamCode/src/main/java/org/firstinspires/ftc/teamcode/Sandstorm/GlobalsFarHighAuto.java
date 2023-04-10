@@ -11,7 +11,7 @@ public class GlobalsFarHighAuto {
     public static int LiftHighPosition = -718;
     public static int LiftHighPosition10 = -770; // could be used - this is to make lift faster for 1+10
 
-    public static double TurretLeftposition = -5.3;
+    public static double TurretLeftposition = -5.6;
     public static double TurretRightposition = -TurretLeftposition; // use turret right position
 
     public static double TurretLeftPositionInternalPid = -21;
@@ -31,12 +31,12 @@ public class GlobalsFarHighAuto {
     public static double PreloadDriveRotation = Math.toRadians(0);
 
     public static double inconestackX = 37.37;
-    public static double inconestackY = -17.7;
-    public static double inStackRotation = Math.toRadians(1.2);
+    public static double inconestackY = -18.1;
+    public static double inStackRotation = Math.toRadians(1);
 
     public static double outconestackX = 17;
     public static double outconestackY = -18.7;
-    public static double outconeStackRotation = Math.toRadians(1.2);
+    public static double outconeStackRotation = Math.toRadians(1.5);
     public static double xValueBeforeSlidesExtend = 20;
 
     public static double parkLeft = -61;
