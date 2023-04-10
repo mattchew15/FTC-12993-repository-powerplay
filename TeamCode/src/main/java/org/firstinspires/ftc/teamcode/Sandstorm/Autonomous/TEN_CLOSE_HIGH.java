@@ -4,6 +4,7 @@ import static org.firstinspires.ftc.teamcode.Sandstorm.GlobalsCloseHighAuto.outc
 import static org.firstinspires.ftc.teamcode.Sandstorm.GlobalsCloseHighAuto.outconestackYOtherSide;
 
 import com.acmerobotics.roadrunner.geometry.Pose2d;
+import com.acmerobotics.roadrunner.geometry.Vector2d;
 import com.acmerobotics.roadrunner.trajectory.Trajectory;
 //import com.outoftheboxrobotics.photoncore.PhotonCore;
 import com.outoftheboxrobotics.photoncore.PhotonCore;
@@ -156,8 +157,8 @@ public class TEN_CLOSE_HIGH extends LinearOpMode {
         Trajectory DriveOtherSide = drive.trajectoryBuilder(PreloadDrive.end())
                 .lineToLinearHeading(new Pose2d(outconestackXOtherSide*SideMultiplier, outconestackYOtherSide, 0 + AngleOffset))
 
-                //.splineToSplineHeading(new Pose2d(-22 * SideMultiplier,-17, Math.toRadians(0)+AngleOffset),Math.toRadians(0)+AngleOffset)
-                //.splineToSplineHeading(new Pose2d(outconestackXOtherSide * SideMultiplier,outconestackY, Math.toRadians(180)),Math.toRadians(0))
+                .splineTo(new Vector2d(-22 * SideMultiplier,-17), Math.toRadians(0)+AngleOffset)
+                .splineToSplineHeading(new Pose2d(outconestackXOtherSide * SideMultiplier,outconestackY, GlobalsCloseHighAuto.outconeStackRotationOtherSide),Math.toRadians(0))
                 .build();
 
         Trajectory ParkRight = drive.trajectoryBuilder(DriveOtherSide.end())
