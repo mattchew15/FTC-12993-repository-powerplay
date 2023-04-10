@@ -35,11 +35,11 @@ public class holdPositionOtherSideTest extends LinearOpMode {
     int SignalRotation;
     int slowerVelocityConstraint;
 
-    double correctedHeading;
     double correctedHeadingOtherSide;
     double xPosition;
     double yPosition;
     double headingPosition;
+    double offsetHeading;
 
     // create class instances
     Outtake outtake = new Outtake();
@@ -72,8 +72,6 @@ public class holdPositionOtherSideTest extends LinearOpMode {
     }
     // Define our start pose
 
-
-
     Pose2d startPose = new Pose2d(outconestackXOtherSide, outconestackY, Math.toRadians(0));
 
     @Override
@@ -88,8 +86,6 @@ public class holdPositionOtherSideTest extends LinearOpMode {
         Setup();
         // Set inital pose
         drive.setPoseEstimate(startPose);
-        //drive.turnAsync(180);
-
 
         waitForStart();
         if (isStopRequested()) return;
@@ -106,11 +102,11 @@ public class holdPositionOtherSideTest extends LinearOpMode {
             xPosition = poseEstimate.getX();
             yPosition = poseEstimate.getY();
             headingPosition = poseEstimate.getHeading(); // returns raw heading position
-            correctedHeading = inputs.angleWrap(headingPosition);
-            correctedHeadingOtherSide = inputs.angleWrapOtherSide(headingPosition);
+            offsetHeading = inputs.offsetAngle90(headingPosition);
             telemetry.addData("OtherSide", OtherSide);
             telemetry.addData("heading", Math.toDegrees(headingPosition));
-            telemetry.addData("corrected heading", Math.toDegrees(correctedHeading));
+            telemetry.addData("offset heading", Math.toDegrees(offsetHeading));
+
             telemetry.addData("autostate", currentState);
             telemetry.addData("HeadingError", drivebase.getHeadingError());
             telemetry.addData("HeadingOutput", drivebase.getHeadingOutput());
@@ -158,10 +154,10 @@ public class holdPositionOtherSideTest extends LinearOpMode {
 
     }
     public void holdDrivebaseOtherSide(){ // inputs the raw heading instead of corrected heading
-        drivebase.DriveToPositionAutonomous(outconestackXOtherSide,outconestackY,Math.toRadians(-1.2),xPosition,yPosition,headingPosition, 1,1); // last values are translationalspeed, and rotational speed
+        drivebase.DriveToPositionAutonomous(outconestackXOtherSide,outconestackY,Math.toRadians(100),xPosition,yPosition,offsetHeading, 1,1); // last values are translationalspeed, and rotational speed
     }
     public void holdDrivebase(){ // inputs the raw heading instead of corrected heading
-        drivebase.DriveToPositionAutonomous(outconestackXOtherSide,outconestackY,Math.toRadians(0),xPosition,yPosition,correctedHeading, 1,1); // last values are translationalspeed, and rotational speed
+        drivebase.DriveToPositionAutonomous(outconestackXOtherSide,outconestackY,Math.toRadians(-100),xPosition,yPosition,offsetHeading, 1,1); // last values are translationalspeed, and rotational speed
     }
 }
 

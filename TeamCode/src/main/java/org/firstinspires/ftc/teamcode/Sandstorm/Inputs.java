@@ -219,8 +219,17 @@ public class Inputs {
         return radians;
     }
 
-    public double angleWrapOtherSide(double radians) {
+    public double offsetAngle90(double radians) {
+        while (radians < (3*Math.PI)/2) {
+            radians = -(radians - Math.PI/2);
+        }
+        while (radians > (3*Math.PI)/2) {
+            radians = -(radians - (5*Math.PI)/2);
+        }
+          return radians;
+    }
 
+    public double angleWrapOtherSide(double radians) {
         while (radians > Math.PI) {
             radians -= 2 * Math.PI;
         }
@@ -229,7 +238,7 @@ public class Inputs {
         }
 
         // keep in mind that the result is in radians
-        return radians + Math.PI;
+        return radians + Math.toRadians(90);
     }
 
 
