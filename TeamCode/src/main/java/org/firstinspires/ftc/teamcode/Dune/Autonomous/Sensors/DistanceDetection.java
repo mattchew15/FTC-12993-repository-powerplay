@@ -1,12 +1,13 @@
 package org.firstinspires.ftc.teamcode.Dune.Autonomous.Sensors;
 import com.qualcomm.hardware.rev.Rev2mDistanceSensor;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
-
+@Disabled
 public class DistanceDetection extends LinearOpMode { //either linear op mode or whatever is needed depending on where you code it
 
     private DistanceSensor sensorRangeLeft;

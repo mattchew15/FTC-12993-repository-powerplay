@@ -1,13 +1,14 @@
 package org.firstinspires.ftc.teamcode.Dune.Autonomous.Sensors;
 import com.qualcomm.hardware.rev.Rev2mDistanceSensor;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 
-
+@Disabled
 @Autonomous(name = "Sensor: Rev2mDistance", group = "Sensor")
 
 public class DistanceTest extends LinearOpMode {

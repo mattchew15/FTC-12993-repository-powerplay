@@ -1,10 +1,11 @@
 package org.firstinspires.ftc.teamcode.Dune.Autonomous.Sensors;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DigitalChannel;
 import com.qualcomm.robotcore.hardware.UltrasonicSensor;
-
+@Disabled
 @Autonomous(name = "Sensor", group = "Sensor")
 
 public class UltrasonicTest extends LinearOpMode {
