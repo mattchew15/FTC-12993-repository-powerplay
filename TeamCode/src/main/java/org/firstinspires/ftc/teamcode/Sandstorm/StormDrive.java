@@ -53,7 +53,7 @@ public class StormDrive extends LinearOpMode {
     final int IntakeSlideOutTicks = -744; // make this max pull out distance
     final int IntakeLiftHeightThreshold = 265;
 
-    final int LiftHighPosition = -750;
+    final int LiftHighPosition = -740;
     final int LiftMidPosition = -375;
     final int LiftLowPosition = -25;
     final int LiftGroundPosition = -30;
@@ -252,29 +252,29 @@ public class StormDrive extends LinearOpMode {
                 //drivebase.motorDirectionTest(gamepad1.left_stick_y, gamepad1.left_stick_x,gamepad1.right_stick_x,gamepad1.right_stick_y);
                 //drivebase.PowerToggle(gamepad1.left_stick_button);
                 //inputs.gamepadRumbleTimer();
-                telemetry.addData("LiftMotorPosition", outtake.liftPosition);
-                telemetry.addData("LiftTargetPosition", liftTargetPosition);
-                telemetry.addData("turretPosition", outtake.tickstoDegrees((int)Math.round(outtake.turretPosition))); // might be in the wrong degrees/other
+                //telemetry.addData("LiftMotorPosition", outtake.liftPosition);
+                //telemetry.addData("LiftTargetPosition", liftTargetPosition);
+                //telemetry.addData("turretPosition", outtake.tickstoDegrees((int)Math.round(outtake.turretPosition))); // might be in the wrong degrees/other
                 inputs.manualResetToggleMode(gamepad2.left_stick_button);
-                telemetry.addData("intakeSlideMotor", outtake.intakeSlidePosition);
+                //telemetry.addData("intakeSlideMotor", outtake.intakeSlidePosition);
                 outtakeSequence(); // if gamepad things don't work here then need to pass them in as parameters of this function
-                telemetry.addData("Main Outtake State", outtakeState);
-                telemetry.addData("Intake Out State", intakeout);
+                //telemetry.addData("Main Outtake State", outtakeState);
+                //telemetry.addData("Intake Out State", intakeout);
                 //telemetry.addData("Cone Deposit State", coneDepositState);
                 //telemetry.addData("Flip Cone State", flipConeArmState);
-                telemetry.addData("Outtake Pickup state", outtakePickupState);
-                telemetry.addData("Ground Junctions deposit state", groundJunctionsDeposit);
-                telemetry.addData("IntakeLiftSequence", intakeLiftSequence);
-                telemetry.addData("GroundJunctionToggleMode", inputs.GroundJunctionsToggleMode);
-                telemetry.addData("BeaconScore", BeaconScore);
-                //telemetry.addData("intakeTouch", outtake.intakeClawTouchPressed());
+                //telemetry.addData("Outtake Pickup state", outtakePickupState);
+                //telemetry.addData("Ground Junctions deposit state", groundJunctionsDeposit);
+                //telemetry.addData("IntakeLiftSequence", intakeLiftSequence);
+                //telemetry.addData("GroundJunctionToggleMode", inputs.GroundJunctionsToggleMode);
+                //telemetry.addData("BeaconScore", BeaconScore);
+                telemetry.addData("intakeTouch", outtake.intakeClawTouchPressed());
                 //telemetry.addData("gamepad2RightStickYPastDeadZone", gamepad2RightStickYPastDeadZone());
-                //telemetry.addData("intake lift encoder", outtake.intakeLiftPosition);
+                telemetry.addData("intake lift encoder", outtake.intakeLiftPosition);
                 telemetry.addData("intake arm encoder", outtake.intakeArmPosition);
                 //telemetry.addData("intake slide motor battery draw", outtake.getIntakeSlideVoltage());
                 //telemetry.addData("lift motor battery draw", outtake.getLiftVoltage());
-                telemetry.addData("cycle state for intake lift", inputs.CycleState);
-                telemetry.addData("IntakeOut", IntakeReady);
+                //telemetry.addData("cycle state for intake lift", inputs.CycleState);
+                //telemetry.addData("IntakeOut", IntakeReady);
                 telemetry.update();
             }
         }

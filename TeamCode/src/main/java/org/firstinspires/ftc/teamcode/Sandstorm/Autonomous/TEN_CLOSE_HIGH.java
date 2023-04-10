@@ -47,6 +47,7 @@ public class TEN_CLOSE_HIGH extends LinearOpMode {
     double xPosition;
     double yPosition;
     double headingPosition;
+    double offsetHeading;
 
     // create class instances
     Outtake outtake = new Outtake();
@@ -270,6 +271,7 @@ public class TEN_CLOSE_HIGH extends LinearOpMode {
             yPosition = poseEstimate.getY();
             headingPosition = poseEstimate.getHeading();
             correctedHeading = inputs.angleWrap(headingPosition);
+            offsetHeading = inputs.offsetAngle90(headingPosition);
             outtake.outtakeReads();
 
             telemetry.addData("OtherSide", OtherSide);
@@ -425,7 +427,7 @@ public class TEN_CLOSE_HIGH extends LinearOpMode {
                         outtake.IntakeLift3();
                         autoTimer = GlobalTimer.milliseconds(); // reset timer
                         currentState = AutoState.TURN_OTHER_STACK;
-                        drive.setPoseEstimate(new Pose2d(xPosition,yPosition,headingPosition+Math.toRadians(180)));
+                       // drive.setPoseEstimate(new Pose2d(xPosition,yPosition,headingPosition+Math.toRadians(180)));
                     }
 
                     break;
@@ -577,21 +579,21 @@ public class TEN_CLOSE_HIGH extends LinearOpMode {
     }
     public void holdDrivebasePosition(){ // THE OUTCONESTACKROTATION SHOULD BE NEGATIVE
         if (!OtherSide){
-            drivebase.DriveToPositionAutonomous(GlobalsCloseHighAuto.outconestackX * SideMultiplier, outconestackY,GlobalsCloseHighAuto.outconeStackRotation* SideMultiplier + AngleOffset,xPosition,yPosition,correctedHeading, 1,1); // last values are translationalspeed, and rotational speed
+            drivebase.DriveToPositionAutonomous2(GlobalsCloseHighAuto.outconestackX * SideMultiplier, outconestackY,GlobalsCloseHighAuto.outconeStackRotation*SideMultiplier,xPosition,yPosition,offsetHeading,headingPosition, 1,1); // last values are translationalspeed, and rotational speed
         } else if (OtherSide){
             holdDrivebaseOtherSide();
         }
     }
 
     public void holdDrivebaseOtherSide(){ // this 3 is negative
-        drivebase.DriveToPositionAutonomous(outconestackXOtherSide * SideMultiplier,outconestackYOtherSide,Math.toRadians(14) * SideMultiplier + AngleOffset,xPosition,yPosition,correctedHeading, 1,1); // last values are translationalspeed, and rotational speed
+        drivebase.DriveToPositionAutonomous2(outconestackXOtherSide * SideMultiplier,outconestackYOtherSide,GlobalsCloseHighAuto.outconeStackRotationHOLDPID * -SideMultiplier,xPosition,yPosition,offsetHeading,headingPosition, 1,1); // last values are translationalspeed, and rotational speed
     }
 
     public void holdTurretPosition(){
         if (!OtherSide){
             outtake.turretSpinInternalPID(-21,1);
         } else {
-            outtake.turretSpinInternalPID(22.5, 1);
+            outtake.turretSpinInternalPID(21, 1);
         }
     }
 }

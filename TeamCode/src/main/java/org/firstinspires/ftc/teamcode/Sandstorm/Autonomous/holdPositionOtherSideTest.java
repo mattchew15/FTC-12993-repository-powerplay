@@ -112,7 +112,7 @@ public class holdPositionOtherSideTest extends LinearOpMode {
             telemetry.addData("heading", Math.toDegrees(headingPosition));
             telemetry.addData("offset heading", Math.toDegrees(offsetHeading));
 
-            telemetry.addData("autostate", currentState);
+            //telemetry.addData("autostate", currentState);
             telemetry.addData("HeadingError", drivebase.getHeadingError());
             telemetry.addData("HeadingOutput", drivebase.getHeadingOutput());
             telemetry.addData("XError", drivebase.getXError());
@@ -138,18 +138,15 @@ public class holdPositionOtherSideTest extends LinearOpMode {
                     break;
                 case TURN_FORWARDS:
                     // turns using my PID
-                    /*
+
                     holdDrivebase();
                     outtake.IntakeSlideTo(1,outtake.IntakeSlidePos(),1);
                     outtake.turretSpin(0,outtake.turretPos(),1); // spin turret after
                     outtake.liftTo(0, outtake.liftPos(), 1);
-                    */
-                    currentState = AutoState.TURN_OTHER_STACK;
-
                     //threshold is 1 inch, 2 degrees
-                    //if (gamepad1.a){ // have to deal with the heading here, read telemetry for heading angle
-                      //  currentState = AutoState.TURN_OTHER_STACK;
-                    //}
+                    if (gamepad1.a){ // have to deal with the heading here, read telemetry for heading angle
+                        currentState = AutoState.TURN_OTHER_STACK;
+                    }
                     break;
             }
             // Updates driving for trajectories
@@ -159,10 +156,10 @@ public class holdPositionOtherSideTest extends LinearOpMode {
 
     }
     public void holdDrivebaseOtherSide(){ // inputs the raw heading instead of corrected heading
-        drivebase.DriveToPositionAutonomous(outconestackXOtherSide,outconestackY,Math.toRadians(100),xPosition,yPosition,offsetHeading, 1,1); // last values are translationalspeed, and rotational speed
+        drivebase.DriveToPositionAutonomous2(outconestackXOtherSide,outconestackY,Math.toRadians(90),xPosition,yPosition,offsetHeading,headingPosition, 1,1); // last values are translationalspeed, and rotational speed
     }
     public void holdDrivebase(){ // inputs the raw heading instead of corrected heading
-        drivebase.DriveToPositionAutonomous(outconestackXOtherSide,outconestackY,Math.toRadians(-100),xPosition,yPosition,offsetHeading, 1,1); // last values are translationalspeed, and rotational speed
+        drivebase.DriveToPositionAutonomous2(outconestackXOtherSide,outconestackY,Math.toRadians(-90),xPosition,yPosition,offsetHeading,headingPosition, 1,1); // last values are translationalspeed, and rotational speed
     }
 }
 

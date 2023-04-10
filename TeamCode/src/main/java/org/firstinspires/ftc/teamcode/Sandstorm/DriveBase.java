@@ -110,7 +110,20 @@ public class DriveBase {  // no constructor for this class
         FR.setPower((x_rotated - y_rotated - theta));
         BR.setPower((x_rotated + y_rotated - theta));
     }
+    public void DriveToPositionAutonomous2(double xTarget, double yTarget, double thetaTarget, double xRobotPosition, double yRobotPosition, double robotThetaOffset,double robotTheta, double maxTranslationalSpeed, double maxRotationalSpeed){
+        double x = drivebaseXPID.update(xTarget,xRobotPosition,maxTranslationalSpeed); // set a target, get the robots state, and set the max speed
+        double y = -drivebaseYPID.update(yTarget,yRobotPosition,maxTranslationalSpeed);
+        double theta = drivebaseThetaPID.update(thetaTarget,robotThetaOffset,maxRotationalSpeed); // this pid should probably be different
+        double x_rotated = x * Math.cos(robotTheta) - y * Math.sin(robotTheta);
+        double y_rotated = x * Math.sin(robotTheta) + y * Math.cos(robotTheta);
 
+        // x, y, theta input mixing
+        double denominator = Math.max(Math.abs(x_rotated) + Math.abs(y_rotated) + Math.abs(robotTheta), 1);
+        FL.setPower((x_rotated + y_rotated + theta));
+        BL.setPower((x_rotated - y_rotated + theta));
+        FR.setPower((x_rotated - y_rotated - theta));
+        BR.setPower((x_rotated + y_rotated - theta));
+    }
     public double holdHeading(double thetaTarget, double robotTheta, double maxRotationalSpeed){
         double thetaOutput = -drivebaseThetaPID.update(thetaTarget,robotTheta,maxRotationalSpeed); // this pid should probably be different
         return thetaOutput;

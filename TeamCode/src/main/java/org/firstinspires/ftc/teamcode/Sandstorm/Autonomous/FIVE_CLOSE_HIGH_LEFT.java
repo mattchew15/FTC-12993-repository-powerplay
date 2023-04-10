@@ -1,11 +1,11 @@
 package org.firstinspires.ftc.teamcode.Sandstorm.Autonomous;
+import static org.firstinspires.ftc.teamcode.Sandstorm.GlobalsCloseHighAuto.outconestackXOtherSide;
 import static org.firstinspires.ftc.teamcode.Sandstorm.GlobalsCloseHighAuto.outconestackY;
 
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.geometry.Vector2d;
 import com.acmerobotics.roadrunner.trajectory.Trajectory;
 import com.outoftheboxrobotics.photoncore.PhotonCore;
-import com.qualcomm.hardware.lynx.LynxModule;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.util.ElapsedTime;
@@ -43,6 +43,7 @@ public class FIVE_CLOSE_HIGH_LEFT extends LinearOpMode {
     double xPosition;
     double yPosition;
     double headingPosition;
+    double offsetHeading;
     double dt;
     double prev_time;
 
@@ -109,8 +110,6 @@ public class FIVE_CLOSE_HIGH_LEFT extends LinearOpMode {
 
     @Override
     public void runOpMode() throws InterruptedException {
-        PhotonCore.CONTROL_HUB.setBulkCachingMode(LynxModule.BulkCachingMode.AUTO); // check this
-        PhotonCore.EXPANSION_HUB.setBulkCachingMode(LynxModule.BulkCachingMode.AUTO);
         PhotonCore.enable();
 
         int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
@@ -258,30 +257,31 @@ public class FIVE_CLOSE_HIGH_LEFT extends LinearOpMode {
             yPosition = poseEstimate.getY();
             headingPosition = poseEstimate.getHeading();
             correctedHeading = inputs.angleWrap(headingPosition);
+            offsetHeading = inputs.offsetAngle90(headingPosition);
             outtake.outtakeReads();
 
-            telemetry.addData("x", xPosition);
-            telemetry.addData("y", yPosition);
-            telemetry.addData("heading", headingPosition);
-            telemetry.addData("corrected heading", correctedHeading);
+            //telemetry.addData("x", xPosition);
+            //telemetry.addData("y", yPosition);
+            telemetry.addData("heading", Math.toDegrees(headingPosition));
+            telemetry.addData("offsetHeading", Math.toDegrees(offsetHeading));
+            telemetry.addData("targetHeading", Math.toDegrees(GlobalsCloseHighAuto.outconeStackRotationHOLDPID));
 
-            telemetry.addData("autostate", currentState);
-            telemetry.addData("Intake Slide Position", outtake.intakeSlidePosition);
-            telemetry.addData("Intake Slide Target Reached", outtake.intakeSlideTargetReachedSmallerThreshold());
+            //telemetry.addData("autostate", currentState);
+            //telemetry.addData("Intake Slide Position", outtake.intakeSlidePosition);
+            //telemetry.addData("Intake Slide Target Reached", outtake.intakeSlideTargetReachedSmallerThreshold());
 
-            telemetry.addData("liftPosition", outtake.liftPosition);
-            telemetry.addData("lift target reached", outtake.liftTargetReached());
+            //telemetry.addData("liftPosition", outtake.liftPosition);
+            //telemetry.addData("lift target reached", outtake.liftTargetReached());
 
-
-            telemetry.addData("XError", drivebase.getXError());
-            telemetry.addData("YError", drivebase.getYError());
+            // telemetry.addData("XError", drivebase.getXError());
+            // telemetry.addData("YError", drivebase.getYError());
             telemetry.addData("HeadingError", drivebase.getHeadingError());
 
-            telemetry.addData("XOutput", drivebase.getXOutput());
-            telemetry.addData("YOutput", drivebase.getYOutput());
-            telemetry.addData("HeadingOutput", drivebase.getHeadingOutput());
+            // telemetry.addData("XOutput", drivebase.getXOutput());
+            // telemetry.addData("YOutput", drivebase.getYOutput());
+            // telemetry.addData("HeadingOutput", drivebase.getHeadingOutput());
 
-            telemetry.addData("number of cycles:", numCycles);
+            //telemetry.addData("number of cycles:", numCycles);
 
             outtake.ConeArmReady();
             // main switch statement logic
@@ -447,7 +447,6 @@ public class FIVE_CLOSE_HIGH_LEFT extends LinearOpMode {
             drive.update();
             telemetry.update();
         }
-
     }
 
     public void intakeLiftHeight(){
@@ -465,7 +464,6 @@ public class FIVE_CLOSE_HIGH_LEFT extends LinearOpMode {
             outtake.IntakeLiftReady();
         }
     }
-
     public void OuttakeCone(boolean Intake){
         if (Intake){ // if parameter is set to false it won't do the intake slides just outtake
             outtake.IntakeSlideTo(globalsCloseHighAuto.IntakeSlideNotQuiteOutTicks,outtake.intakeSlidePosition, 1); // move to just before the stack
@@ -531,9 +529,8 @@ public class FIVE_CLOSE_HIGH_LEFT extends LinearOpMode {
         telemetry.addLine(String.format("Rotation Roll: %.2f degrees", Math.toDegrees(detection.pose.roll)));
     }
     public void holdDrivebasePosition(){ // THE OUTCONESTACKROTATION SHOULD BE NEGATIVE
-        drivebase.DriveToPositionAutonomous(globalsCloseHighAuto.outconestackX * SideMultiplier, globalsCloseHighAuto.outconestackY,globalsCloseHighAuto.outconeStackRotation* SideMultiplier + AngleOffset,xPosition,yPosition,correctedHeading, 1,1); // last values are translationalspeed, and rotational speed
-        // positionHoldPID.returnMotorPowers(globalsCloseHighAuto.outconestackX * SideMultiplier, globalsCloseHighAuto.outconestackY,globalsCloseHighAuto.outconeStackRotation* SideMultiplier + AngleOffset,xPosition,yPosition,correctedHeading, 1,1);
-        // drive.setMotorPowers(positionHoldPID.FL_Power,positionHoldPID.BL_Power,positionHoldPID.BR_Power,positionHoldPID.FR_Power); // should reduce the number of writes for motors
+        //drivebase.DriveToPositionAutonomous(globalsCloseHighAuto.outconestackX * SideMultiplier, globalsCloseHighAuto.outconestackY,globalsCloseHighAuto.outconeStackRotationHOLDPID* SideMultiplier,xPosition,yPosition,offsetHeading, 1,1); // last values are translationalspeed, and rotational speed
+        drivebase.DriveToPositionAutonomous2(globalsCloseHighAuto.outconestackX * SideMultiplier, globalsCloseHighAuto.outconestackY,globalsCloseHighAuto.outconeStackRotationHOLDPID* SideMultiplier,xPosition,yPosition,offsetHeading,headingPosition, 1,1); // last values are translationalspeed, and rotational speed
     }
     public void holdTurretPosition(){
         outtake.turretSpin(GlobalsCloseHighAuto.TurretLeftposition * SideMultiplier,outtake.turretPosition,1);

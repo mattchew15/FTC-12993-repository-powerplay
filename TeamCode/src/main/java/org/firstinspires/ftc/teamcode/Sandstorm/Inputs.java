@@ -207,7 +207,6 @@ public class Inputs {
         }
     }
     public double angleWrap(double radians) {
-
         while (radians > Math.PI) {
             radians -= 2 * Math.PI;
         }
@@ -220,10 +219,10 @@ public class Inputs {
     }
 
     public double offsetAngle90(double radians) {
-        while (radians < (3*Math.PI)/2) {
+        if (radians < (3*Math.PI)/2) {
             radians = -(radians - Math.PI/2);
         }
-        while (radians > (3*Math.PI)/2) {
+        else if (radians > (3*Math.PI)/2) {
             radians = -(radians - (5*Math.PI)/2);
         }
           return radians;

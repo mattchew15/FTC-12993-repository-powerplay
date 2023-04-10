@@ -8,7 +8,7 @@ public class GlobalsCloseHighAuto {
 
     // encoder positions
     public static int IntakeSlideOutTicks = -605;
-    public static int LiftHighPosition = -712;
+    public static int LiftHighPosition = -705;
     public static int LiftHighPosition10 = -760;
 
     public static double TurretLeftposition = -5.55;
