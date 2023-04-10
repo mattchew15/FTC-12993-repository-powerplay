@@ -13,13 +13,10 @@ public class GlobalsCloseHighAuto {
 
     public static double TurretLeftposition = -5.55;
     public static double TurretRightposition = -TurretLeftposition;
-
     public static double TurretLeftPositionInternalPid = -21;
 
     public static int IntakeSlideNotQuiteOutTicks = IntakeSlideOutTicks + 105;
-
     public static int IntakeSlideBackFromStack = IntakeSlideOutTicks + 80;
-
     // webcam names
     public String WebCamLeftName  = "WebcamLeft";
     public String WebCamRightName  = "WebcamRight";
@@ -33,6 +30,10 @@ public class GlobalsCloseHighAuto {
     public static double outconestackYOtherSide = -16.85;
     public static double outconeStackRotation = Math.toRadians(-1.2);
     public static double outconeStackRotationHOLDPID = Math.toRadians(90 + -outconeStackRotation);
+
+    public static double ramDepositX = 42;
+    public static double ramDepositY = 2;
+    public static double ramDepositRotation = Math.toRadians(-1.2);
     // add 180 to angles
 
     public static double outconestackXOtherSide = -40.8;
