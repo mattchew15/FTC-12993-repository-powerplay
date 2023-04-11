@@ -46,6 +46,32 @@ public class PID {
         return output;
     }
 
+    public double updateWithError(double errorHeading, double maxOutput) { // parameter of the method is the target,
+        // PID logic and then return the output
+        error = errorHeading;
+        derivative = (error-lastError)/timer.seconds();
+        integralSum = integralSum + (error * timer.seconds());
+        // set a limit on our integral sum
+        if (integralSum > integralSumLimit) {
+            integralSum = integralSumLimit;
+        }
+        if (integralSum < -integralSumLimit) {
+            integralSum = -integralSumLimit;
+        }
+        output = (Kp * error) + (Ki * integralSum) + (Kd * derivative);
+
+        if (output > maxOutput){ // basically cuts the PID so the motor can run at the max speed
+            output = maxOutput;
+        } else if (output < -maxOutput){
+            output = -maxOutput; // accounts for negative as well
+        }
+
+        lastError = error;
+        timer.reset(); // i didn't do this it will mess with the PIDs
+
+        return output;
+    }
+
     public double returnError(){
         return error;
     }

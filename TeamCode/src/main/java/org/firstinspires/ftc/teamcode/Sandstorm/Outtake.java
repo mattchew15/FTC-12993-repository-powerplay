@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.Sandstorm;
 import androidx.annotation.GuardedBy;
 
+import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
@@ -11,6 +12,7 @@ import com.qualcomm.robotcore.hardware.DigitalChannel;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.ServoImplEx;
 
+import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
 import org.firstinspires.ftc.teamcode.Dune.PID;
 
@@ -60,13 +62,16 @@ public class Outtake {  // no constructor for this class
 
     //editable dashboard variables must be public static - PID values for turret and lift that can be tuned
     public static double TurretKp = 0.007, TurretKi = 0.000, TurretKd = 0.0002, TurretIntegralSumLimit = 1, TurretFeedforward = 0.3;
+    public static double TurretPointKp = 2.5, TurretPointKi = 0.000, TurretPointKd = 0.02;
     public static double LiftKp = 0.015, LiftKi = 0.0001, LiftKd = 0.00006, LiftIntegralSumLimit = 10, LiftKf = 0;
     public static double intakeSlideKp = 0.01, intakeSlideKi = 0.00, intakeSlideKd = 0.0005, intakeSlideIntegralSumLimit = 10, intakeSlideKf = 0;
 
     // New instance of PID class with editable variables
     PID turretPID = new PID(TurretKp,TurretKi,TurretKd,TurretIntegralSumLimit,TurretFeedforward);
+    PID turretPointPID = new PID(TurretPointKp,TurretPointKi,TurretPointKd,TurretIntegralSumLimit,TurretFeedforward);
     PID liftPID = new PID(LiftKp,LiftKi,LiftKd,LiftIntegralSumLimit,LiftKf);
     PID intakeSlidePID = new PID(intakeSlideKp,intakeSlideKi,intakeSlideKd,intakeSlideIntegralSumLimit,intakeSlideKf);
+    CoordinatesLogic coordinatesLogic = new CoordinatesLogic();
 
     // final variables
     final double turretthresholdDistance = degreestoTicks(8); // should make the threshold less
@@ -75,6 +80,10 @@ public class Outtake {  // no constructor for this class
     final double liftthresholdDistance = 22;
     final double intakeSlidethresholdDistance = 20;
     final double intakeSlidethresholdDistanceNewThreshold = 4;
+
+    final double turretXOffset = 2.5;
+    final double turretYOffset = 0;
+
 
     double turretTarget;
     int liftTarget;
@@ -188,6 +197,22 @@ public class Outtake {  // no constructor for this class
         double output = turretPID.update(targetRotations,motorPosition,maxSpeed); //does a lift to with external PID instead of just regular encoders
         TurretMotor.setPower(output);
     }
+    public double getTurretErrorFromPole(double poleX, double poleY, Pose2d turretCoordinatePosition, Telemetry telemetry){
+        double error = coordinatesLogic.pointToTargetTurret(new Pose2d(poleX,poleY,0),turretCoordinatePosition,ticksToRadians(turretPosition), telemetry);
+        telemetry.addData("turret error", Math.toDegrees(error)); // this error should be an angle
+        telemetry.addData("turretPositionDegrees", Math.toDegrees(ticksToRadians(turretPosition)));
+        return error;
+    }
+
+    public void turretPointToPole(double poleX, double poleY, Pose2d currentPose, double maxSpeed, Telemetry telemetry){
+        TurretMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        Pose2d turretPos = coordinatesLogic.getTurretPosition(turretXOffset,turretYOffset,currentPose,telemetry);
+        double turretError = getTurretErrorFromPole(poleX,poleY,turretPos,telemetry);
+        double output = turretPointPID.updateWithError(turretError,maxSpeed);
+        telemetry.addData("turretMotorOutput", output);
+        TurretMotor.setPower(output);
+    }
+
     public void IntakeSlideTo(int targetRotations, double motorPosition, double maxSpeed){
         intakeSlideTarget = targetRotations;
         IntakeSlideMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
@@ -348,6 +373,13 @@ public class Outtake {  // no constructor for this class
     }
     public double tickstoDegrees(int ticks){
         return ticks / 11;
+    }
+
+    public double ticksToRadians (double ticks){
+        return 2.0 * Math.PI*(ticks/(28 * 84));
+    }
+    public double radiansToTicks (double radians){
+        return (radians/2.0*Math.PI)*(28 * 84);
     }
 
     public double returnPIDLiftOutput(){return liftPID.returnOutput();}

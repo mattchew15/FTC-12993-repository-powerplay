@@ -1,4 +1,5 @@
 package org.firstinspires.ftc.teamcode.Sandstorm.Autonomous;
+import static org.firstinspires.ftc.teamcode.Sandstorm.GlobalsCloseHighAuto.outconeStackRotationOtherSide;
 import static org.firstinspires.ftc.teamcode.Sandstorm.GlobalsCloseHighAuto.outconestackXOtherSide;
 import static org.firstinspires.ftc.teamcode.Sandstorm.GlobalsCloseHighAuto.outconestackY;
 import static org.firstinspires.ftc.teamcode.Sandstorm.GlobalsCloseHighAuto.outconestackYOtherSide;
@@ -18,6 +19,7 @@ import org.firstinspires.ftc.teamcode.Sandstorm.GlobalsCloseHighAuto;
 import org.firstinspires.ftc.teamcode.Sandstorm.Inputs;
 import org.firstinspires.ftc.teamcode.Sandstorm.Outtake;
 import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
+import org.firstinspires.ftc.teamcode.trajectorysequence.TrajectorySequence;
 import org.openftc.apriltag.AprilTagDetection;
 import org.openftc.easyopencv.OpenCvCamera;
 import org.openftc.easyopencv.OpenCvCameraFactory;
@@ -154,11 +156,10 @@ public class TEN_CLOSE_HIGH extends LinearOpMode {
                 .lineToLinearHeading(new Pose2d(GlobalsCloseHighAuto.outconestackX, outconestackY, GlobalsCloseHighAuto.outconeStackRotation * SideMultiplier + AngleOffset))
                 .build();
 
-        Trajectory DriveOtherSide = drive.trajectoryBuilder(PreloadDrive.end())
-                .lineToLinearHeading(new Pose2d(outconestackXOtherSide*SideMultiplier, outconestackYOtherSide, 0 + AngleOffset))
-
-                .splineTo(new Vector2d(-22 * SideMultiplier,-17), Math.toRadians(0)+AngleOffset)
-                .splineToSplineHeading(new Pose2d(outconestackXOtherSide * SideMultiplier,outconestackY, GlobalsCloseHighAuto.outconeStackRotationOtherSide),Math.toRadians(0))
+        TrajectorySequence DriveOtherSide = drive.trajectorySequenceBuilder(PreloadDrive.end())
+                .lineToLinearHeading(new Pose2d(-22*SideMultiplier, outconestackYOtherSide, 0 + AngleOffset))
+                //.splineTo(new Vector2d(-22 * SideMultiplier), Math.toRadians(0)+AngleOffset)
+                .splineToSplineHeading(new Pose2d(outconestackXOtherSide * SideMultiplier,outconestackY, outconeStackRotationOtherSide),Math.toRadians(0))
                 .build();
 
         Trajectory ParkRight = drive.trajectoryBuilder(DriveOtherSide.end())
@@ -275,13 +276,13 @@ public class TEN_CLOSE_HIGH extends LinearOpMode {
             offsetHeading = inputs.offsetAngle90(headingPosition);
             outtake.outtakeReads();
 
-            telemetry.addData("OtherSide", OtherSide);
-            telemetry.addData("x", xPosition);
-            telemetry.addData("y", yPosition);
-            telemetry.addData("heading", headingPosition);
-            telemetry.addData("correctedheading", correctedHeading);
+          //  telemetry.addData("OtherSide", OtherSide);
+          //  telemetry.addData("x", xPosition);
+            //telemetry.addData("y", yPosition);
+            //telemetry.addData("heading", headingPosition);
+            //telemetry.addData("correctedheading", correctedHeading);
 
-            telemetry.addData("autostate", currentState);
+            //telemetry.addData("autostate", currentState);
             telemetry.addData("Intake Slide Position", outtake.intakeSlidePosition);
             telemetry.addData("Intake Slide Target Reached", outtake.intakeSlideTargetReachedSmallerThreshold());
 
@@ -358,7 +359,7 @@ public class TEN_CLOSE_HIGH extends LinearOpMode {
                             if (numCycles == 5){
                                 autoTimer = GlobalTimer.milliseconds(); // reset timer not rly needed here
                                 currentState = AutoState.DRIVE_OTHER_SIDE_AND_TRANSFER;
-                                drive.followTrajectoryAsync(DriveOtherSide);
+                                drive.followTrajectorySequenceAsync(DriveOtherSide);
                                 autoTimer = GlobalTimer.milliseconds(); // reset timer
                             }
                             if (GlobalTimer.milliseconds()-autoTimer > 110){

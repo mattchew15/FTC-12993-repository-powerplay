@@ -35,9 +35,14 @@ public class GlobalsCloseHighAuto {
     public static double ramDepositY = 2;
     public static double ramDepositRotation = Math.toRadians(-1.2);
     // add 180 to angles
-
     public static double outconestackXOtherSide = -40.8;
     public static double outconeStackRotationOtherSide = Math.toRadians(170);
+
+    public static double stackTargetX = 68;
+    public static double stackTargetY = -18;
+
+    public static double poleTargetX = 27;
+    public static double poleTargetY = -8.5;
 
     public static double parkLeft = -61;
     public static double parkRight = -11.5;

@@ -1,10 +1,14 @@
 package org.firstinspires.ftc.teamcode.Sandstorm;
 
 import com.acmerobotics.dashboard.config.Config;
+import com.acmerobotics.roadrunner.geometry.Pose2d;
+import com.acmerobotics.roadrunner.geometry.Vector2d;
+import com.acmerobotics.roadrunner.util.Angle;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
+import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.Dune.PID;
 
 @Config // Allows dashboard to tune
@@ -31,6 +35,8 @@ public class DriveBase {  // no constructor for this class
     PID drivebaseXPID = new PID(DrivebaseXKp,DrivebaseXKi,DrivebaseXKd,DrivebaseXIntegralSumLimit,DrivebaseXKf);
     PID drivebaseYPID = new PID(DrivebaseYKp,DrivebaseYKi,DrivebaseYKd,DrivebaseYIntegralSumLimit,DrivebaseYKf);
     PID drivebaseThetaPID = new PID(DrivebaseThetaKp,DrivebaseThetaKi,DrivebaseThetaKd,DrivebaseThetaIntegralSumLimit,DrivebaseThetaKf);
+
+    CoordinatesLogic coordinatesLogic = new CoordinatesLogic();
 
     public void Drivebase_init(HardwareMap hwMap) {
 
@@ -123,7 +129,26 @@ public class DriveBase {  // no constructor for this class
         BL.setPower((x_rotated - y_rotated + theta));
         FR.setPower((x_rotated - y_rotated - theta));
         BR.setPower((x_rotated + y_rotated - theta));
+    } // change from doubles to poses if wanting to optimize
+    public void DriveToPositionAutonomous3(double stackTargetX, double stackTargetY, double xTarget, double yTarget, double xRobotPosition, double yRobotPosition,double robotTheta, double maxTranslationalSpeed, double maxRotationalSpeed, Telemetry telemetry, Pose2d currentPose){
+        double x = drivebaseXPID.update(xTarget,xRobotPosition,maxTranslationalSpeed); // set a target, get the robots state, and set the max speed
+        double y = -drivebaseYPID.update(yTarget,yRobotPosition,maxTranslationalSpeed);
+        double thetaPower = coordinatesLogic.pointToTarget(new Pose2d(stackTargetX,stackTargetY,0),currentPose);
+        telemetry.addData("thetapower", thetaPower);
+        double theta = -drivebaseThetaPID.updateWithError(thetaPower, maxRotationalSpeed); // this pid should probably be different
+        telemetry.addData("theta", theta);
+        double x_rotated = x * Math.cos(robotTheta) - y * Math.sin(robotTheta);
+        double y_rotated = x * Math.sin(robotTheta) + y * Math.cos(robotTheta);
+
+        // x, y, theta input mixing
+       // double denominator = Math.max(Math.abs(x_rotated) + Math.abs(y_rotated) + Math.abs(robotTheta), 1);
+
+        FL.setPower((x_rotated + y_rotated + theta));
+        BL.setPower((x_rotated - y_rotated + theta));
+        FR.setPower((x_rotated - y_rotated - theta));
+        BR.setPower((x_rotated + y_rotated - theta));
     }
+
     public double holdHeading(double thetaTarget, double robotTheta, double maxRotationalSpeed){
         double thetaOutput = -drivebaseThetaPID.update(thetaTarget,robotTheta,maxRotationalSpeed); // this pid should probably be different
         return thetaOutput;
