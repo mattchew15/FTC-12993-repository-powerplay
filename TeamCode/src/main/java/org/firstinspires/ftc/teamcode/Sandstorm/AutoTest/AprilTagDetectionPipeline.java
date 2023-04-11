@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.Sandstorm.Autonomous;
+package org.firstinspires.ftc.teamcode.Sandstorm.AutoTest;
 
 
 /*
@@ -40,7 +40,7 @@ import org.openftc.easyopencv.OpenCvPipeline;
 
 import java.util.ArrayList;
 
-class AprilTagDetectionPipeline extends OpenCvPipeline
+public class AprilTagDetectionPipeline extends OpenCvPipeline
 {
     private long nativeApriltagPtr;
     private Mat grey = new Mat();

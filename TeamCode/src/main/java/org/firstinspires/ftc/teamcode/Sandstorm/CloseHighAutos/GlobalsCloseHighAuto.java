@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.Sandstorm;
+package org.firstinspires.ftc.teamcode.Sandstorm.CloseHighAutos;
 
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
@@ -27,22 +27,22 @@ public class GlobalsCloseHighAuto {
     public static double startPoseAngle = Math.toRadians(0);
     public static double outconestackX = 42;
     public static double outconestackY = -17.7;
-    public static double outconestackYOtherSide = -16.85;
     public static double outconeStackRotation = Math.toRadians(-1.2);
     public static double outconeStackRotationHOLDPID = Math.toRadians(90 + -outconeStackRotation);
 
-    public static double ramDepositX = 42;
-    public static double ramDepositY = 2;
+    public static double ramDepositX = 40;
+    public static double ramDepositY = -2;
     public static double ramDepositRotation = Math.toRadians(-1.2);
     // add 180 to angles
-    public static double outconestackXOtherSide = -40.8;
-    public static double outconeStackRotationOtherSide = Math.toRadians(170);
+    public static double outconestackXOtherSide = -42;
+    public static double outconestackYOtherSide = -17.7;
+    public static double outconeStackRotationOtherSide = Math.toRadians(-178.8);
 
     public static double stackTargetX = 68;
     public static double stackTargetY = -18;
 
     public static double poleTargetX = 27;
-    public static double poleTargetY = -8.5;
+    public static double poleTargetY = -8;
 
     public static double parkLeft = -61;
     public static double parkRight = -11.5;

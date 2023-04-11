@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.Sandstorm;
+package org.firstinspires.ftc.teamcode.Sandstorm.MidAutos;
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 

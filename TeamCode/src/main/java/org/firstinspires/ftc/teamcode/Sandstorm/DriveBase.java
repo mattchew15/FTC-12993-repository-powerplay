@@ -170,6 +170,9 @@ public class DriveBase {  // no constructor for this class
     public double getHeadingError(){
         return drivebaseThetaPID.returnError();
     }
+  //  public double getHeadingToPointError(){
+    //    return drivebaseThetaPID.returnError();
+   // }
 
     public double getXOutput(){
         return drivebaseXPID.returnOutput();

@@ -1,10 +1,9 @@
-package org.firstinspires.ftc.teamcode.Sandstorm.Autonomous;
+package org.firstinspires.ftc.teamcode.Sandstorm.AutoTest;
 
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.AnalogInput;
-import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.ServoImplEx;
 @Disabled
 @TeleOp

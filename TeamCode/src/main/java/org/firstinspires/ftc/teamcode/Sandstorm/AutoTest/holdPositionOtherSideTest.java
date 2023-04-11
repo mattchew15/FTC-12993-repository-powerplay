@@ -1,27 +1,19 @@
-package org.firstinspires.ftc.teamcode.Sandstorm.Autonomous;
-import static org.firstinspires.ftc.teamcode.Sandstorm.GlobalsCloseHighAuto.outconestackXOtherSide;
-import static org.firstinspires.ftc.teamcode.Sandstorm.GlobalsCloseHighAuto.outconestackY;
+package org.firstinspires.ftc.teamcode.Sandstorm.AutoTest;
+import static org.firstinspires.ftc.teamcode.Sandstorm.CloseHighAutos.GlobalsCloseHighAuto.outconestackXOtherSide;
+import static org.firstinspires.ftc.teamcode.Sandstorm.CloseHighAutos.GlobalsCloseHighAuto.outconestackY;
 
 import com.acmerobotics.roadrunner.geometry.Pose2d;
-import com.acmerobotics.roadrunner.geometry.Vector2d;
-import com.acmerobotics.roadrunner.trajectory.Trajectory;
 import com.outoftheboxrobotics.photoncore.PhotonCore;
 import com.qualcomm.hardware.lynx.LynxModule;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.util.ElapsedTime;
-import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
+
 import org.firstinspires.ftc.teamcode.Sandstorm.DriveBase;
 import org.firstinspires.ftc.teamcode.Sandstorm.Inputs;
 import org.firstinspires.ftc.teamcode.Sandstorm.Outtake;
-import org.firstinspires.ftc.teamcode.Sandstorm.StormDrive;
 import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
-import org.firstinspires.ftc.teamcode.drive.StandardTrackingWheelLocalizer;
-import org.openftc.apriltag.AprilTagDetection;
 import org.openftc.easyopencv.OpenCvCamera;
-import org.openftc.easyopencv.OpenCvCameraFactory;
-import org.openftc.easyopencv.OpenCvCameraRotation;
-import java.util.ArrayList;
 
 
 @Autonomous(name = "Hold Position Other Side Test", group = "Autonomous")

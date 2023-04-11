@@ -53,7 +53,7 @@ public class Outtake {  // no constructor for this class
     public static double IntakeClipHold = 0.712, IntakeClipOpen = 0.575;
 
     //Servo Positions for Intake
-    public static double IntakeClawOpenPos = 0.675, IntakeClawClosedPos = 0.733, IntakeClawOpenHardPos = 0.57;
+    public static double IntakeClawOpenPos = 0.675, IntakeClawClosedPos = 0.735, IntakeClawOpenHardPos = 0.57;
     public static double IntakeArmReadyPos = 0.908, IntakeArmTransferPos = 0.448, IntakeArmCOneHoldForTransferPos = 0.65;
     public static double IntakeLiftReadyPos = 0.43, IntakeLiftTransferPos = 0.212;
 
@@ -95,6 +95,7 @@ public class Outtake {  // no constructor for this class
     public double intakeArmPosition;
     public double intakeLiftPosition;
 
+    public double turretErrorFromPole;
 
     public void Outtake_init(HardwareMap hwMap) {
         TurretMotor = hwMap.get(DcMotorEx.class, "TurretMotor");
@@ -204,11 +205,12 @@ public class Outtake {  // no constructor for this class
         return error;
     }
 
+
     public void turretPointToPole(double poleX, double poleY, Pose2d currentPose, double maxSpeed, Telemetry telemetry){
         TurretMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         Pose2d turretPos = coordinatesLogic.getTurretPosition(turretXOffset,turretYOffset,currentPose,telemetry);
-        double turretError = getTurretErrorFromPole(poleX,poleY,turretPos,telemetry);
-        double output = turretPointPID.updateWithError(turretError,maxSpeed);
+        turretErrorFromPole = getTurretErrorFromPole(poleX,poleY,turretPos,telemetry);
+        double output = turretPointPID.updateWithError(turretErrorFromPole,maxSpeed);
         telemetry.addData("turretMotorOutput", output);
         TurretMotor.setPower(output);
     }

@@ -1,5 +1,5 @@
-package org.firstinspires.ftc.teamcode.Sandstorm.Autonomous;
-import static org.firstinspires.ftc.teamcode.Sandstorm.GlobalsCloseHighAuto.outconestackY;
+package org.firstinspires.ftc.teamcode.Sandstorm.CloseHighAutos;
+import static org.firstinspires.ftc.teamcode.Sandstorm.CloseHighAutos.GlobalsCloseHighAuto.outconestackY;
 
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.geometry.Vector2d;
@@ -10,8 +10,8 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
+import org.firstinspires.ftc.teamcode.Sandstorm.AutoTest.AprilTagDetectionPipeline;
 import org.firstinspires.ftc.teamcode.Sandstorm.DriveBase;
-import org.firstinspires.ftc.teamcode.Sandstorm.GlobalsCloseHighAuto;
 import org.firstinspires.ftc.teamcode.Sandstorm.Inputs;
 import org.firstinspires.ftc.teamcode.Sandstorm.Outtake;
 import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
@@ -329,18 +329,18 @@ public class FIVE_CLOSE_HIGH_RIGHT_DEFENSIVE extends LinearOpMode {
                     break;
 
                 case OUTTAKE_CONE:
-                    holdDrivebasePosition();
+                    holdDrivebasePosition(poseEstimate);
                     if (true){
-                        OuttakeCone(true); // next state is grab off
+                        OuttakeCone(true,poseEstimate); // next state is grab off
                     }
                     break;
 
                 case GRAB_OFF_STACK:
-                    holdDrivebasePosition(); // dropping cone
-                    dropCone(350);
-                    if (GlobalTimer.milliseconds() - autoTimer > 350){
+                    holdDrivebasePosition(poseEstimate); // dropping cone
+                    dropCone(350,poseEstimate);
+                    if (GlobalTimer.milliseconds() - autoTimer < 350){
                         outtake.liftToInternalPID(GlobalsCloseHighAuto.LiftHighPosition, 1);
-                        holdTurretPosition();
+                        holdTurretPosition(poseEstimate,1);
                     }
 
                     if (GlobalTimer.milliseconds() - autoTimer > 370) { // time taken to drop cone
@@ -359,7 +359,7 @@ public class FIVE_CLOSE_HIGH_RIGHT_DEFENSIVE extends LinearOpMode {
                     outtake.OuttakeClawOpen();
                     outtake.OuttakeArmReady();
                     outtake.BraceReady();
-                    holdDrivebasePosition();
+                    holdDrivebasePosition(poseEstimate);
                     outtake.turretSpinInternalPID(0,1);
                     outtake.liftToInternalPID(2, 1);
                     if (GlobalTimer.milliseconds() - autoTimer > 0){
@@ -391,7 +391,7 @@ public class FIVE_CLOSE_HIGH_RIGHT_DEFENSIVE extends LinearOpMode {
                     }
                     break;
                 case TRANSFER_CONE:
-                    holdDrivebasePosition();
+                    holdDrivebasePosition(poseEstimate);
                     outtake.IntakeSlideInternalPID(6,1); // so it holds in when transferring
                     outtake.turretSpinInternalPID(0,1); // spin turret after
                     outtake.liftToInternalPID(2, 1);
@@ -417,30 +417,31 @@ public class FIVE_CLOSE_HIGH_RIGHT_DEFENSIVE extends LinearOpMode {
                     break;
                 case OUTTAKE_CONE_NO_INTAKE_SLIDES:
                     if (numCycles == 0){
-                        holdRamPosition(); // so we can't get pushed when ramming
                         if (GlobalTimer.milliseconds()-autoTimer > 300){ // delay wait - can't be too much
-                            OuttakeCone(false); // in a function so that i don't have to make 2 changes
+                            OuttakeCone(false,poseEstimate); // in a function so that i don't have to make 2 changes
                         }
                     }else{
-                        holdDrivebasePosition();
-                        OuttakeCone(false); // in a function so that i don't have to make 2 changes
+                        holdDrivebasePosition(poseEstimate);
+                        OuttakeCone(false,poseEstimate); // in a function so that i don't have to make 2 changes
                     }
                     break;
                 case RETRACT_SLIDES:
-                    dropCone(350);
-                    if (GlobalTimer.milliseconds() - autoTimer > 350){
+                    dropCone(350,poseEstimate);
+                    if (GlobalTimer.milliseconds() - autoTimer < 350){ // this should be less than - it holds if LESS THAN
                         outtake.liftToInternalPID(GlobalsCloseHighAuto.LiftHighPosition, 1);
-                        holdTurretPosition();
+                        holdTurretPosition(poseEstimate,1);
+                    } else {
+                        outtake.liftToInternalPID(GlobalsCloseHighAuto.LiftHighPosition, 1);
+                        outtake.turretSpinInternalPID(0,1);
                     }
 
-                    if (numCycles == 1){ // goes back to continue cycling
-                        holdRamPosition();
-                        if (GlobalTimer.milliseconds() - autoTimer > 800){ // lifttarget reached doesn't work, is instantly true
+                    if (numCycles == 0){ // goes back to continue cycling
+                        if (GlobalTimer.milliseconds() - autoTimer > 1500){ // lifttarget reached doesn't work, is instantly true
                             currentState = AutoState.SETUP_DRIVE;
                             drive.followTrajectoryAsync(PreloadDrive);
                         }
                     } else { // goes to park state
-                        holdDrivebasePosition();
+                        holdDrivebasePosition(poseEstimate);
                         if (GlobalTimer.milliseconds() - autoTimer > 750){ // lifttarget reached doesn't work, is instantly true
                             currentState = AutoState.PARK;
                         }
@@ -497,7 +498,7 @@ public class FIVE_CLOSE_HIGH_RIGHT_DEFENSIVE extends LinearOpMode {
         }
     }
 
-    public void OuttakeCone(boolean Intake){
+    public void OuttakeCone(boolean Intake, Pose2d currentpose){
         if (Intake){ // if parameter is set to false it won't do the intake slides just outtake
             outtake.IntakeSlideTo(globalsCloseHighAuto.IntakeSlideNotQuiteOutTicks,outtake.intakeSlidePosition, 1); // move to just before the stack
             intakeLiftHeight();
@@ -512,7 +513,7 @@ public class FIVE_CLOSE_HIGH_RIGHT_DEFENSIVE extends LinearOpMode {
         outtake.OuttakeArmScoreAuto();
         outtake.BraceActiveAuto();
 
-        holdTurretPosition();
+        holdTurretPosition(currentpose, 1);
 
         if (outtake.liftPosition < globalsCloseHighAuto.LiftHighPosition+10){
             if (!Intake){ // on the last one or the first one
@@ -520,7 +521,7 @@ public class FIVE_CLOSE_HIGH_RIGHT_DEFENSIVE extends LinearOpMode {
                 currentState = AutoState.RETRACT_SLIDES;
                 outtake.OuttakeArmScoreAuto();
                 outtake.BraceActiveAuto();
-                numCycles += 1;
+                //numCycles += 1;
             } else {
                 autoTimer = GlobalTimer.milliseconds();
                 currentState = AutoState.GRAB_OFF_STACK;
@@ -530,8 +531,8 @@ public class FIVE_CLOSE_HIGH_RIGHT_DEFENSIVE extends LinearOpMode {
             }
         }
     }
-    public void dropCone(int waitBeforeRetract){
-        holdDrivebasePosition(); // dropping cone
+    public void dropCone(int waitBeforeRetract, Pose2d currentPose){
+        holdDrivebasePosition(currentPose); // dropping cone
         if (GlobalTimer.milliseconds() - autoTimer > 200){ // small wait
             if (GlobalTimer.milliseconds() - autoTimer > 280){
                 outtake.OuttakeClawOpenHard();
@@ -542,7 +543,7 @@ public class FIVE_CLOSE_HIGH_RIGHT_DEFENSIVE extends LinearOpMode {
                         outtake.turretSpinInternalPID(0, 0.8);
                         outtake.OuttakeSlideReady(); // drops down on pole a bit
                     } else {
-                        holdTurretPosition();
+                        holdTurretPosition(currentPose,1);
                     }
                 }
             } else {
@@ -561,14 +562,12 @@ public class FIVE_CLOSE_HIGH_RIGHT_DEFENSIVE extends LinearOpMode {
         telemetry.addLine(String.format("Rotation Pitch: %.2f degrees", Math.toDegrees(detection.pose.pitch)));
         telemetry.addLine(String.format("Rotation Roll: %.2f degrees", Math.toDegrees(detection.pose.roll)));
     }
-    public void holdDrivebasePosition(){ // THE OUTCONESTACKROTATION SHOULD BE NEGATIVE
-        drivebase.DriveToPositionAutonomous(globalsCloseHighAuto.outconestackX * SideMultiplier, globalsCloseHighAuto.outconestackY,globalsCloseHighAuto.outconeStackRotation* SideMultiplier + AngleOffset,xPosition,yPosition,correctedHeading, 1,1); // last values are translationalspeed, and rotational speed
-         }
-    public void holdRamPosition(){ // THE OUTCONESTACKROTATION SHOULD BE NEGATIVE
-        drivebase.DriveToPositionAutonomous(globalsCloseHighAuto.ramDepositX * SideMultiplier, globalsCloseHighAuto.ramDepositY,globalsCloseHighAuto.ramDepositRotation* SideMultiplier + AngleOffset,xPosition,yPosition,correctedHeading, 1,1); // last values are translationalspeed, and rotational speed
+    public void holdDrivebasePosition(Pose2d currentPose){ // THE OUTCONESTACKROTATION SHOULD BE NEGATIVE
+        //drivebase.DriveToPositionAutonomous(globalsCloseHighAuto.outconestackX * SideMultiplier, globalsCloseHighAuto.outconestackY,globalsCloseHighAuto.outconeStackRotationHOLDPID* SideMultiplier,xPosition,yPosition,offsetHeading, 1,1); // last values are translationalspeed, and rotational speed
+        drivebase.DriveToPositionAutonomous3(GlobalsCloseHighAuto.stackTargetX*SideMultiplier,GlobalsCloseHighAuto.stackTargetY, globalsCloseHighAuto.outconestackX * SideMultiplier, globalsCloseHighAuto.outconestackY,xPosition,yPosition,headingPosition, 1,1, telemetry, currentPose); // last values are translationalspeed, and rotational speed
     }
-    public void holdTurretPosition(){
-        outtake.turretSpin(GlobalsCloseHighAuto.TurretLeftposition * SideMultiplier,outtake.turretPosition,1);
+    public void holdTurretPosition(Pose2d currentPose, double maxOutput){
+        outtake.turretPointToPole(GlobalsCloseHighAuto.poleTargetX * SideMultiplier,GlobalsCloseHighAuto.poleTargetY,currentPose,maxOutput,telemetry);
     }
 }
 

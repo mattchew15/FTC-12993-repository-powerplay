@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.Sandstorm;
+package org.firstinspires.ftc.teamcode.Sandstorm.FarHighAutos;
 
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
@@ -8,8 +8,8 @@ public class GlobalsFarHighAuto {
 
     // encoder positions
     public static int IntakeSlideOutTicks = -745; // this is max
-    public static int LiftHighPosition = -718;
-    public static int LiftHighPosition10 = -770; // could be used - this is to make lift faster for 1+10
+    public static int LiftHighPosition = -703;
+    public static int LiftHighPosition10 = -720; // could be used - this is to make lift faster for 1+10
 
     public static double TurretLeftposition = -5.6;
     public static double TurretRightposition = -TurretLeftposition; // use turret right position
@@ -31,7 +31,7 @@ public class GlobalsFarHighAuto {
     public static double PreloadDriveRotation = Math.toRadians(0);
 
     public static double inconestackX = 37.37;
-    public static double inconestackY = -18.1;
+    public static double inconestackY = -18.6;
     public static double inStackRotation = Math.toRadians(1);
 
     public static double outconestackX = 17;
@@ -39,12 +39,15 @@ public class GlobalsFarHighAuto {
     public static double outconeStackRotation = Math.toRadians(1.5);
     public static double xValueBeforeSlidesExtend = 20;
 
+    public static double farpoleTargetX = 0;
+    public static double farpoleTargetY = -28;
+
     public static double parkLeft = -61;
     public static double parkRight = -11.5;
-    public static double parkCentre = -35;
+    public static double parkCentre = -36.7;
 
     // starting position
     public static Pose2d startPose = new Pose2d(34, -69, Math.toRadians(0));
-    public static double slowerVelocityConstraintIn = 20;
+    public static double slowerVelocityConstraintIn = 22;
     public static double slowerVelocityConstraintOut = 40;
 }
