@@ -31,11 +31,16 @@ public class GlobalsMidAuto { // copy and paste close high autos and replace the
     public static double outconeStackRotation = Math.toRadians(7.3);
     // add 180 to angles
 
+    public static double stackTargetX = 68;
+    public static double stackTargetY = -19;
+
+    public static double poleTargetX = 25;
+    public static double poleTargetY = -29.6;
 
     public static double parkLeft = -61;
     public static double parkRight = -12;
     public static double parkCentre = -35;
-    public static double parkY = -17.1;
+    public static double parkY = -17.6;
     public static double parkRotation = Math.toRadians(0);
 
     // starting position

@@ -31,20 +31,20 @@ public class GlobalsFarHighAuto {
     public static double PreloadDriveRotation = Math.toRadians(0);
 
     public static double inconestackX = 37.37;
-    public static double inconestackY = -18.6;
-    public static double inStackRotation = Math.toRadians(1);
+    public static double inconestackY = -18.75;
+    public static double inStackRotation = Math.toRadians(0.5);
 
     public static double outconestackX = 17;
     public static double outconestackY = -18.7;
     public static double outconeStackRotation = Math.toRadians(1.5);
     public static double xValueBeforeSlidesExtend = 20;
 
-    public static double farpoleTargetX = 0;
-    public static double farpoleTargetY = -28;
+    public static double farpoleTargetX = -2;
+    public static double farpoleTargetY = -28.3;
 
     public static double parkLeft = -61;
     public static double parkRight = -11.5;
-    public static double parkCentre = -36.7;
+    public static double parkCentre = -36.8;
 
     // starting position
     public static Pose2d startPose = new Pose2d(34, -69, Math.toRadians(0));

@@ -7,7 +7,7 @@ import com.acmerobotics.roadrunner.geometry.Pose2d;
 public class GlobalsCloseHighAuto {
 
     // encoder positions
-    public static int IntakeSlideOutTicks = -605;
+    public static int IntakeSlideOutTicks = -608;
     public static int LiftHighPosition = -705;
     public static int LiftHighPosition10 = -760;
 
@@ -39,10 +39,10 @@ public class GlobalsCloseHighAuto {
     public static double outconeStackRotationOtherSide = Math.toRadians(-178.8);
 
     public static double stackTargetX = 68;
-    public static double stackTargetY = -18;
+    public static double stackTargetY = -18.5;
 
-    public static double poleTargetX = 27;
-    public static double poleTargetY = -8;
+    public static double poleTargetX = 24;
+    public static double poleTargetY = -8.2;
 
     public static double parkLeft = -61;
     public static double parkRight = -11.5;

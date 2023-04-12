@@ -1,12 +1,9 @@
-package org.firstinspires.ftc.teamcode.Sandstorm.CloseHighAutos;
-import static org.firstinspires.ftc.teamcode.Sandstorm.CloseHighAutos.GlobalsCloseHighAuto.outconestackY;
+package org.firstinspires.ftc.teamcode.Sandstorm.MidAutos;
 
 import com.acmerobotics.roadrunner.geometry.Pose2d;
-import com.acmerobotics.roadrunner.geometry.Vector2d;
 import com.acmerobotics.roadrunner.trajectory.Trajectory;
 import com.outoftheboxrobotics.photoncore.PhotonCore;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
@@ -22,14 +19,14 @@ import org.openftc.easyopencv.OpenCvCameraFactory;
 import org.openftc.easyopencv.OpenCvCameraRotation;
 import java.util.ArrayList;
 
-@Disabled
-@Autonomous(name = "Left 1+5 Close-High Auto PIDhold", group = "Autonomous")
-public class FIVE_CLOSE_HIGH_LEFT_PIDHOLD extends LinearOpMode {
 
-    GlobalsCloseHighAuto globalsCloseHighAuto = new GlobalsCloseHighAuto();
-    int SideMultiplier = -1; // this multiplies everything that changes with the right side
-    double AngleOffset = Math.toRadians(180); // this adds to every angle
-    String webcamname = globalsCloseHighAuto.WebCamLeftName; // this is the webcam name for the right or left
+@Autonomous(name = "Right 1+5 Mid Auto", group = "Autonomous")
+public class RIGHT_FIVE_MID extends LinearOpMode {
+
+    GlobalsMidAuto GlobalsMidAuto = new GlobalsMidAuto();
+    int SideMultiplier = 1; // this multiplies everything that changes with the right side
+    double AngleOffset = Math.toRadians(0); // this adds to every angle
+    String webcamname = GlobalsMidAuto.WebCamLeftName; // this is the webcam name for the right or left
 
     // class members
     ElapsedTime GlobalTimer;
@@ -43,7 +40,6 @@ public class FIVE_CLOSE_HIGH_LEFT_PIDHOLD extends LinearOpMode {
     double xPosition;
     double yPosition;
     double headingPosition;
-    double offsetHeading;
     double dt;
     double prev_time;
 
@@ -84,6 +80,7 @@ public class FIVE_CLOSE_HIGH_LEFT_PIDHOLD extends LinearOpMode {
         RETRACT_SLIDES,
         DRIVE_OTHER_SIDE_AND_TRANSFER,
         TURN_OTHER_STACK,
+        PARK_SETUP,
         PARK,
         IDLE,
     }
@@ -106,7 +103,7 @@ public class FIVE_CLOSE_HIGH_LEFT_PIDHOLD extends LinearOpMode {
     }
     // Define our start pose
 
-    Pose2d startPose = new Pose2d(globalsCloseHighAuto.startPoseX * SideMultiplier, globalsCloseHighAuto.startPoseY, globalsCloseHighAuto.startPoseAngle + AngleOffset);
+    Pose2d startPose = new Pose2d(GlobalsMidAuto.startPoseX * SideMultiplier, GlobalsMidAuto.startPoseY, GlobalsMidAuto.startPoseAngle + AngleOffset);
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -146,19 +143,19 @@ public class FIVE_CLOSE_HIGH_LEFT_PIDHOLD extends LinearOpMode {
         // trajectories that aren't changing should all be here
 
         Trajectory PreloadDrive = drive.trajectoryBuilder(startPose)
-                .lineToLinearHeading(new Pose2d(globalsCloseHighAuto.outconestackX*SideMultiplier, globalsCloseHighAuto.outconestackY, globalsCloseHighAuto.outconeStackRotation * SideMultiplier + AngleOffset))
+                .lineToLinearHeading(new Pose2d(GlobalsMidAuto.outconestackX*SideMultiplier, GlobalsMidAuto.outconestackY, GlobalsMidAuto.outconeStackRotation * SideMultiplier + AngleOffset))
                 .build();
 
-        Trajectory ParkRight = drive.trajectoryBuilder(PreloadDrive.end())
-                .lineTo(new Vector2d(SideMultiplier == 1 ? -GlobalsCloseHighAuto.parkLeft: GlobalsCloseHighAuto.parkRight * SideMultiplier, outconestackY))
+        Trajectory ParkSetup = drive.trajectoryBuilder(PreloadDrive.end())
+                .lineToLinearHeading(new Pose2d(-GlobalsMidAuto.parkCentre * SideMultiplier, GlobalsMidAuto.parkY, GlobalsMidAuto.parkRotation))
                 .build();
 
-        Trajectory ParkLeft = drive.trajectoryBuilder(PreloadDrive.end())
-                .lineTo(new Vector2d(SideMultiplier == 1 ? -GlobalsCloseHighAuto.parkRight: GlobalsCloseHighAuto.parkLeft * SideMultiplier, outconestackY))
+        Trajectory ParkRight = drive.trajectoryBuilder(ParkSetup.end())
+                .lineToLinearHeading(new Pose2d(SideMultiplier == 1 ? -GlobalsMidAuto.parkLeft: GlobalsMidAuto.parkRight, GlobalsMidAuto.parkY, GlobalsMidAuto.parkRotation))
                 .build();
 
-        Trajectory ParkCentre = drive.trajectoryBuilder(PreloadDrive.end())
-                .lineTo(new Vector2d(-globalsCloseHighAuto.parkCentre * SideMultiplier, globalsCloseHighAuto.outconestackY))
+        Trajectory ParkLeft = drive.trajectoryBuilder(ParkSetup.end())
+                .lineToLinearHeading(new Pose2d(SideMultiplier == 1 ? -GlobalsMidAuto.parkRight: GlobalsMidAuto.parkLeft, GlobalsMidAuto.parkY, GlobalsMidAuto.parkRotation))
                 .build();
 
         while (!isStarted()) {
@@ -257,31 +254,30 @@ public class FIVE_CLOSE_HIGH_LEFT_PIDHOLD extends LinearOpMode {
             yPosition = poseEstimate.getY();
             headingPosition = poseEstimate.getHeading();
             correctedHeading = inputs.angleWrap(headingPosition);
-            offsetHeading = inputs.offsetAngle90(headingPosition);
             outtake.outtakeReads();
 
-            //telemetry.addData("x", xPosition);
-            //telemetry.addData("y", yPosition);
-            telemetry.addData("heading", Math.toDegrees(headingPosition));
-            telemetry.addData("offsetHeading", Math.toDegrees(offsetHeading));
-            telemetry.addData("targetHeading", Math.toDegrees(GlobalsCloseHighAuto.outconeStackRotationHOLDPID));
+            telemetry.addData("x", xPosition);
+            telemetry.addData("y", yPosition);
+            telemetry.addData("heading", headingPosition);
+            telemetry.addData("corrected heading", correctedHeading);
 
-            //telemetry.addData("autostate", currentState);
-            //telemetry.addData("Intake Slide Position", outtake.intakeSlidePosition);
-            //telemetry.addData("Intake Slide Target Reached", outtake.intakeSlideTargetReachedSmallerThreshold());
+            telemetry.addData("autostate", currentState);
+            telemetry.addData("Intake Slide Position", outtake.intakeSlidePosition);
+            telemetry.addData("Intake Slide Target Reached", outtake.intakeSlideTargetReachedSmallerThreshold());
 
-            //telemetry.addData("liftPosition", outtake.liftPosition);
-            //telemetry.addData("lift target reached", outtake.liftTargetReached());
+            telemetry.addData("liftPosition", outtake.liftPosition);
+            telemetry.addData("lift target reached", outtake.liftTargetReached());
 
-            // telemetry.addData("XError", drivebase.getXError());
-            // telemetry.addData("YError", drivebase.getYError());
+
+            telemetry.addData("XError", drivebase.getXError());
+            telemetry.addData("YError", drivebase.getYError());
             telemetry.addData("HeadingError", drivebase.getHeadingError());
 
-            // telemetry.addData("XOutput", drivebase.getXOutput());
-            // telemetry.addData("YOutput", drivebase.getYOutput());
-            // telemetry.addData("HeadingOutput", drivebase.getHeadingOutput());
+            telemetry.addData("XOutput", drivebase.getXOutput());
+            telemetry.addData("YOutput", drivebase.getYOutput());
+            telemetry.addData("HeadingOutput", drivebase.getHeadingOutput());
 
-            //telemetry.addData("number of cycles:", numCycles);
+            telemetry.addData("number of cycles:", numCycles);
 
             outtake.ConeArmReady();
             // main switch statement logic
@@ -290,7 +286,7 @@ public class FIVE_CLOSE_HIGH_LEFT_PIDHOLD extends LinearOpMode {
                     outtake.OuttakeClawClose();
                     outtake.IntakeClipOpen();
                     outtake.OuttakeArmReady();
-                    if (GlobalTimer.milliseconds() - autoTimer > 0){
+                    if (GlobalTimer.milliseconds() - autoTimer > 6000){
                         autoTimer = GlobalTimer.milliseconds(); // reset timer not rly needed here
                         currentState = AutoState.PRELOAD_DRIVE;
                         drive.followTrajectoryAsync(PreloadDrive);
@@ -313,18 +309,18 @@ public class FIVE_CLOSE_HIGH_LEFT_PIDHOLD extends LinearOpMode {
                     break;
 
                 case OUTTAKE_CONE:
-                    holdDrivebasePosition();
+                    holdDrivebasePosition(poseEstimate);
                     if (true){
-                        OuttakeCone(true); // next state is grab off
+                        OuttakeCone(true,poseEstimate); // next state is grab off
                     }
                     break;
 
                 case GRAB_OFF_STACK:
-                    holdDrivebasePosition(); // dropping cone
-                    dropCone(350);
+                    holdDrivebasePosition(poseEstimate); // dropping cone
+                    dropCone(350,poseEstimate);
                     if (GlobalTimer.milliseconds() - autoTimer > 350){
-                        outtake.liftToInternalPID(GlobalsCloseHighAuto.LiftHighPosition, 1);
-                        holdTurretPosition();
+                        outtake.liftToInternalPID(GlobalsMidAuto.LiftMidPosition, 1);
+                        holdTurretPosition(poseEstimate,1);
                     }
 
                     if (GlobalTimer.milliseconds() - autoTimer > 370) { // time taken to drop cone
@@ -332,18 +328,18 @@ public class FIVE_CLOSE_HIGH_LEFT_PIDHOLD extends LinearOpMode {
                             autoTimer = GlobalTimer.milliseconds(); // reset timer not rly needed here
                             currentState = AutoState.AFTER_GRAB_OFF_STACK;
                         } else {
-                            outtake.IntakeSlideInternalPID(globalsCloseHighAuto.IntakeSlideOutTicks, 0.7); // slower
+                            outtake.IntakeSlideInternalPID(GlobalsMidAuto.IntakeSlideOutTicks, 0.9); // slower
                         }
                     } else {
-                        outtake.IntakeSlideInternalPID(globalsCloseHighAuto.IntakeSlideNotQuiteOutTicks, 1); // slower
+                        outtake.IntakeSlideInternalPID(GlobalsMidAuto.IntakeSlideNotQuiteOutTicks, 1); // slower
                     }
 
                     break;
                 case AFTER_GRAB_OFF_STACK: // grabs off the stack
                     outtake.OuttakeClawOpen();
                     outtake.OuttakeArmReady();
-                    outtake.BraceReady();
-                    holdDrivebasePosition();
+                    outtake.BraceReadyAuto();
+                    holdDrivebasePosition(poseEstimate);
                     outtake.turretSpinInternalPID(0,1);
                     outtake.liftToInternalPID(2, 1);
                     if (GlobalTimer.milliseconds() - autoTimer > 0){
@@ -353,29 +349,28 @@ public class FIVE_CLOSE_HIGH_LEFT_PIDHOLD extends LinearOpMode {
                             if (outtake.intakeLiftPosition > 275){
                                 outtake.IntakeArmTransfer();
                                 if ((numCycles==1? outtake.intakeArmPosition > 175: outtake.intakeArmPosition > 150) && GlobalTimer.milliseconds()-autoTimer > 600){ // this reads the position of the intake arm
-                                    outtake.IntakeSlideInternalPID(2,1);
+                                    outtake.IntakeSlideInternalPID(2,0.7);
                                     outtake.IntakeLiftTransfer();
                                     if (outtake.intakeSlidePosition > -2 && outtake.intakeArmPosition > 195){ // this controls when the claw closes
                                         autoTimer = GlobalTimer.milliseconds(); // reset timer not rly needed here
                                         currentState = AutoState.TRANSFER_CONE;
                                         outtake.OuttakeClawClose();
-                                        outtake.BraceActive();
                                     }
                                 } else{
-                                    outtake.IntakeSlideInternalPID(globalsCloseHighAuto.IntakeSlideBackFromStack, 0.36); // this pulls slides in while doing stuff
+                                    outtake.IntakeSlideInternalPID(GlobalsMidAuto.IntakeSlideBackFromStack, 0.42); // this pulls slides in while doing stuff
                                 }
                             } else {
                                 outtake.IntakeLift5();
                             }
                         } else {
-                            outtake.IntakeSlideInternalPID(globalsCloseHighAuto.IntakeSlideOutTicks, 1); // slower
+                            outtake.IntakeSlideInternalPID(GlobalsMidAuto.IntakeSlideBackFromStack, 0.42); // slower
                         }
                     } else {
-                        outtake.IntakeSlideInternalPID(globalsCloseHighAuto.IntakeSlideOutTicks, 1); // slower
+                        outtake.IntakeSlideInternalPID(GlobalsMidAuto.IntakeSlideOutTicks, 1); // slower
                     }
                     break;
                 case TRANSFER_CONE:
-                    holdDrivebasePosition();
+                    holdDrivebasePosition(poseEstimate);
                     outtake.IntakeSlideInternalPID(6,1); // so it holds in when transferring
                     outtake.turretSpinInternalPID(0,1); // spin turret after
                     outtake.liftToInternalPID(2, 1);
@@ -391,7 +386,7 @@ public class FIVE_CLOSE_HIGH_LEFT_PIDHOLD extends LinearOpMode {
                             } else{
                                 outtake.IntakeArmReady();
                                 outtake.IntakeLift3();
-                                outtake.IntakeSlideTo(globalsCloseHighAuto.IntakeSlideNotQuiteOutTicks, outtake.intakeSlidePosition, 1);
+                                outtake.IntakeSlideTo(GlobalsMidAuto.IntakeSlideNotQuiteOutTicks, outtake.intakeSlidePosition, 1);
 
                                 autoTimer = GlobalTimer.milliseconds(); // reset timer
                                 currentState = AutoState.OUTTAKE_CONE;
@@ -400,22 +395,28 @@ public class FIVE_CLOSE_HIGH_LEFT_PIDHOLD extends LinearOpMode {
                     }
                     break;
                 case OUTTAKE_CONE_NO_INTAKE_SLIDES:
-                    OuttakeCone(false); // in a function so that i don't have to make 2 changes
-                    holdDrivebasePosition();
+                    OuttakeCone(false,poseEstimate); // in a function so that i don't have to make 2 changes
+                    holdDrivebasePosition(poseEstimate);
 
                     break;
                 case RETRACT_SLIDES:
-                    holdDrivebasePosition();
-                    dropCone(350);
+                    holdDrivebasePosition(poseEstimate);
+                    dropCone(350,poseEstimate);
                     if (GlobalTimer.milliseconds() - autoTimer > 350){
-                        outtake.liftToInternalPID(GlobalsCloseHighAuto.LiftHighPosition, 1);
-                        holdTurretPosition();
+                        outtake.liftToInternalPID(GlobalsMidAuto.LiftMidPosition, 1);
+                        holdTurretPosition(poseEstimate,1);
                     }
-                    if (GlobalTimer.milliseconds() - autoTimer > 750){ // lifttarget reached doesn't work, is instantly true
-                        currentState = AutoState.PARK;
+                    if (GlobalTimer.milliseconds() - autoTimer > 750){ // better than a wait
+                        currentState = AutoState.PARK_SETUP;
+                        drive.followTrajectoryAsync(ParkSetup);
                     }
                     break;
 
+                case PARK_SETUP:
+                    if(!drive.isBusy()){
+                        currentState = AutoState.PARK;
+                    }
+                    break;
 
                 case PARK:
                     if (SignalRotation == 1){
@@ -427,7 +428,6 @@ public class FIVE_CLOSE_HIGH_LEFT_PIDHOLD extends LinearOpMode {
                         currentState = AutoState.IDLE;
                     }
                     else{
-                        drive.followTrajectoryAsync(ParkCentre);
                         currentState = AutoState.IDLE; // doesn't have to drive anywhere, already in position hopefully
                     }
 
@@ -447,6 +447,7 @@ public class FIVE_CLOSE_HIGH_LEFT_PIDHOLD extends LinearOpMode {
             drive.update();
             telemetry.update();
         }
+
     }
 
     public void intakeLiftHeight(){
@@ -464,9 +465,10 @@ public class FIVE_CLOSE_HIGH_LEFT_PIDHOLD extends LinearOpMode {
             outtake.IntakeLiftReady();
         }
     }
-    public void OuttakeCone(boolean Intake){
+
+    public void OuttakeCone(boolean Intake, Pose2d currentPose){
         if (Intake){ // if parameter is set to false it won't do the intake slides just outtake
-            outtake.IntakeSlideTo(globalsCloseHighAuto.IntakeSlideNotQuiteOutTicks,outtake.intakeSlidePosition, 1); // move to just before the stack
+            outtake.IntakeSlideTo(GlobalsMidAuto.IntakeSlideNotQuiteOutTicks,outtake.intakeSlidePosition, 1); // move to just before the stack
             intakeLiftHeight();
             outtake.IntakeClawOpenHard();
             outtake.IntakeArmReady();
@@ -474,14 +476,16 @@ public class FIVE_CLOSE_HIGH_LEFT_PIDHOLD extends LinearOpMode {
             outtake.IntakeSlideInternalPID(0,1); // move to just before the stack
         }
 
-        outtake.liftToInternalPID(globalsCloseHighAuto.LiftHighPosition, 1);
+        outtake.liftToInternalPID(GlobalsMidAuto.LiftMidPosition, 1);
         outtake.OuttakeClawClose();
         outtake.OuttakeArmScoreAuto();
-        outtake.BraceActiveAuto();
+        if (GlobalTimer.milliseconds() - autoTimer > 250){
+            outtake.BraceActiveAuto();
+        }
 
-        holdTurretPosition();
+        holdTurretPosition(currentPose,1);
 
-        if (outtake.liftPosition < globalsCloseHighAuto.LiftHighPosition+10){
+        if (outtake.liftPosition < GlobalsMidAuto.LiftMidPosition+6){
             if (!Intake){ // on the last one
                 autoTimer = GlobalTimer.milliseconds(); // reset timer not rly needed here
                 currentState = AutoState.RETRACT_SLIDES;
@@ -497,8 +501,7 @@ public class FIVE_CLOSE_HIGH_LEFT_PIDHOLD extends LinearOpMode {
             }
         }
     }
-    public void dropCone(int waitBeforeRetract){
-        holdDrivebasePosition(); // dropping cone
+    public void dropCone(int waitBeforeRetract, Pose2d currentPose){
         if (GlobalTimer.milliseconds() - autoTimer > 200){ // small wait
             if (GlobalTimer.milliseconds() - autoTimer > 280){
                 outtake.OuttakeClawOpenHard();
@@ -509,7 +512,7 @@ public class FIVE_CLOSE_HIGH_LEFT_PIDHOLD extends LinearOpMode {
                         outtake.turretSpinInternalPID(0, 0.8);
                         outtake.OuttakeSlideReady(); // drops down on pole a bit
                     } else {
-                        holdTurretPosition();
+                        holdTurretPosition(currentPose,1);
                     }
                 }
             } else {
@@ -528,12 +531,11 @@ public class FIVE_CLOSE_HIGH_LEFT_PIDHOLD extends LinearOpMode {
         telemetry.addLine(String.format("Rotation Pitch: %.2f degrees", Math.toDegrees(detection.pose.pitch)));
         telemetry.addLine(String.format("Rotation Roll: %.2f degrees", Math.toDegrees(detection.pose.roll)));
     }
-    public void holdDrivebasePosition(){ // THE OUTCONESTACKROTATION SHOULD BE NEGATIVE
-        //drivebase.DriveToPositionAutonomous(globalsCloseHighAuto.outconestackX * SideMultiplier, globalsCloseHighAuto.outconestackY,globalsCloseHighAuto.outconeStackRotationHOLDPID* SideMultiplier,xPosition,yPosition,offsetHeading, 1,1); // last values are translationalspeed, and rotational speed
-        drivebase.DriveToPositionAutonomous2(globalsCloseHighAuto.outconestackX * SideMultiplier, globalsCloseHighAuto.outconestackY,globalsCloseHighAuto.outconeStackRotationHOLDPID* SideMultiplier,xPosition,yPosition,offsetHeading,headingPosition, 1,1); // last values are translationalspeed, and rotational speed
+    public void holdDrivebasePosition(Pose2d currentPose){ // THE OUTCONESTACKROTATION SHOULD BE NEGATIVE
+        drivebase.DriveToPositionAutonomous3(GlobalsMidAuto.stackTargetX*SideMultiplier,GlobalsMidAuto.stackTargetY, GlobalsMidAuto.outconestackX * SideMultiplier, GlobalsMidAuto.outconestackY,xPosition,yPosition,headingPosition, 1,1, telemetry, currentPose); // last values are translationalspeed, and rotational speed
     }
-    public void holdTurretPosition(){
-        outtake.turretSpin(GlobalsCloseHighAuto.TurretLeftposition * SideMultiplier,outtake.turretPosition,1);
+    public void holdTurretPosition(Pose2d currentPose, double maxOutput){
+        outtake.turretPointToPole(GlobalsMidAuto.poleTargetX * SideMultiplier,GlobalsMidAuto.poleTargetY,currentPose,maxOutput,telemetry);
     }
 }
 
