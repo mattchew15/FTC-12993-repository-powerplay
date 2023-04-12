@@ -9,14 +9,14 @@ public class GlobalsCloseHighAuto {
     // encoder positions
     public static int IntakeSlideOutTicks = -608;
     public static int LiftHighPosition = -705;
-    public static int LiftHighPosition10 = -760;
+    public static int LiftHighPosition10 = -740;
 
     public static double TurretLeftposition = -5.55;
     public static double TurretRightposition = -TurretLeftposition;
     public static double TurretLeftPositionInternalPid = -21;
 
     public static int IntakeSlideNotQuiteOutTicks = IntakeSlideOutTicks + 105;
-    public static int IntakeSlideBackFromStack = IntakeSlideOutTicks + 80;
+    public static int IntakeSlideBackFromStack = IntakeSlideOutTicks + 110;
     // webcam names
     public String WebCamLeftName  = "WebcamLeft";
     public String WebCamRightName  = "WebcamRight";

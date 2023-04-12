@@ -36,10 +36,10 @@ public class GlobalsFarHighAuto {
 
     public static double outconestackX = 17;
     public static double outconestackY = -18.7;
-    public static double outconeStackRotation = Math.toRadians(1.5);
+    public static double outconeStackRotation = Math.toRadians(3);
     public static double xValueBeforeSlidesExtend = 20;
 
-    public static double farpoleTargetX = -2;
+    public static double farpoleTargetX = 0;
     public static double farpoleTargetY = -28.3;
 
     public static double parkLeft = -61;

@@ -147,15 +147,15 @@ public class LEFT_FIVE_MID extends LinearOpMode {
                 .build();
 
         Trajectory ParkSetup = drive.trajectoryBuilder(PreloadDrive.end())
-                .lineToLinearHeading(new Pose2d(-GlobalsMidAuto.parkCentre * SideMultiplier, GlobalsMidAuto.parkY, GlobalsMidAuto.parkRotation))
+                .lineToLinearHeading(new Pose2d(-GlobalsMidAuto.parkCentre * SideMultiplier, GlobalsMidAuto.parkY, GlobalsMidAuto.parkRotation * SideMultiplier + AngleOffset))
                 .build();
 
         Trajectory ParkRight = drive.trajectoryBuilder(ParkSetup.end())
-                .lineToLinearHeading(new Pose2d(SideMultiplier == 1 ? -GlobalsMidAuto.parkLeft: GlobalsMidAuto.parkRight, GlobalsMidAuto.parkY, GlobalsMidAuto.parkRotation))
+                .lineToLinearHeading(new Pose2d(SideMultiplier == 1 ? -GlobalsMidAuto.parkLeft: GlobalsMidAuto.parkRight, GlobalsMidAuto.parkY, GlobalsMidAuto.parkRotation * SideMultiplier + AngleOffset))
                 .build();
 
         Trajectory ParkLeft = drive.trajectoryBuilder(ParkSetup.end())
-                .lineToLinearHeading(new Pose2d(SideMultiplier == 1 ? -GlobalsMidAuto.parkRight: GlobalsMidAuto.parkLeft, GlobalsMidAuto.parkY, GlobalsMidAuto.parkRotation))
+                .lineToLinearHeading(new Pose2d(SideMultiplier == 1 ? -GlobalsMidAuto.parkRight: GlobalsMidAuto.parkLeft, GlobalsMidAuto.parkY, GlobalsMidAuto.parkRotation * SideMultiplier + AngleOffset))
                 .build();
 
         while (!isStarted()) {
@@ -345,7 +345,6 @@ public class LEFT_FIVE_MID extends LinearOpMode {
                     if (GlobalTimer.milliseconds() - autoTimer > 0){
                         outtake.IntakeClawClose();
                         if (GlobalTimer.milliseconds() - autoTimer > 200){
-                            outtake.IntakeArmConeHoldForTransfer();
                             if (outtake.intakeLiftPosition > 275){
                                 outtake.IntakeArmTransfer();
                                 if ((numCycles==1? outtake.intakeArmPosition > 175: outtake.intakeArmPosition > 150) && GlobalTimer.milliseconds()-autoTimer > 600){ // this reads the position of the intake arm
@@ -356,11 +355,12 @@ public class LEFT_FIVE_MID extends LinearOpMode {
                                         currentState = AutoState.TRANSFER_CONE;
                                         outtake.OuttakeClawClose();
                                     }
-                                } else{
-                                    outtake.IntakeSlideInternalPID(GlobalsMidAuto.IntakeSlideBackFromStack, 0.42); // this pulls slides in while doing stuff
+                                } else if (outtake.intakeArmPosition > 100){
+                                    outtake.IntakeSlideInternalPID(GlobalsMidAuto.IntakeSlideBackFurtherFromStack, 0.42); // this pulls slides in while doing stuff
                                 }
                             } else {
                                 outtake.IntakeLift5();
+                                outtake.IntakeArmConeHoldForTransfer();
                             }
                         } else {
                             outtake.IntakeSlideInternalPID(GlobalsMidAuto.IntakeSlideBackFromStack, 0.42); // slower

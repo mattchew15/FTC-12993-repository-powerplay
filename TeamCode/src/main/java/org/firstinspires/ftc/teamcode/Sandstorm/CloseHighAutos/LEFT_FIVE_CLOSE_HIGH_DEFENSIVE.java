@@ -349,7 +349,6 @@ public class LEFT_FIVE_CLOSE_HIGH_DEFENSIVE extends LinearOpMode {
                     if (GlobalTimer.milliseconds() - autoTimer > 0){
                         outtake.IntakeClawClose();
                         if (GlobalTimer.milliseconds() - autoTimer > 200){
-                            outtake.IntakeArmConeHoldForTransfer();
                             if (outtake.intakeLiftPosition > 275){
                                 outtake.IntakeArmTransfer();
                                 if ((numCycles==1? outtake.intakeArmPosition > 175: outtake.intakeArmPosition > 150) && GlobalTimer.milliseconds()-autoTimer > 600){ // this reads the position of the intake arm
@@ -366,6 +365,7 @@ public class LEFT_FIVE_CLOSE_HIGH_DEFENSIVE extends LinearOpMode {
                                 }
                             } else {
                                 outtake.IntakeLift5();
+                                outtake.IntakeArmConeHoldForTransfer();
                             }
                         } else {
                             outtake.IntakeSlideInternalPID(globalsCloseHighAuto.IntakeSlideBackFromStack, 0.42); // slower

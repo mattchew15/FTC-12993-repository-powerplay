@@ -101,8 +101,6 @@ public class RIGHT_FIVE_FAR_HIGH extends LinearOpMode {
         OtherSide = false;
     }
     // Define our start pose
-    Pose2d startPose = new Pose2d(GlobalsFarHighAuto.startPoseX*SideMultiplier, GlobalsFarHighAuto.startPoseY,GlobalsFarHighAuto.startPoseAngle+AngleOffset*SideMultiplier);
-
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -134,8 +132,8 @@ public class RIGHT_FIVE_FAR_HIGH extends LinearOpMode {
         SampleMecanumDrive drive = new SampleMecanumDrive(hardwareMap); // road drive class
 
         // out cone stack position
-        Pose2d startPose = new Pose2d(34, -69, Math.toRadians(0));
-        Pose2d OutConePose = new Pose2d(GlobalsFarHighAuto.outconestackX*SideMultiplier, GlobalsFarHighAuto.outconestackY, GlobalsFarHighAuto.outconeStackRotation+AngleOffset*SideMultiplier);
+        Pose2d startPose = new Pose2d(GlobalsFarHighAuto.startPoseX*SideMultiplier, GlobalsFarHighAuto.startPoseY,GlobalsFarHighAuto.startPoseAngle*SideMultiplier+AngleOffset);
+        Pose2d OutConePose = new Pose2d(GlobalsFarHighAuto.outconestackX*SideMultiplier, GlobalsFarHighAuto.outconestackY, GlobalsFarHighAuto.outconeStackRotation*SideMultiplier+AngleOffset);
 
         // functions runs on start
         Setup();
@@ -145,25 +143,25 @@ public class RIGHT_FIVE_FAR_HIGH extends LinearOpMode {
         // trajectories that aren't changing should all be here
 
         Trajectory PreloadDrive = drive.trajectoryBuilder(startPose)
-                .lineToLinearHeading(new Pose2d(GlobalsFarHighAuto.PreloadDriveX*SideMultiplier, GlobalsFarHighAuto.PreloadDriveY, GlobalsFarHighAuto.PreloadDriveRotation+AngleOffset*SideMultiplier))
+                .lineToLinearHeading(new Pose2d(GlobalsFarHighAuto.PreloadDriveX*SideMultiplier, GlobalsFarHighAuto.PreloadDriveY, GlobalsFarHighAuto.PreloadDriveRotation*SideMultiplier+AngleOffset))
                 .build();
         // could make this one drive
         Trajectory DriveOutStackAfterPreload = drive.trajectoryBuilder(PreloadDrive.end()) // actual drive out will occur during loop
-                .lineToLinearHeading(new Pose2d(GlobalsFarHighAuto.outconestackX*SideMultiplier, GlobalsFarHighAuto.outconestackY, GlobalsFarHighAuto.outconeStackRotation+AngleOffset*SideMultiplier), SampleMecanumDrive.getVelocityConstraint(GlobalsFarHighAuto.slowerVelocityConstraintOut, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH),
+                .lineToLinearHeading(new Pose2d(GlobalsFarHighAuto.outconestackX*SideMultiplier, GlobalsFarHighAuto.outconestackY, GlobalsFarHighAuto.outconeStackRotation*SideMultiplier+AngleOffset), SampleMecanumDrive.getVelocityConstraint(GlobalsFarHighAuto.slowerVelocityConstraintOut, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH),
                         SampleMecanumDrive.getAccelerationConstraint(DriveConstants.MAX_ACCEL))
                 .build();
 
         Trajectory DriveIntoStack = drive.trajectoryBuilder(DriveOutStackAfterPreload.end()) //
-                .lineToLinearHeading(new Pose2d(GlobalsFarHighAuto.inconestackX*SideMultiplier,  GlobalsFarHighAuto.inconestackY, GlobalsFarHighAuto.inStackRotation+AngleOffset*SideMultiplier), SampleMecanumDrive.getVelocityConstraint(GlobalsFarHighAuto.slowerVelocityConstraintIn, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH),
+                .lineToLinearHeading(new Pose2d(GlobalsFarHighAuto.inconestackX*SideMultiplier,  GlobalsFarHighAuto.inconestackY, GlobalsFarHighAuto.inStackRotation*SideMultiplier+AngleOffset), SampleMecanumDrive.getVelocityConstraint(GlobalsFarHighAuto.slowerVelocityConstraintIn, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH),
                         SampleMecanumDrive.getAccelerationConstraint(DriveConstants.MAX_ACCEL))
                 .build();
 
         Trajectory ParkRight = drive.trajectoryBuilder(OutConePose)
-                .lineTo(new Vector2d(SideMultiplier == 1 ? -GlobalsFarHighAuto.parkLeft: GlobalsFarHighAuto.parkRight * SideMultiplier,GlobalsFarHighAuto.PreloadDriveY))
+                .lineTo(new Vector2d(SideMultiplier == 1 ? -GlobalsFarHighAuto.parkLeft: GlobalsFarHighAuto.parkRight,GlobalsFarHighAuto.PreloadDriveY))
                 .build();
 
         Trajectory ParkLeft = drive.trajectoryBuilder(OutConePose)
-                .lineTo(new Vector2d(SideMultiplier == 1 ? -GlobalsFarHighAuto.parkRight: GlobalsFarHighAuto.parkLeft * SideMultiplier,GlobalsFarHighAuto.PreloadDriveY))
+                .lineTo(new Vector2d(SideMultiplier == 1 ? -GlobalsFarHighAuto.parkRight: GlobalsFarHighAuto.parkLeft,GlobalsFarHighAuto.PreloadDriveY))
                 .build();
 
         Trajectory ParkCentre = drive.trajectoryBuilder(OutConePose)
@@ -332,7 +330,7 @@ public class RIGHT_FIVE_FAR_HIGH extends LinearOpMode {
                         autoTimer = GlobalTimer.milliseconds(); // reset timer not rly needed here
                         currentState = AutoState.AFTER_GRAB_OFF_STACK;
                         Trajectory OutConeStack = drive.trajectoryBuilder(poseEstimate)
-                                .lineToLinearHeading(new Pose2d(GlobalsFarHighAuto.outconestackX*SideMultiplier,GlobalsFarHighAuto.outconestackY, Math.toRadians(3)+AngleOffset*SideMultiplier), SampleMecanumDrive.getVelocityConstraint(GlobalsFarHighAuto.slowerVelocityConstraintOut, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH),
+                                .lineToLinearHeading(new Pose2d(GlobalsFarHighAuto.outconestackX*SideMultiplier,GlobalsFarHighAuto.outconestackY, GlobalsFarHighAuto.outconeStackRotation*SideMultiplier+AngleOffset), SampleMecanumDrive.getVelocityConstraint(GlobalsFarHighAuto.slowerVelocityConstraintOut, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH),
                                         SampleMecanumDrive.getAccelerationConstraint(DriveConstants.MAX_ACCEL))
                                 .build();
 
@@ -349,7 +347,6 @@ public class RIGHT_FIVE_FAR_HIGH extends LinearOpMode {
                     if (GlobalTimer.milliseconds() - autoTimer > 0){
                         outtake.IntakeClawClose();
                         if (GlobalTimer.milliseconds() - autoTimer > 120){
-                            outtake.IntakeArmConeHoldForTransfer();
                             if (outtake.intakeLiftPosition > 275){
                                 outtake.IntakeArmTransfer();
                                 if ((outtake.getIntakeArmPos() > 137)){ // this reads the position of the intake arm
@@ -366,6 +363,7 @@ public class RIGHT_FIVE_FAR_HIGH extends LinearOpMode {
                                 }
                             } else {
                                 outtake.IntakeLift5();
+                                outtake.IntakeArmConeHoldForTransfer();
                             }
                         }
                     }

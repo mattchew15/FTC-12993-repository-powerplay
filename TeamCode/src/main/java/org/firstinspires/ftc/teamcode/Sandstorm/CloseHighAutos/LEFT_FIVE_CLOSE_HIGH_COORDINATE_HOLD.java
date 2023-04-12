@@ -259,33 +259,9 @@ public class LEFT_FIVE_CLOSE_HIGH_COORDINATE_HOLD extends LinearOpMode {
             correctedHeading = inputs.angleWrap(headingPosition);
             offsetHeading = inputs.offsetAngle90(headingPosition);
             outtake.outtakeReads();
-
-            telemetry.addData("x", xPosition);
-            telemetry.addData("y", yPosition);
-            //telemetry.addData("liftPosition", outtake.liftPosition);
-            //telemetry.addData("heading", Math.toDegrees(headingPosition));
-            telemetry.addData("drivebaseHeadingError", Math.toDegrees(drivebase.getHeadingError()));
-            telemetry.addData("turretError", Math.toDegrees(outtake.turretErrorFromPole));
-            //telemetry.addData("offsetHeading", Math.toDegrees(offsetHeading));
-            //telemetry.addData("targetHeading", Math.toDegrees(GlobalsCloseHighAuto.outconeStackRotationHOLDPID));
-
-
-
-            //telemetry.addData("autostate", currentState);
-            //telemetry.addData("Intake Slide Position", outtake.intakeSlidePosition);
-            //telemetry.addData("Intake Slide Target Reached", outtake.intakeSlideTargetReachedSmallerThreshold());
-            //telemetry.addData("lift target reached", outtake.liftTargetReached());
-            //telemetry.addData("XError", drivebase.getXError());
-            //telemetry.addData("YError", drivebase.getYError());
-            //telemetry.addData("HeadingError", drivebase.getHeadingError());
-
-            // telemetry.addData("XOutput", drivebase.getXOutput());
-            // telemetry.addData("YOutput", drivebase.getYOutput());
-            // telemetry.addData("HeadingOutput", drivebase.getHeadingOutput());
-
-            //telemetry.addData("number of cycles:", numCycles);
-
             outtake.ConeArmReady();
+            telemetry.addData("autoState", currentState);
+
             // main switch statement logic
             switch (currentState) {
                 case DELAY:
@@ -315,8 +291,7 @@ public class LEFT_FIVE_CLOSE_HIGH_COORDINATE_HOLD extends LinearOpMode {
                     break;
 
                 case OUTTAKE_CONE:
-                    // holdDrivebasePosition(poseEstimate);
-                    holdTurretPosition(poseEstimate,0.4);
+                    holdDrivebasePosition(poseEstimate);
                     if (true){
                         OuttakeCone(true,poseEstimate); // next state is grab off
                     }
@@ -352,7 +327,6 @@ public class LEFT_FIVE_CLOSE_HIGH_COORDINATE_HOLD extends LinearOpMode {
                     if (GlobalTimer.milliseconds() - autoTimer > 0){
                         outtake.IntakeClawClose();
                         if (GlobalTimer.milliseconds() - autoTimer > 200){
-                            outtake.IntakeArmConeHoldForTransfer();
                             if (outtake.intakeLiftPosition > 275){
                                 outtake.IntakeArmTransfer();
                                 if ((numCycles==1? outtake.intakeArmPosition > 175: outtake.intakeArmPosition > 150) && GlobalTimer.milliseconds()-autoTimer > 600){ // this reads the position of the intake arm
@@ -369,6 +343,7 @@ public class LEFT_FIVE_CLOSE_HIGH_COORDINATE_HOLD extends LinearOpMode {
                                 }
                             } else {
                                 outtake.IntakeLift5();
+                                outtake.IntakeArmConeHoldForTransfer();
                             }
                         } else {
                             outtake.IntakeSlideInternalPID(globalsCloseHighAuto.IntakeSlideBackFromStack, 0.42); // slower
@@ -484,7 +459,7 @@ public class LEFT_FIVE_CLOSE_HIGH_COORDINATE_HOLD extends LinearOpMode {
 
         holdTurretPosition(currentPose,1);
 
-        if ((outtake.liftPosition < globalsCloseHighAuto.LiftHighPosition+10) && (outtake.turretErrorFromPole < Math.toRadians(2))){
+        if ((outtake.liftPosition < globalsCloseHighAuto.LiftHighPosition+10)){
             if (!Intake){ // on the last one
                 autoTimer = GlobalTimer.milliseconds(); // reset timer not rly needed here
                 currentState = AutoState.RETRACT_SLIDES;

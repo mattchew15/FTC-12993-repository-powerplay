@@ -157,8 +157,9 @@ public class TEN_CLOSE_HIGH extends LinearOpMode {
 
         TrajectorySequence DriveOtherSide = drive.trajectorySequenceBuilder(PreloadDrive.end())
                 .lineToLinearHeading(new Pose2d(-22*SideMultiplier, outconestackYOtherSide, 0 + AngleOffset))
-                //.splineTo(new Vector2d(-22 * SideMultiplier), Math.toRadians(0)+AngleOffset)
-                .splineToSplineHeading(new Pose2d(outconestackXOtherSide * SideMultiplier,outconestackY, Math.toRadians(180)),Math.toRadians(0))
+                .lineToLinearHeading(new Pose2d(outconestackXOtherSide, -18.4, 0 + AngleOffset))
+                //.splineTo(new Vector2d(-22 * SideMultiplier), Math.toRadians(0)+AngleOffset)-
+               // .splineToSplineHeading(new Pose2d(outconestackXOtherSide * SideMultiplier,outconestackY, Math.toRadians(180)),Math.toRadians(0))
                 .build();
 
         Trajectory ParkRight = drive.trajectoryBuilder(DriveOtherSide.end())
@@ -552,7 +553,7 @@ public class TEN_CLOSE_HIGH extends LinearOpMode {
 
         holdTurretPosition(currentPose,1);
 
-        if (outtake.liftPosition < globalsCloseHighAuto.LiftHighPosition+26){
+        if (outtake.liftPosition < globalsCloseHighAuto.LiftHighPosition+27){
             if (!Intake){ // on the last one
                 autoTimer = GlobalTimer.milliseconds(); // reset timer not rly needed here
                 currentState = AutoState.RETRACT_SLIDES;

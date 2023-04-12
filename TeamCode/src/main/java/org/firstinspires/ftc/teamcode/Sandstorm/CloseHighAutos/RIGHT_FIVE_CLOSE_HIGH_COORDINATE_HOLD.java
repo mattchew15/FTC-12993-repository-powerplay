@@ -315,8 +315,7 @@ public class RIGHT_FIVE_CLOSE_HIGH_COORDINATE_HOLD extends LinearOpMode {
                     break;
 
                 case OUTTAKE_CONE:
-                   // holdDrivebasePosition(poseEstimate);
-                    holdTurretPosition(poseEstimate,0.4);
+                    holdDrivebasePosition(poseEstimate);
                     if (true){
                         OuttakeCone(true,poseEstimate); // next state is grab off
                     }
@@ -352,7 +351,6 @@ public class RIGHT_FIVE_CLOSE_HIGH_COORDINATE_HOLD extends LinearOpMode {
                     if (GlobalTimer.milliseconds() - autoTimer > 0){
                         outtake.IntakeClawClose();
                         if (GlobalTimer.milliseconds() - autoTimer > 200){
-                            outtake.IntakeArmConeHoldForTransfer();
                             if (outtake.intakeLiftPosition > 275){
                                 outtake.IntakeArmTransfer();
                                 if ((numCycles==1? outtake.intakeArmPosition > 175: outtake.intakeArmPosition > 150) && GlobalTimer.milliseconds()-autoTimer > 600){ // this reads the position of the intake arm
@@ -369,6 +367,7 @@ public class RIGHT_FIVE_CLOSE_HIGH_COORDINATE_HOLD extends LinearOpMode {
                                 }
                             } else {
                                 outtake.IntakeLift5();
+                                outtake.IntakeArmConeHoldForTransfer();
                             }
                         } else {
                             outtake.IntakeSlideInternalPID(globalsCloseHighAuto.IntakeSlideBackFromStack, 0.42); // slower
@@ -484,7 +483,7 @@ public class RIGHT_FIVE_CLOSE_HIGH_COORDINATE_HOLD extends LinearOpMode {
 
         holdTurretPosition(currentPose,1);
 
-        if ((outtake.liftPosition < globalsCloseHighAuto.LiftHighPosition+10) && (outtake.turretErrorFromPole < Math.toRadians(2))){
+        if (outtake.liftPosition < globalsCloseHighAuto.LiftHighPosition+10){
             if (!Intake){ // on the last one
                 autoTimer = GlobalTimer.milliseconds(); // reset timer not rly needed here
                 currentState = AutoState.RETRACT_SLIDES;

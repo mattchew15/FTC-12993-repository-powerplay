@@ -14,8 +14,9 @@ public class GlobalsMidAuto { // copy and paste close high autos and replace the
 
     public static double TurretRightPositionInternalPid = 21;
 
-    public static int IntakeSlideNotQuiteOutTicks = IntakeSlideOutTicks + 87;
-    public static int IntakeSlideBackFromStack = IntakeSlideOutTicks + 70;
+    public static int IntakeSlideNotQuiteOutTicks = IntakeSlideOutTicks + 90;
+    public static int IntakeSlideBackFromStack = IntakeSlideOutTicks + 90;
+    public static int IntakeSlideBackFurtherFromStack = IntakeSlideOutTicks + 87;
 
     // webcam names
     public String WebCamLeftName  = "WebcamLeft";
