@@ -292,7 +292,7 @@ public class RIGHT_FIVE_CLOSE_HIGH_COORDINATE_HOLD extends LinearOpMode {
                     outtake.OuttakeClawClose();
                     outtake.IntakeClipOpen();
                     outtake.OuttakeArmReady();
-                    if (GlobalTimer.milliseconds() - autoTimer > 0){
+                    if (GlobalTimer.milliseconds() - autoTimer > 6000){
                         autoTimer = GlobalTimer.milliseconds(); // reset timer not rly needed here
                         currentState = AutoState.PRELOAD_DRIVE;
                         drive.followTrajectoryAsync(PreloadDrive);

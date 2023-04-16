@@ -202,6 +202,7 @@ public class StormDrive extends LinearOpMode {
         // this is basically init, all setup, hardware classes etc get initialized here
         drivebase.Drivebase_init(hardwareMap);
         outtake.Outtake_init(hardwareMap);
+        rumbleSetup();
         //for (LynxModule module : hardwareMap.getAll(LynxModule.class)) { // turns on bulk reads cannot read or write to the same motor mor ethan once or it will issues multiple bulk reads
          //   module.setBulkCachingMode(LynxModule.BulkCachingMode.AUTO);
        // } //
@@ -219,7 +220,7 @@ public class StormDrive extends LinearOpMode {
             location.setPoseEstimate(PoseStorage.currentPose); // this gets sets the current position to what it ended in auto
 
             while (opModeIsActive()) {
-                //rumble();
+                rumble();
                 location.update();
                 // Retrieve your pose
                 Pose2d poseEstimate = location.getPoseEstimate();
@@ -518,6 +519,7 @@ public class StormDrive extends LinearOpMode {
                 if (gamepad2.right_bumper){
                     outtake.encodersReset();
                     outtakeState = OuttakeState.READY;
+                    gamepad2.runRumbleEffect(switchRumbleEffect);
                     inputs.ManualResetToggleMode = false; // this should exit this state once right bumper is pressed
                 }
                 break;
@@ -986,22 +988,6 @@ public class StormDrive extends LinearOpMode {
     }
 
     public void rumbleSetup() {
-        oneFourthRumbleEffect = new Gamepad.RumbleEffect.Builder()
-                .addStep(1.0, 1.0, 100)
-                .addStep(0.0, 0.0, 100)
-                .addStep(1.0, 1.0, 100)
-                .addStep(0.0, 0.0, 100)
-                .addStep(1.0, 1.0, 100)
-                .addStep(0.0, 0.0, 100)
-                .addStep(1.0, 1.0, 100)
-                .build();
-
-        halfRumbleEffect = new Gamepad.RumbleEffect.Builder()
-                .addStep(1.0, 1.0, 500)
-                .addStep(0.0, 0.0, 300)
-                .addStep(1.0, 1.0, 750)
-                .build();
-
         endgameRumbleEffect = new Gamepad.RumbleEffect.Builder()
                 .addStep(1.0, 1.0, 500)
                 .addStep(0.0, 0.0, 300)
@@ -1011,7 +997,7 @@ public class StormDrive extends LinearOpMode {
                 .build();
 
         tenRumbleEffect = new Gamepad.RumbleEffect.Builder()
-                .addStep(1.0, 1.0, 1000)
+                .addStep(1.0, 1.0, 1500)
                 .build();
 
         switchRumbleEffect = new Gamepad.RumbleEffect.Builder()
@@ -1020,18 +1006,6 @@ public class StormDrive extends LinearOpMode {
     }
 
     public void rumble(){ // this runs the logic for when and what rumbles will go off at what time
-        if(runtime.seconds() > oneFourth && one){
-            gamepad1.runRumbleEffect(oneFourthRumbleEffect);
-            gamepad2.runRumbleEffect(oneFourthRumbleEffect);
-            one = false;
-            two = true;
-        }
-        if(runtime.seconds() > halfTime && two){
-            gamepad1.runRumbleEffect(halfRumbleEffect);
-            gamepad2.runRumbleEffect(halfRumbleEffect);
-            two = false;
-            three = true;
-        }
         if(runtime.seconds() > endgame && three){
             gamepad1.runRumbleEffect(endgameRumbleEffect);
             gamepad2.runRumbleEffect(endgameRumbleEffect);
@@ -1075,7 +1049,7 @@ public class StormDrive extends LinearOpMode {
             if (!SlidesToggleUp) {
                 SlidesToggleUp = true;
                 if (liftTargetPosition > LiftUpperLimit){
-                    liftTargetPosition -= 50; // increases by 50 every time
+                    liftTargetPosition -= 46; // increases by 50 every time
                 }
             }
         }
@@ -1088,7 +1062,7 @@ public class StormDrive extends LinearOpMode {
             if (!SlidesToggleDown) {
                 SlidesToggleDown = true;
                 if (liftTargetPosition < 0){
-                    liftTargetPosition += 50; // decreases by 50 every time
+                    liftTargetPosition += 46; // decreases by 50 every time
                 }
             }
         }

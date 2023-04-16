@@ -322,7 +322,7 @@ public class FIVE_CLOSE_HIGH_LEFT_PIDHOLD extends LinearOpMode {
                 case GRAB_OFF_STACK:
                     holdDrivebasePosition(); // dropping cone
                     dropCone(350);
-                    if (GlobalTimer.milliseconds() - autoTimer > 350){
+                    if (GlobalTimer.milliseconds() - autoTimer < 350){
                         outtake.liftToInternalPID(GlobalsCloseHighAuto.LiftHighPosition, 1);
                         holdTurretPosition();
                     }
@@ -407,7 +407,7 @@ public class FIVE_CLOSE_HIGH_LEFT_PIDHOLD extends LinearOpMode {
                 case RETRACT_SLIDES:
                     holdDrivebasePosition();
                     dropCone(350);
-                    if (GlobalTimer.milliseconds() - autoTimer > 350){
+                    if (GlobalTimer.milliseconds() - autoTimer < 350){
                         outtake.liftToInternalPID(GlobalsCloseHighAuto.LiftHighPosition, 1);
                         holdTurretPosition();
                     }
@@ -498,7 +498,6 @@ public class FIVE_CLOSE_HIGH_LEFT_PIDHOLD extends LinearOpMode {
         }
     }
     public void dropCone(int waitBeforeRetract){
-        holdDrivebasePosition(); // dropping cone
         if (GlobalTimer.milliseconds() - autoTimer > 200){ // small wait
             if (GlobalTimer.milliseconds() - autoTimer > 280){
                 outtake.OuttakeClawOpenHard();

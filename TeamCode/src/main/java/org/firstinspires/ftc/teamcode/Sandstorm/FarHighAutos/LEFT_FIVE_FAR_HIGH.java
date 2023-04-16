@@ -275,7 +275,7 @@ public class LEFT_FIVE_FAR_HIGH extends LinearOpMode {
                     outtake.OuttakeClawClose();
                     outtake.IntakeClipOpen();
                     outtake.OuttakeArmReady();
-                    if (GlobalTimer.milliseconds() - autoTimer > 4500){
+                    if (GlobalTimer.milliseconds() - autoTimer > 2500){
                         autoTimer = GlobalTimer.milliseconds(); // reset timer not rly needed here
                         currentState = AutoState.PRELOAD_DRIVE;
                         drive.followTrajectoryAsync(PreloadDrive);
@@ -325,9 +325,13 @@ public class LEFT_FIVE_FAR_HIGH extends LinearOpMode {
                         outtake.OuttakeSlideReady(); // drops down on pole a bit
                         outtake.liftToInternalPID(0,1);
                     }
+                    if (Math.abs(xPosition) > GlobalsFarHighAuto.grabConeThreshold){ // close the claw earlier
+                        outtake.IntakeClawClose();
+                    }
                     outtake.IntakeSlideTo(GlobalsFarHighAuto.IntakeSlideOutTicks, outtake.intakeSlidePosition, 1); // slower
                     if (outtake.intakeClawTouchPressed() || !drive.isBusy()){ // could replace this with if x is over a certain point for speed
                         autoTimer = GlobalTimer.milliseconds(); // reset timer not rly needed here
+                        outtake.IntakeClawClose();
                         currentState = AutoState.AFTER_GRAB_OFF_STACK;
                         Trajectory OutConeStack = drive.trajectoryBuilder(poseEstimate)
                                 .lineToLinearHeading(new Pose2d(GlobalsFarHighAuto.outconestackX*SideMultiplier,GlobalsFarHighAuto.outconestackY, GlobalsFarHighAuto.outconeStackRotation*SideMultiplier+AngleOffset), SampleMecanumDrive.getVelocityConstraint(GlobalsFarHighAuto.slowerVelocityConstraintOut, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH),
@@ -380,7 +384,9 @@ public class LEFT_FIVE_FAR_HIGH extends LinearOpMode {
                             outtake.OuttakeArmUpright();
                             outtake.OuttakeClawClose();
                             outtake.BraceActiveAuto();
-                            holdTurretPosition(poseEstimate,1); // holds position while driving backwards
+                            if (GlobalTimer.milliseconds()-autoTimer > 400) {
+                                holdTurretPosition(poseEstimate,1); // holds position while driving backwards
+                            }
                             if (xPosition < GlobalsFarHighAuto.xValueBeforeSlidesExtend){ // kinda like a temporal marker
                                 if (numCycles == 5){
                                     outtake.IntakeArmReady();

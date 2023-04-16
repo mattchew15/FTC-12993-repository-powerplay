@@ -31,7 +31,7 @@ public class GlobalsFarHighAuto {
     public static double PreloadDriveRotation = Math.toRadians(0);
 
     public static double inconestackX = 37.37;
-    public static double inconestackY = -18.75;
+    public static double inconestackY = -18.85;
     public static double inStackRotation = Math.toRadians(0.5);
 
     public static double outconestackX = 17;
@@ -39,8 +39,9 @@ public class GlobalsFarHighAuto {
     public static double outconeStackRotation = Math.toRadians(3);
     public static double xValueBeforeSlidesExtend = 20;
 
-    public static double farpoleTargetX = 0;
-    public static double farpoleTargetY = -28.3;
+    public static double farpoleTargetX = -0.5;
+    public static double farpoleTargetY = -28.7;
+    public static double grabConeThreshold = 34.5;
 
     public static double parkLeft = -61;
     public static double parkRight = -11.5;

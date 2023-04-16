@@ -333,7 +333,7 @@ public class TEN_CLOSE_HIGH extends LinearOpMode {
                     }
 
                     if (GlobalTimer.milliseconds() - autoTimer > 220) { // time taken to drop cone
-                        if (outtake.intakeClawTouchPressed() || GlobalTimer.milliseconds() - autoTimer > 300){
+                        if (outtake.intakeClawTouchPressed() || GlobalTimer.milliseconds() - autoTimer > 350){
                             autoTimer = GlobalTimer.milliseconds(); // reset timer not rly needed here
                             currentState = AutoState.AFTER_GRAB_OFF_STACK;
                         } else {

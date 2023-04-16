@@ -19,7 +19,6 @@ import org.openftc.easyopencv.OpenCvCameraFactory;
 import org.openftc.easyopencv.OpenCvCameraRotation;
 import java.util.ArrayList;
 
-
 @Autonomous(name = "Right 1+5 Mid Auto", group = "Autonomous")
 public class RIGHT_FIVE_MID extends LinearOpMode {
 
