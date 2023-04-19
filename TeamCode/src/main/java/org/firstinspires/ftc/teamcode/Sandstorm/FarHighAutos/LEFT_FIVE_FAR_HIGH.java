@@ -31,6 +31,7 @@ public class LEFT_FIVE_FAR_HIGH extends LinearOpMode {
     double autoTimer;
 
     boolean OtherSide;
+    boolean goToPark;
 
     int numCycles;
     int SignalRotation;
@@ -99,6 +100,7 @@ public class LEFT_FIVE_FAR_HIGH extends LinearOpMode {
         numCycles = 0;
         outtake.encodersReset();
         OtherSide = false;
+        goToPark = true;
     }
     // Define our start pose
 
@@ -275,7 +277,7 @@ public class LEFT_FIVE_FAR_HIGH extends LinearOpMode {
                     outtake.OuttakeClawClose();
                     outtake.IntakeClipOpen();
                     outtake.OuttakeArmReady();
-                    if (GlobalTimer.milliseconds() - autoTimer > 2500){
+                    if (GlobalTimer.milliseconds() - autoTimer > 2000){
                         autoTimer = GlobalTimer.milliseconds(); // reset timer not rly needed here
                         currentState = AutoState.PRELOAD_DRIVE;
                         drive.followTrajectoryAsync(PreloadDrive);
@@ -443,6 +445,10 @@ public class LEFT_FIVE_FAR_HIGH extends LinearOpMode {
                     outtake.OuttakeArmReady();
                     break;
 
+            }
+            if ((GlobalTimer.milliseconds() - autoTimer > 28000) && goToPark){
+                goToPark = false;
+                currentState = AutoState.PARK;
             }
             // Updates driving for trajectories
             drive.update();

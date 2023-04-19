@@ -22,7 +22,7 @@ import org.openftc.easyopencv.OpenCvCameraRotation;
 import java.util.ArrayList;
 
 
-@Autonomous(name = "Left 1+5 Close-High Auto CoordinateHold", group = "Autonomous")
+@Autonomous(name = "Left 1+5 Close-High Auto", group = "Autonomous")
 public class LEFT_FIVE_CLOSE_HIGH_COORDINATE_HOLD extends LinearOpMode {
 
     GlobalsCloseHighAuto globalsCloseHighAuto = new GlobalsCloseHighAuto();

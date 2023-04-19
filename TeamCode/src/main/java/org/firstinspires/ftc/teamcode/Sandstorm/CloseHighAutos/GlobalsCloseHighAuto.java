@@ -41,7 +41,7 @@ public class GlobalsCloseHighAuto {
     public static double stackTargetY = -18.5;
 
     public static double poleTargetX = 24;
-    public static double poleTargetY = -8.2;
+    public static double poleTargetY = -8.1;
 
     public static double parkLeft = -61;
     public static double parkRight = -11.5;

@@ -118,6 +118,7 @@ public class PIDmotortest extends LinearOpMode {
                  */
                 telemetry.addData("IntakeArmPosition", outtake.getIntakeArmPos());
                 telemetry.addData("IntakeLiftPosition", outtake.getIntakeLiftPos());
+                telemetry.addData("IntakeTouch", outtake.intakeClawTouchPressed());
 
 
                 location.update();

@@ -32,7 +32,7 @@ public class GlobalsFarHighAuto {
 
     public static double inconestackX = 37.37;
     public static double inconestackY = -18.85;
-    public static double inStackRotation = Math.toRadians(0.5);
+    public static double inStackRotation = Math.toRadians(0.45);
 
     public static double outconestackX = 17;
     public static double outconestackY = -18.7;

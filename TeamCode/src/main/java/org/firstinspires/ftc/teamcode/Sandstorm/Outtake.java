@@ -175,21 +175,16 @@ public class Outtake {  // no constructor for this class
         liftTarget = rotations;
         double liftPosition = liftPosition - startPosition;
         double output;
-
         if (liftPosition < accelerationDistance) {
             output = liftPID.update(liftTarget,motorPosition,(maxSpeed/accelerationDistance)*liftPosition);
-
         } else if (liftPosition > rotations - deccelerationDistance) {
             output = liftPID.update(liftTarget,motorPosition,(maxSpeed/deccelerationDistance)*(rotations-liftPosition));
-
         } else {
             output = liftPID.update(liftTarget,motorPosition,maxSpeed);
         }
-
         LiftMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER); // this is added so that the external pids could be used
         LiftMotor.setPower(output);
     }
-
      */
 
     public void turretSpin(double targetRotations, double motorPosition, double maxSpeed){
@@ -211,7 +206,7 @@ public class Outtake {  // no constructor for this class
         Pose2d turretPos = coordinatesLogic.getTurretPosition(turretXOffset,turretYOffset,currentPose,telemetry);
         turretErrorFromPole = getTurretErrorFromPole(poleX,poleY,turretPos,telemetry);
         double output = turretPointPID.updateWithError(turretErrorFromPole,maxSpeed);
-       // telemetry.addData("turretMotorOutput", output);
+        // telemetry.addData("turretMotorOutput", output);
         TurretMotor.setPower(output);
     }
 
@@ -352,7 +347,7 @@ public class Outtake {  // no constructor for this class
     public void OuttakeArmScore(){OuttakeArmServo.setPosition(OuttakeArmScorePos);}
     public void OuttakeArmTiltUpSlightly(){OuttakeArmServo.setPosition(OuttakeArmSlightlyTiltedUpPos);}
     public void OuttakeArmScoreAuto(){OuttakeArmServo.setPosition(OuttakeArmScoreAutoPos);}
-   // public void GetOuttakeArmPosition(){OuttakeArmServo.getPosition();}
+    // public void GetOuttakeArmPosition(){OuttakeArmServo.getPosition();}
 
     public void BraceReady(){OuttakeBraceServo.setPosition(BraceReadyPos);}
     public void BraceReadyAuto(){OuttakeBraceServo.setPosition(BraceReadyAutoPos);}
