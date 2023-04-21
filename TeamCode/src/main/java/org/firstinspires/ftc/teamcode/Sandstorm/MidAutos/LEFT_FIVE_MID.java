@@ -10,6 +10,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.teamcode.Sandstorm.AutoTest.AprilTagDetectionPipeline;
 import org.firstinspires.ftc.teamcode.Sandstorm.DriveBase;
+import org.firstinspires.ftc.teamcode.Sandstorm.FarHighAutos.RIGHT_FIVE_FAR_HIGH;
 import org.firstinspires.ftc.teamcode.Sandstorm.Inputs;
 import org.firstinspires.ftc.teamcode.Sandstorm.Outtake;
 import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
@@ -18,7 +19,6 @@ import org.openftc.easyopencv.OpenCvCamera;
 import org.openftc.easyopencv.OpenCvCameraFactory;
 import org.openftc.easyopencv.OpenCvCameraRotation;
 import java.util.ArrayList;
-
 
 @Autonomous(name = "Left 1+5 Mid Auto", group = "Autonomous")
 public class LEFT_FIVE_MID extends LinearOpMode {
@@ -35,6 +35,7 @@ public class LEFT_FIVE_MID extends LinearOpMode {
     int numCycles;
     int SignalRotation;
     int slowerVelocityConstraint;
+    boolean goToPark;
 
     double correctedHeading;
     double xPosition;
@@ -100,6 +101,7 @@ public class LEFT_FIVE_MID extends LinearOpMode {
         numCycles = 0;
         slowerVelocityConstraint = 12;
         outtake.encodersReset();
+        goToPark = true;
     }
     // Define our start pose
 
@@ -444,6 +446,10 @@ public class LEFT_FIVE_MID extends LinearOpMode {
 
             }
             // Updates driving for trajectories
+            if ((GlobalTimer.milliseconds() - autoTimer > 28000) && goToPark){
+                goToPark = false;
+                currentState = AutoState.PARK;
+            }
             drive.update();
             telemetry.update();
         }

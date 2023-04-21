@@ -40,7 +40,7 @@ public class GlobalsFarHighAuto {
     public static double xValueBeforeSlidesExtend = 20;
 
     public static double farpoleTargetX = -0.5;
-    public static double farpoleTargetY = -28.7;
+    public static double farpoleTargetY = -28.8;
     public static double grabConeThreshold = 34.5;
 
     public static double parkLeft = -61;

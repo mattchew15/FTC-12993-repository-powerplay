@@ -262,6 +262,9 @@ public class RIGHT_FIVE_FAR_HIGH extends LinearOpMode {
             dt = System.currentTimeMillis() - prev_time;
             prev_time = System.currentTimeMillis();
             telemetry.addData("Loop Time", dt);
+            telemetry.addData("Auto State", currentState);
+            telemetry.addData("Intake Arm Encoder", outtake.intakeArmPosition);
+            telemetry.addData("Intake lift Encoder", outtake.intakeLiftPosition);
 
             xPosition = poseEstimate.getX();
             yPosition = poseEstimate.getY();
@@ -277,7 +280,7 @@ public class RIGHT_FIVE_FAR_HIGH extends LinearOpMode {
                     outtake.OuttakeClawClose();
                     outtake.IntakeClipOpen();
                     outtake.OuttakeArmReady();
-                    if (GlobalTimer.milliseconds() - autoTimer > 2000){
+                    if (GlobalTimer.milliseconds() - autoTimer > 4000){
                         autoTimer = GlobalTimer.milliseconds(); // reset timer not rly needed here
                         currentState = AutoState.PRELOAD_DRIVE;
                         drive.followTrajectoryAsync(PreloadDrive);
@@ -301,7 +304,7 @@ public class RIGHT_FIVE_FAR_HIGH extends LinearOpMode {
                     break;
 
                 case OUT_AFTER_PRELOAD_DRIVE:
-                    holdTurretPosition(poseEstimate,1);
+                    //holdTurretPosition(poseEstimate,1);
                     if (!drive.isBusy()){
                         currentState = AutoState.OUTTAKE_CONE;
                     }
@@ -331,7 +334,7 @@ public class RIGHT_FIVE_FAR_HIGH extends LinearOpMode {
                         outtake.IntakeClawClose();
                     }
                     outtake.IntakeSlideTo(GlobalsFarHighAuto.IntakeSlideOutTicks, outtake.intakeSlidePosition, 1); // slower
-                    if (outtake.intakeClawTouchPressed() || !drive.isBusy()){ // could replace this with if x is over a certain point for speed
+                    if (outtake.intakeClawTouchPressed() || !drive.isBusy() || Math.abs(xPosition) > GlobalsFarHighAuto.grabConeThreshold){ // could replace this with if x is over a certain point for speed
                         autoTimer = GlobalTimer.milliseconds(); // reset timer not rly needed here
                         currentState = AutoState.AFTER_GRAB_OFF_STACK;
                         outtake.IntakeClawClose();
@@ -355,8 +358,9 @@ public class RIGHT_FIVE_FAR_HIGH extends LinearOpMode {
                         if (GlobalTimer.milliseconds() - autoTimer > 120){
                             if (outtake.intakeLiftPosition > 275){
                                 outtake.IntakeArmTransfer();
-                                if ((outtake.getIntakeArmPos() > 137)){ // this reads the position of the intake arm
+                                if ((outtake.intakeArmPosition > 137)){ // this reads the position of the intake arm
                                     outtake.IntakeSlideInternalPID(7,1);
+                                    telemetry.addLine("Intake Slides Into Transfer");
                                     if (outtake.intakeSlidePosition > -400){
                                         outtake.IntakeLiftTransfer();
                                         if (outtake.intakeSlidePosition > -4){ // this controls when the claw closes

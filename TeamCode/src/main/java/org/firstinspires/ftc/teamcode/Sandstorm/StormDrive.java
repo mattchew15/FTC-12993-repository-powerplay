@@ -250,12 +250,12 @@ public class StormDrive extends LinearOpMode {
                 //drivebase.motorDirectionTest(gamepad1.left_stick_y, gamepad1.left_stick_x,gamepad1.right_stick_x,gamepad1.right_stick_y);
                 //drivebase.PowerToggle(gamepad1.left_stick_button);
                 //inputs.gamepadRumbleTimer();
-                //telemetry.addData("LiftMotorPosition", outtake.liftPosition);
+                telemetry.addData("LiftMotorPosition", outtake.liftPosition);
                 //telemetry.addData("turretPosition", outtake.tickstoDegrees((int)Math.round(outtake.turretPosition))); // might be in the wrong degrees/other
-                //inputs.manualResetToggleMode(gamepad2.left_stick_button);
+                inputs.manualResetToggleMode(gamepad2.left_stick_button);
                 //telemetry.addData("intakeSlideMotor", outtake.intakeSlidePosition);
                 outtakeSequence(); // if gamepad things don't work here then need to pass them in as parameters of this function
-                //telemetry.addData("Main Outtake State", outtakeState);
+                telemetry.addData("Main Outtake State", outtakeState);
                 //telemetry.addData("Intake Out State", intakeout);
                 //telemetry.addData("Cone Deposit State", coneDepositState);
                 //telemetry.addData("Flip Cone State", flipConeArmState);
@@ -293,11 +293,12 @@ public class StormDrive extends LinearOpMode {
                 }
 
                 if (outtakePickupState == OuttakePickupState.READY){ // so it doesn't conflict when lift has to lift up to move counterspringing arm
-                    if (!outtake.liftTargetReached()){
+                    if (outtake.liftPosition < -20){
                         outtake.liftToInternalPID(50,1);
                     }
                     else {
                         outtake.liftToInternalPID(0,1);
+                        telemetry.addLine("run to 0");
                     }
                     liftTargetPosition = 0; // if lift target position is zero, then the transfer won't happen
                     inputs.GroundJunctionsToggleMode = false; // same with the ground junctions

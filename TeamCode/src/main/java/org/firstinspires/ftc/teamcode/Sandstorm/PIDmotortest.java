@@ -73,13 +73,11 @@ public class PIDmotortest extends LinearOpMode {
                 telemetry.addData("Loop Time", LoopTime/LoopTimeTimer.nanoseconds()); // should return loop time for previous loop
                 // Main loop. Run class methods here to do stuff
                 if(gamepad1.a){
-                    outtake.liftTo(GlobalsCloseHighAuto.LiftHighPosition, outtake.liftPosition, 1);
-                    outtake.OuttakeArmScoreAuto();
+                    outtake.IntakeLift5();
                 }
                 else if (gamepad1.b){
-                    outtake.liftTo(0, outtake.liftPosition, 1);
-                    outtake.OuttakeArmReady();
-                }
+                    outtake.IntakeLiftReady();
+                }/*
                 if (gamepad1.x){
                     outtake.IntakeSlideTo(0, outtake.intakeSlidePosition, 1);
                 } else if (gamepad1.y){
@@ -102,6 +100,7 @@ public class PIDmotortest extends LinearOpMode {
                 } else if (gamepad1.left_stick_button){
                     outtake.IntakeSlideInternalPID(0, 1);
                 }
+                */
                 /*
                 telemetry.addData("lift position", outtake.liftPosition);
                 telemetry.addData("lift pid output", outtake.returnPIDLiftOutput());

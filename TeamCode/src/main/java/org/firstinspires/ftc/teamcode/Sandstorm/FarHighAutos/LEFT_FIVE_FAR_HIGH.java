@@ -277,7 +277,7 @@ public class LEFT_FIVE_FAR_HIGH extends LinearOpMode {
                     outtake.OuttakeClawClose();
                     outtake.IntakeClipOpen();
                     outtake.OuttakeArmReady();
-                    if (GlobalTimer.milliseconds() - autoTimer > 2000){
+                    if (GlobalTimer.milliseconds() - autoTimer > 4000){
                         autoTimer = GlobalTimer.milliseconds(); // reset timer not rly needed here
                         currentState = AutoState.PRELOAD_DRIVE;
                         drive.followTrajectoryAsync(PreloadDrive);
@@ -301,7 +301,7 @@ public class LEFT_FIVE_FAR_HIGH extends LinearOpMode {
                     break;
 
                 case OUT_AFTER_PRELOAD_DRIVE:
-                    holdTurretPosition(poseEstimate,1);
+                    //holdTurretPosition(poseEstimate,1);
                     if (!drive.isBusy()){
                         currentState = AutoState.OUTTAKE_CONE;
                     }
@@ -331,7 +331,7 @@ public class LEFT_FIVE_FAR_HIGH extends LinearOpMode {
                         outtake.IntakeClawClose();
                     }
                     outtake.IntakeSlideTo(GlobalsFarHighAuto.IntakeSlideOutTicks, outtake.intakeSlidePosition, 1); // slower
-                    if (outtake.intakeClawTouchPressed() || !drive.isBusy()){ // could replace this with if x is over a certain point for speed
+                    if (outtake.intakeClawTouchPressed() || !drive.isBusy() || Math.abs(xPosition) > GlobalsFarHighAuto.grabConeThreshold){ // could replace this with if x is over a certain point for speed
                         autoTimer = GlobalTimer.milliseconds(); // reset timer not rly needed here
                         outtake.IntakeClawClose();
                         currentState = AutoState.AFTER_GRAB_OFF_STACK;
