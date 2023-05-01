@@ -20,7 +20,6 @@ import org.firstinspires.ftc.teamcode.Dune.PID;
 public class Outtake {  // no constructor for this class
 
     // remove all double ups of reading and writing from hubs
-
     private DcMotorEx TurretMotor;
     private DcMotorEx LiftMotor;
     private DcMotorEx IntakeSlideMotor;
@@ -44,7 +43,7 @@ public class Outtake {  // no constructor for this class
 
     //Servo Positions for outtake
     public static double OuttakeClawOpenPos = 0.58, OuttakeClawClosedPos = 0.45, OuttakeClawOpenHardPos = 0.7;
-    public static double OuttakeArmReadyPos = 0.737, OuttakeArmDepositPos = 0.095, OuttakeArmPickupPos = 0.095, OuttakeArmScorePos = 0.22, OuttakeArmScoreAutoPos = 0.23, OuttakeArmSlightlyTiltedUpPos = 0.3, OuttakeArmUprightPos = 0.53;
+    public static double OuttakeArmReadyPos = 0.733, OuttakeArmDepositPos = 0.095, OuttakeArmPickupPos = 0.095, OuttakeArmScorePos = 0.22, OuttakeArmScoreAutoPos = 0.23, OuttakeArmSlightlyTiltedUpPos = 0.3, OuttakeArmUprightPos = 0.53;
     public static double BraceReadyPos = 0.55,BraceReadyAutoPos = 0.23, BraceActivePos = 0.72, BraceActivePosAuto = 0.64, BraceTuckedPos = 0, BraceFlipConePos = 0.6;
     public static double OuttakeSlideReadyPos = 0.03, OuttakeSlideScorePos = 0.03, OuttakeSlideScoreDropPos = 0.16, OuttakeSlideGroundPos =  0.305, OuttakeSlideConeFlipPos = 0.18, OuttakeSlideAboveConePos = 0.245;
 
@@ -94,7 +93,6 @@ public class Outtake {  // no constructor for this class
     public double intakeSlidePosition;
     public double intakeArmPosition;
     public double intakeLiftPosition;
-
     public double turretErrorFromPole;
 
     public void Outtake_init(HardwareMap hwMap) {

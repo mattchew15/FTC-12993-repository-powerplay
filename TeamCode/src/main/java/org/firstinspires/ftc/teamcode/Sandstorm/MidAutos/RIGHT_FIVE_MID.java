@@ -485,7 +485,7 @@ public class RIGHT_FIVE_MID extends LinearOpMode {
         outtake.liftToInternalPID(GlobalsMidAuto.LiftMidPosition, 1);
         outtake.OuttakeClawClose();
         outtake.OuttakeArmScoreAuto();
-        if (GlobalTimer.milliseconds() - autoTimer > 250){
+        if (GlobalTimer.milliseconds() - autoTimer > 150){
             outtake.BraceActiveAuto();
         }
 

@@ -6,7 +6,7 @@ import com.acmerobotics.roadrunner.geometry.Pose2d;
 public class GlobalsMidAuto { // copy and paste close high autos and replace the variables with the mid ones, makes easy to tune
 
     // encoder positions
-    public static int IntakeSlideOutTicks = -676;
+    public static int IntakeSlideOutTicks = -677;
     public static int LiftMidPosition = -363;
 
     public static double TurretLeftposition = -2.93;
@@ -15,7 +15,7 @@ public class GlobalsMidAuto { // copy and paste close high autos and replace the
     public static double TurretRightPositionInternalPid = 21;
 
     public static int IntakeSlideNotQuiteOutTicks = IntakeSlideOutTicks + 90;
-    public static int IntakeSlideBackFromStack = IntakeSlideOutTicks + 90;
+    public static int IntakeSlideBackFromStack = IntakeSlideOutTicks + 95;
     public static int IntakeSlideBackFurtherFromStack = IntakeSlideOutTicks + 87;
 
     // webcam names

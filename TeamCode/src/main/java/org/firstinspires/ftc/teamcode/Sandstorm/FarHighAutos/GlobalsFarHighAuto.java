@@ -33,10 +33,15 @@ public class GlobalsFarHighAuto {
     public static double inconestackX = 37.37;
     public static double inconestackY = -18.85;
     public static double inStackRotation = Math.toRadians(0.45);
+    public static double inStackRotationOtherSide =  -inStackRotation + Math.toRadians(180);;
+    public static double kookyinconestackY = -21;
+    public static double kookyinStackRotation = Math.toRadians(3);
 
     public static double outconestackX = 17;
     public static double outconestackY = -18.7;
+    public static double kookyoutconestackY = -21;
     public static double outconeStackRotation = Math.toRadians(3);
+    public static double outconeStackRotationOtherSide = -outconeStackRotation + Math.toRadians(180);
     public static double xValueBeforeSlidesExtend = 20;
 
     public static double farpoleTargetX = -0.5;
