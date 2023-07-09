@@ -27,13 +27,13 @@ public class GlobalsFarHighAuto {
     public static double startPoseAngle = Math.toRadians(0);
 
     public static double PreloadDriveX = 38.5;
-    public static double PreloadDriveY = -17.7;
+    public static double PreloadDriveY = -15; // was -17.7 , drives in further to ram in
     public static double PreloadDriveRotation = Math.toRadians(0);
 
     public static double inconestackX = 37.37;
     public static double inconestackY = -18.85;
     public static double inStackRotation = Math.toRadians(0.45);
-    public static double inStackRotationOtherSide =  -inStackRotation + Math.toRadians(180);;
+    public static double inStackRotationOtherSide =  Math.toRadians(180);
     public static double kookyinconestackY = -21;
     public static double kookyinStackRotation = Math.toRadians(3);
 
@@ -41,12 +41,17 @@ public class GlobalsFarHighAuto {
     public static double outconestackY = -18.7;
     public static double kookyoutconestackY = -21;
     public static double outconeStackRotation = Math.toRadians(3);
-    public static double outconeStackRotationOtherSide = -outconeStackRotation + Math.toRadians(180);
+    public static double outconeStackRotationOtherSide = Math.toRadians(180);
     public static double xValueBeforeSlidesExtend = 20;
 
     public static double farpoleTargetX = -0.5;
     public static double farpoleTargetY = -28.8;
+
+    public static double farpoleTargetX10 = 0;
+    public static double farpoleTargetY10 = -29;
+
     public static double grabConeThreshold = 34.5;
+    public static double grabConeThreshold10 = 32.5;
 
     public static double parkLeft = -61;
     public static double parkRight = -11.5;
@@ -55,5 +60,7 @@ public class GlobalsFarHighAuto {
     // starting position
     public static Pose2d startPose = new Pose2d(34, -69, Math.toRadians(0));
     public static double slowerVelocityConstraintIn = 22;
+    public static double fasterVelocityConstraintIn = 40;
     public static double slowerVelocityConstraintOut = 40;
+    public static double fasterVelocityConstraintOut = 60;
 }

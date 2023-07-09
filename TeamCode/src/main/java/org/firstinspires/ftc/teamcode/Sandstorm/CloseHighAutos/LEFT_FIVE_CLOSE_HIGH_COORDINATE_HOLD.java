@@ -12,6 +12,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.teamcode.Sandstorm.AutoTest.AprilTagDetectionPipeline;
 import org.firstinspires.ftc.teamcode.Sandstorm.DriveBase;
+import org.firstinspires.ftc.teamcode.Sandstorm.FarHighAutos.RIGHT_FIVE_FAR_HIGH;
 import org.firstinspires.ftc.teamcode.Sandstorm.Inputs;
 import org.firstinspires.ftc.teamcode.Sandstorm.Outtake;
 import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
@@ -33,6 +34,7 @@ public class LEFT_FIVE_CLOSE_HIGH_COORDINATE_HOLD extends LinearOpMode {
     // class members
     ElapsedTime GlobalTimer;
     double autoTimer;
+    boolean goToPark;
 
     int numCycles;
     int SignalRotation;
@@ -93,7 +95,6 @@ public class LEFT_FIVE_CLOSE_HIGH_COORDINATE_HOLD extends LinearOpMode {
 
     private void Setup() {
         GlobalTimer = new ElapsedTime(System.nanoTime());
-        GlobalTimer.reset();
         outtake.hardwareSetup();
         drivebase.motorsSetup();
         inputs.inputsSetup(); // hopefully won't conflict
@@ -102,6 +103,7 @@ public class LEFT_FIVE_CLOSE_HIGH_COORDINATE_HOLD extends LinearOpMode {
         numCycles = 0;
         slowerVelocityConstraint = 12;
         outtake.encodersReset();
+        goToPark = true;
     }
     // Define our start pose
 
@@ -242,6 +244,7 @@ public class LEFT_FIVE_CLOSE_HIGH_COORDINATE_HOLD extends LinearOpMode {
 
         // runs instantly once
         autoTimer = GlobalTimer.milliseconds();
+        GlobalTimer.reset();
         camera.stopStreaming();
 
         while (opModeIsActive() && !isStopRequested()) {
@@ -307,10 +310,11 @@ public class LEFT_FIVE_CLOSE_HIGH_COORDINATE_HOLD extends LinearOpMode {
 
                     if (GlobalTimer.milliseconds() - autoTimer > 370) { // time taken to drop cone
                         if ((outtake.intakeClawTouchPressed() || GlobalTimer.milliseconds() - autoTimer > 600) && (drivebase.getHeadingError() < Math.toRadians(2))){ // outtake.intakeClawTouchPressed() || GlobalTimer.milliseconds() - autoTimer > 680
+                            outtake.IntakeClawClose();
                             autoTimer = GlobalTimer.milliseconds(); // reset timer not rly needed here
                             currentState = AutoState.AFTER_GRAB_OFF_STACK;
                         } else {
-                            outtake.IntakeSlideInternalPID(globalsCloseHighAuto.IntakeSlideOutTicks, 0.7); // slower
+                            outtake.IntakeSlideInternalPID(globalsCloseHighAuto.IntakeSlideOutTicks, 0.9); // slower
                         }
                     } else {
                         outtake.IntakeSlideInternalPID(globalsCloseHighAuto.IntakeSlideNotQuiteOutTicks, 1); // slower
@@ -326,13 +330,13 @@ public class LEFT_FIVE_CLOSE_HIGH_COORDINATE_HOLD extends LinearOpMode {
                     outtake.liftToInternalPID(2, 1);
                     if (GlobalTimer.milliseconds() - autoTimer > 0){
                         outtake.IntakeClawClose();
-                        if (GlobalTimer.milliseconds() - autoTimer > 200){
+                        if (GlobalTimer.milliseconds() - autoTimer > 210){
                             if (outtake.intakeLiftPosition > 275){
                                 outtake.IntakeArmTransfer();
                                 if ((numCycles==1? outtake.intakeArmPosition > 175: outtake.intakeArmPosition > 150) && GlobalTimer.milliseconds()-autoTimer > 600){ // this reads the position of the intake arm
-                                    outtake.IntakeSlideInternalPID(2,1);
+                                    outtake.IntakeSlideInternalPID(7,1);
                                     outtake.IntakeLiftTransfer();
-                                    if (outtake.intakeSlidePosition > -2 && outtake.intakeArmPosition > 195){ // this controls when the claw closes
+                                    if (outtake.intakeSlidePosition > 0 && outtake.intakeArmPosition > 195){ // this controls when the claw closes
                                         autoTimer = GlobalTimer.milliseconds(); // reset timer not rly needed here
                                         currentState = AutoState.TRANSFER_CONE;
                                         outtake.OuttakeClawClose();
@@ -422,6 +426,12 @@ public class LEFT_FIVE_CLOSE_HIGH_COORDINATE_HOLD extends LinearOpMode {
 
             }
             // Updates driving for trajectories
+
+            if ((GlobalTimer.milliseconds() > 27500) && goToPark && currentState != AutoState.IDLE){
+                goToPark = false;
+                currentState = AutoState.PARK;
+            }
+
             drive.update();
             telemetry.update();
         }

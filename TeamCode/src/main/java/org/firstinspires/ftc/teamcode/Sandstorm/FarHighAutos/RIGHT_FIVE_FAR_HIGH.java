@@ -7,6 +7,7 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.teamcode.Sandstorm.AutoTest.AprilTagDetectionPipeline;
+import org.firstinspires.ftc.teamcode.Sandstorm.CloseHighAutos.LEFT_FIVE_CLOSE_HIGH_COORDINATE_HOLD;
 import org.firstinspires.ftc.teamcode.Sandstorm.DriveBase;
 import org.firstinspires.ftc.teamcode.Sandstorm.Inputs;
 import org.firstinspires.ftc.teamcode.Sandstorm.Outtake;
@@ -91,7 +92,6 @@ public class RIGHT_FIVE_FAR_HIGH extends LinearOpMode {
 
     private void Setup() {
         GlobalTimer = new ElapsedTime(System.nanoTime());
-        GlobalTimer.reset();
         outtake.hardwareSetup();
         drivebase.motorsSetup();
         inputs.inputsSetup(); // hopefully won't conflict
@@ -252,6 +252,7 @@ public class RIGHT_FIVE_FAR_HIGH extends LinearOpMode {
 
         // runs instantly once
         autoTimer = GlobalTimer.milliseconds();
+        GlobalTimer.reset();
         camera.stopStreaming(); // reduces loop times
 
         while (opModeIsActive() && !isStopRequested()) {
@@ -265,6 +266,7 @@ public class RIGHT_FIVE_FAR_HIGH extends LinearOpMode {
             telemetry.addData("Auto State", currentState);
             telemetry.addData("Intake Arm Encoder", outtake.intakeArmPosition);
             telemetry.addData("Intake lift Encoder", outtake.intakeLiftPosition);
+            telemetry.addData("intake touch", outtake.intakeClawTouchPressed());
 
             xPosition = poseEstimate.getX();
             yPosition = poseEstimate.getY();
@@ -321,7 +323,7 @@ public class RIGHT_FIVE_FAR_HIGH extends LinearOpMode {
                         autoTimer = GlobalTimer.milliseconds(); // reset timer not rly needed here
                     }
                     break;
-                case GRAB_OFF_STACK:
+                case GRAB_OFF_STACK: // add a new state here for pole collisions, and have the slides retract if the current spikes
                     dropCone(300,poseEstimate);
                     if (GlobalTimer.milliseconds() - autoTimer > 650){ // doesn't hit the pole
                         outtake.OuttakeArmReady();
@@ -450,7 +452,7 @@ public class RIGHT_FIVE_FAR_HIGH extends LinearOpMode {
                     break;
 
             }
-            if ((GlobalTimer.milliseconds() - autoTimer > 28000) && goToPark){
+            if ((GlobalTimer.milliseconds() > 27500) && goToPark && currentState != AutoState.IDLE){
                 goToPark = false;
                 currentState = AutoState.PARK;
             }

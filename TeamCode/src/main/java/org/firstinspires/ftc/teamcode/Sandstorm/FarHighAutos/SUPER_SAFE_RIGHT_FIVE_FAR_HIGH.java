@@ -7,6 +7,7 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.teamcode.Sandstorm.AutoTest.AprilTagDetectionPipeline;
+import org.firstinspires.ftc.teamcode.Sandstorm.CloseHighAutos.LEFT_FIVE_CLOSE_HIGH_COORDINATE_HOLD;
 import org.firstinspires.ftc.teamcode.Sandstorm.DriveBase;
 import org.firstinspires.ftc.teamcode.Sandstorm.Inputs;
 import org.firstinspires.ftc.teamcode.Sandstorm.Outtake;
@@ -91,7 +92,6 @@ public class SUPER_SAFE_RIGHT_FIVE_FAR_HIGH extends LinearOpMode {
 
     private void Setup() {
         GlobalTimer = new ElapsedTime(System.nanoTime());
-        GlobalTimer.reset();
         outtake.hardwareSetup();
         drivebase.motorsSetup();
         inputs.inputsSetup(); // hopefully won't conflict
@@ -252,6 +252,7 @@ public class SUPER_SAFE_RIGHT_FIVE_FAR_HIGH extends LinearOpMode {
 
         // runs instantly once
         autoTimer = GlobalTimer.milliseconds();
+        GlobalTimer.reset();
         camera.stopStreaming(); // reduces loop times
 
         while (opModeIsActive() && !isStopRequested()) {
@@ -330,11 +331,11 @@ public class SUPER_SAFE_RIGHT_FIVE_FAR_HIGH extends LinearOpMode {
                         outtake.OuttakeSlideReady(); // drops down on pole a bit
                         outtake.liftToInternalPID(0,1);
                     }
-                    if (Math.abs(xPosition) > GlobalsFarHighAuto.grabConeThreshold){ // close the claw earlier
+                    if (Math.abs(xPosition) > GlobalsFarHighAuto.grabConeThreshold10){ // close the claw earlier
                         outtake.IntakeClawClose();
                     }
                     outtake.IntakeSlideTo(GlobalsFarHighAuto.IntakeSlideOutTicks, outtake.intakeSlidePosition, 1); // slower
-                    if (outtake.intakeClawTouchPressed() || !drive.isBusy() || Math.abs(xPosition) > GlobalsFarHighAuto.grabConeThreshold){ // could replace this with if x is over a certain point for speed
+                    if (outtake.intakeClawTouchPressed() || !drive.isBusy() || Math.abs(xPosition) > GlobalsFarHighAuto.grabConeThreshold10){ // could replace this with if x is over a certain point for speed
                         autoTimer = GlobalTimer.milliseconds(); // reset timer not rly needed here
                         currentState = AutoState.AFTER_GRAB_OFF_STACK;
                         outtake.IntakeClawClose();
@@ -450,7 +451,7 @@ public class SUPER_SAFE_RIGHT_FIVE_FAR_HIGH extends LinearOpMode {
                     break;
 
             }
-            if ((GlobalTimer.milliseconds() - autoTimer > 28000) && goToPark){
+            if ((GlobalTimer.milliseconds() > 27500) && goToPark && currentState != AutoState.IDLE){
                 goToPark = false;
                 currentState = AutoState.PARK;
             }

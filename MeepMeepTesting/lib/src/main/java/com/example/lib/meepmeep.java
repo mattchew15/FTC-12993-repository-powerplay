@@ -15,9 +15,21 @@ public class meepmeep {
                 // Set bot constraints: maxVel, maxAccel, maxAngVel, maxAngAccel, track width
                 .setConstraints(60, 60, Math.toRadians(180), Math.toRadians(180), 15)
                 .followTrajectorySequence(drive ->
-                        drive.trajectorySequenceBuilder(new Pose2d(34, -17.5, Math.toRadians(0)))
-                                .lineToLinearHeading(new Pose2d(-27, -17, 0))
-                                .splineToSplineHeading(new Pose2d(-42,-17.7, Math.toRadians(180)),Math.toRadians(0))
+                        drive.trajectorySequenceBuilder(new Pose2d(17, -18.7, Math.toRadians(3)))
+                                //.splineToSplineHeading(new Pose2d(38.5,-25, Math.toRadians(90)),Math.toRadians(90))
+                                //.splineToLinearHeading(new Pose2d(38.5, -25, Math.toRadians(0)), Math.toRadians(90))
+                                //.lineTo(new Vector2d(38.5, -40))
+                                //.splineToConstantHeading(new Vector2d(38,-25) ,Math.toRadians(90))
+                                //.lineToLinearHeading(new Pose2d(38.5, -25,Math.toRadians(0)))
+                                //.splineToConstantHeading(new Vector2d(25,-18.7) ,Math.toRadians(180))
+                                //.splineToSplineHeading(new Pose2d(17, -18.7, Math.toRadians(3)), Math.toRadians(180))
+
+                             //   .lineTo(new Vector2d(-27, -17))
+                              //  .splineToSplineHeading(new Pose2d(-42,-17.7, Math.toRadians(180)),Math.toRadians(180))
+
+                                .lineTo(new Vector2d(15,-18))
+                                .splineToSplineHeading(new Pose2d(-8,-18, Math.toRadians(177)),Math.toRadians(180))
+                                .splineToSplineHeading(new Pose2d(-37.37,-18.85, Math.toRadians(177)),Math.toRadians(180))
                                 .build()
                 );
 

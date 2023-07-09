@@ -5,6 +5,7 @@ import static org.firstinspires.ftc.teamcode.Sandstorm.CloseHighAutos.GlobalsClo
 import static org.firstinspires.ftc.teamcode.Sandstorm.CloseHighAutos.GlobalsCloseHighAuto.outconestackYOtherSide;
 
 import com.acmerobotics.roadrunner.geometry.Pose2d;
+import com.acmerobotics.roadrunner.geometry.Vector2d;
 import com.acmerobotics.roadrunner.trajectory.Trajectory;
 //import com.outoftheboxrobotics.photoncore.PhotonCore;
 import com.outoftheboxrobotics.photoncore.PhotonCore;
@@ -15,6 +16,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.teamcode.Sandstorm.AutoTest.AprilTagDetectionPipeline;
 import org.firstinspires.ftc.teamcode.Sandstorm.DriveBase;
+import org.firstinspires.ftc.teamcode.Sandstorm.FarHighAutos.RIGHT_FIVE_FAR_HIGH;
 import org.firstinspires.ftc.teamcode.Sandstorm.Inputs;
 import org.firstinspires.ftc.teamcode.Sandstorm.Outtake;
 import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
@@ -40,6 +42,7 @@ public class TEN_CLOSE_HIGH extends LinearOpMode {
     boolean outakeResetReady;
     boolean outakeOutReady;
     boolean OtherSide;
+    boolean goToPark;
 
     int numCycles;
     int SignalRotation;
@@ -108,6 +111,7 @@ public class TEN_CLOSE_HIGH extends LinearOpMode {
         slowerVelocityConstraint = 12;
         outtake.encodersReset();
         OtherSide = false;
+        goToPark = true;
     }
     // Define our start pose
 
@@ -155,23 +159,24 @@ public class TEN_CLOSE_HIGH extends LinearOpMode {
                 .lineToLinearHeading(new Pose2d(GlobalsCloseHighAuto.outconestackX, outconestackY, GlobalsCloseHighAuto.outconeStackRotation * SideMultiplier + AngleOffset))
                 .build();
 
-        TrajectorySequence DriveOtherSide = drive.trajectorySequenceBuilder(PreloadDrive.end())
-                .lineToLinearHeading(new Pose2d(-22*SideMultiplier, outconestackYOtherSide, 0 + AngleOffset))
-                .lineToLinearHeading(new Pose2d(outconestackXOtherSide, -18.4, 0 + AngleOffset))
-                //.splineTo(new Vector2d(-22 * SideMultiplier), Math.toRadians(0)+AngleOffset)-
-               // .splineToSplineHeading(new Pose2d(outconestackXOtherSide * SideMultiplier,outconestackY, Math.toRadians(180)),Math.toRadians(0))
+        Trajectory DriveOtherSide = drive.trajectoryBuilder(PreloadDrive.end())
+               // .lineToLinearHeading(new Pose2d(-22*SideMultiplier, outconestackYOtherSide, 0 + AngleOffset))
+                //.lineToLinearHeading(new Pose2d(outconestackXOtherSide, -18.4, 0 + AngleOffset))
+               // .splineToSplineHeading(new Pose2d(outconestackXOtherSide * SideMultiplier,outconestackY, Math.toRadians(180)),Math.toRadians(180))
+                .lineTo(new Vector2d(-27, -17))
+                .splineToSplineHeading(new Pose2d(-42,-17.7, outconeStackRotationOtherSide),Math.toRadians(180))
                 .build();
 
         Trajectory ParkRight = drive.trajectoryBuilder(DriveOtherSide.end())
-                .lineToLinearHeading(new Pose2d(SideMultiplier == 1 ? GlobalsCloseHighAuto.parkRight: GlobalsCloseHighAuto.parkLeft * SideMultiplier, -18.2,Math.toRadians(5)))
+                .lineTo(new Vector2d(SideMultiplier == 1 ? GlobalsCloseHighAuto.parkRight: GlobalsCloseHighAuto.parkLeft * SideMultiplier, outconestackY))
                 .build();
 
         Trajectory ParkLeft = drive.trajectoryBuilder(DriveOtherSide.end())
-                .lineToLinearHeading(new Pose2d(SideMultiplier == 1 ? -45: GlobalsCloseHighAuto.parkRight * SideMultiplier, -16,Math.toRadians(0)))
+                .lineTo(new Vector2d(SideMultiplier == 1 ? -45: GlobalsCloseHighAuto.parkRight * SideMultiplier, outconestackY))
                 .build();
 
         Trajectory ParkCentre = drive.trajectoryBuilder(DriveOtherSide.end())
-                .lineToLinearHeading(new Pose2d(GlobalsCloseHighAuto.parkCentre * SideMultiplier, outconestackY, Math.toRadians(5)))
+                .lineTo(new Vector2d(GlobalsCloseHighAuto.parkCentre * SideMultiplier, outconestackY))
                 .build();
 
         while (!isStarted()) {
@@ -258,6 +263,7 @@ public class TEN_CLOSE_HIGH extends LinearOpMode {
 
         // runs instantly once
         drive.followTrajectoryAsync(PreloadDrive);
+        GlobalTimer.reset();
         autoTimer = GlobalTimer.milliseconds(); // reset timer not rly needed here
 
         while (opModeIsActive() && !isStopRequested()) {
@@ -319,9 +325,9 @@ public class TEN_CLOSE_HIGH extends LinearOpMode {
                     
                 case OUTTAKE_CONE:
                     holdDrivebasePosition(poseEstimate);
-                    //if (!OtherSide){
+                    if (GlobalTimer.milliseconds() - autoTimer > 200){
                         OuttakeCone(true,poseEstimate); // next state is grab off
-                    //}
+                    }
                     break;
 
                 case GRAB_OFF_STACK:
@@ -349,15 +355,16 @@ public class TEN_CLOSE_HIGH extends LinearOpMode {
                     holdDrivebasePosition(poseEstimate);
                     outtake.turretSpinInternalPID(0,1);
                     outtake.liftToInternalPID(2, 1);
-                    outtake.OuttakeArmReady();
                     if (GlobalTimer.milliseconds() - autoTimer > 0){
                         outtake.IntakeClawClose();
                         if (GlobalTimer.milliseconds() - autoTimer > 100){
                             outtake.IntakeLiftTransfer();
+                            outtake.OuttakeArmReady();
+                            outtake.OuttakeSlideReady();
                             if (numCycles == 5){
                                 autoTimer = GlobalTimer.milliseconds(); // reset timer not rly needed here
                                 currentState = AutoState.DRIVE_OTHER_SIDE_AND_TRANSFER;
-                                drive.followTrajectorySequenceAsync(DriveOtherSide);
+                                drive.followTrajectoryAsync(DriveOtherSide);
                                 autoTimer = GlobalTimer.milliseconds(); // reset timer
                             }
                             if (GlobalTimer.milliseconds()-autoTimer > 110){
@@ -403,7 +410,7 @@ public class TEN_CLOSE_HIGH extends LinearOpMode {
                                 outtake.IntakeLift3();
                                 outtake.IntakeSlideTo(GlobalsCloseHighAuto.IntakeSlideNotQuiteOutTicks, outtake.intakeSlidePosition, 1);
 
-                                autoTimer = GlobalTimer.milliseconds(); // reset timer
+                                autoTimer = 0; // reset timer
                                 currentState = AutoState.OUTTAKE_CONE;
                             }
                         }
@@ -471,7 +478,7 @@ public class TEN_CLOSE_HIGH extends LinearOpMode {
                         currentState = AutoState.IDLE;
                     }
                     else{
-                        //drive.followTrajectoryAsync(ParkCentre);
+                        drive.followTrajectoryAsync(ParkCentre);
                         currentState = AutoState.IDLE; // doesn't have to drive anywhere, already in position hopefully
                     }
 
@@ -482,10 +489,18 @@ public class TEN_CLOSE_HIGH extends LinearOpMode {
                     outtake.turretSpin(0,outtake.turretPosition,1); // spin turret after
                     outtake.liftToInternalPID(0, 1);
                     outtake.IntakeSlideTo(1,outtake.intakeSlidePosition,1);
+                    outtake.OuttakeArmReady();
+                    outtake.OuttakeClawOpen();
+                    outtake.OuttakeSlideReady();
                     break;
 
             }
             // Updates driving for trajectories
+            if ((GlobalTimer.milliseconds() > 27500) && goToPark && currentState != AutoState.IDLE){
+                goToPark = false;
+                currentState = AutoState.PARK;
+            }
+
             drive.update();
             telemetry.update();
         }
@@ -495,11 +510,11 @@ public class TEN_CLOSE_HIGH extends LinearOpMode {
         if (GlobalTimer.milliseconds() - autoTimer > 135){ // small wait
             outtake.OuttakeArmDeposit();
             if (GlobalTimer.milliseconds() - autoTimer > 150){
-                outtake.OuttakeClawOpenHard();
                 outtake.OuttakeSlideScoreDrop(); // drops down on pole a bit
                 if (GlobalTimer.milliseconds() - autoTimer > waitBeforeRetract){
+                    outtake.OuttakeClawOpenHard();
                     outtake.liftToInternalPID(2, 1);
-                    outtake.OuttakeSlideReady(); // drops down on pole a bit
+                    //outtake.OuttakeSlideReady(); // drops down on pole a bit
                     if (GlobalTimer.milliseconds() - autoTimer > 200){
                         outtake.turretSpinInternalPID(0, 0.8);
                     } else {

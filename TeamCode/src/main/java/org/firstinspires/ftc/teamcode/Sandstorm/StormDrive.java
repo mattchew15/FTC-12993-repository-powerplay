@@ -53,7 +53,7 @@ public class StormDrive extends LinearOpMode {
     final int IntakeSlideOutTicks = -744; // make this max pull out distance
     final int IntakeLiftHeightThreshold = 265;
 
-    final int LiftHighPosition = -740;
+    final int LiftHighPosition = -744;
     final int LiftMidPosition = -375;
     final int LiftLowPosition = -25;
     final int LiftGroundPosition = -30;
@@ -224,7 +224,6 @@ public class StormDrive extends LinearOpMode {
                 // Retrieve your pose
                 Pose2d poseEstimate = location.getPoseEstimate();
                 outtake.outtakeReads();
-
                 xPosition = poseEstimate.getX();
                 yPosition = poseEstimate.getY();
                 headingPosition = poseEstimate.getHeading();
@@ -232,8 +231,6 @@ public class StormDrive extends LinearOpMode {
                 dt = System.currentTimeMillis() - prev_time;
                 prev_time = System.currentTimeMillis();
                 telemetry.addData("Loop Time", dt);
-                //telemetry.addData("x", xPosition);
-                //telemetry.addData("y", yPosition);
                 //telemetry.addData("heading", headingPosition);
                 //telemetry.addData("corrected heading", correctedHeading);
                 //make a mode that can be removed
@@ -246,7 +243,6 @@ public class StormDrive extends LinearOpMode {
                 if (gamepad1RightStickXBeingUsed()){
                     HoldHeadingPosition = false; // if the gamepad sticks are moved then stop the automatic driving
                 }
-
                 //drivebase.motorDirectionTest(gamepad1.left_stick_y, gamepad1.left_stick_x,gamepad1.right_stick_x,gamepad1.right_stick_y);
                 //drivebase.PowerToggle(gamepad1.left_stick_button);
                 //inputs.gamepadRumbleTimer();
@@ -518,6 +514,9 @@ public class StormDrive extends LinearOpMode {
                 outtake.IntakeClipOpen();
                 outtake.IntakeClawClose();
                 drivebase.intakeSpin(0);
+                if (gamepad2.left_bumper){
+                    outtake.BraceReady(); // this is if the brace happens to get stuck - might cause issues
+                }
                 if (gamepad2.right_bumper){
                     outtake.encodersReset();
                     outtakeState = OuttakeState.READY;
@@ -562,7 +561,7 @@ public class StormDrive extends LinearOpMode {
                 break;
             case INTAKE_SHOOT_OUT:
                 outtake.IntakeClipOpen(); // time for intake clip to open
-                if (GlobalTimer.milliseconds() - IntakeOutTimer > 150){
+                if (GlobalTimer.milliseconds() - IntakeOutTimer > 100){
                     outtake.IntakeSlideTo(IntakeSlideOutTicks,outtake.intakeSlidePosition, 1);
                     // drivebase.intakeSpin(-0.4); // helps the slides go out
                     if (outtake.intakeSlidePosition < -100) {
@@ -723,7 +722,7 @@ public class StormDrive extends LinearOpMode {
                 }
                 break;
             case READY_TO_OUTTAKE_START:
-                if (GlobalTimer.milliseconds() - OuttakePickupTimer > 650){
+                if (GlobalTimer.milliseconds() - OuttakePickupTimer > 250){ // time it takes for arm to swing over
                     outtake.BraceTucked();
                     outtake.OuttakeClawOpenHard();
                     outtakePickupState = OuttakePickupState.READY_TO_OUTTAKE_END;
@@ -735,7 +734,7 @@ public class StormDrive extends LinearOpMode {
                 }
                 break;
             case READY_TO_OUTTAKE_END:
-                if (GlobalTimer.milliseconds() - OuttakePickupTimer > 300){ // this is the time it takes for the brace to tuck under
+                if (GlobalTimer.milliseconds() - OuttakePickupTimer > 180){ // this is the time it takes for the brace to tuck under
                     outtakePickupState = OuttakePickupState.GRAB_OUTTAKE;
                     liftTargetPosition = LiftGroundPosition;
                     outtake.OuttakeClawOpenHard();
@@ -917,7 +916,7 @@ public class StormDrive extends LinearOpMode {
         }
     }
     public boolean gamepadRightTriggersDown(){
-        if (gamepad2.right_trigger < 0.2 && gamepad1.right_trigger < 0.2){
+        if (gamepad1.right_trigger < 0.2){ //gamepad2.right_trigger < 0.2 &&
             return false;
         } else{
             return true;
