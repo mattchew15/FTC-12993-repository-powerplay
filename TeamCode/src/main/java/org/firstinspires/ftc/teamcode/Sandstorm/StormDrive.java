@@ -4,7 +4,6 @@ package org.firstinspires.ftc.teamcode.Sandstorm;
 
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.outoftheboxrobotics.photoncore.PhotonCore;
-import com.qualcomm.hardware.lynx.LynxModule;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.Gamepad;
@@ -22,6 +21,7 @@ public class StormDrive extends LinearOpMode {
     Gamepad.RumbleEffect tenRumbleEffect;
     Gamepad.RumbleEffect oneFourthRumbleEffect;
     Gamepad.RumbleEffect switchRumbleEffect;
+    HighSpeedCamera camera;
 
     //Timing for rumble
     ElapsedTime runtime = new ElapsedTime();
@@ -201,6 +201,8 @@ public class StormDrive extends LinearOpMode {
         // this is basically init, all setup, hardware classes etc get initialized here
         drivebase.Drivebase_init(hardwareMap);
         outtake.Outtake_init(hardwareMap);
+        camera.initializeCamera(hardwareMap);
+
         rumbleSetup();
         //for (LynxModule module : hardwareMap.getAll(LynxModule.class)) { // turns on bulk reads cannot read or write to the same motor mor ethan once or it will issues multiple bulk reads
          //   module.setBulkCachingMode(LynxModule.BulkCachingMode.AUTO);
@@ -237,6 +239,7 @@ public class StormDrive extends LinearOpMode {
               //  if (!inputs.DriveToPositionToggleMode){ // this line of code basically holds heading if the intake extension is out
                     drivebase.Drive(gamepad1.left_stick_y,gamepad1.left_stick_x,intakeout == IntakeOut.INTAKE_SHOOT_OUT && gamepad1.left_trigger < 0.13? gamepad1.right_stick_x: gamepad1.right_stick_x);// TO HOLD PID HEADING+ holdHeading()
 
+
                 if (gamepad1.dpad_left){
                     location.setPoseEstimate(resetPose);
                 }
@@ -269,6 +272,7 @@ public class StormDrive extends LinearOpMode {
                 telemetry.addData("LiftTargetReacyed", outtake.liftTargetReached());
                 //telemetry.addData("cycle state for intake lift", inputs.CycleState);
                 //telemetry.addData("IntakeOut", IntakeReady);
+                camera.detectAprilTag(telemetry);
                 telemetry.update();
             }
         }
@@ -344,7 +348,6 @@ public class StormDrive extends LinearOpMode {
                 intakeClipHoldorNotHold(4);
                 break;
             case LIFT_CONE:
-                outtake.IntakeClawClose();
                 drivebase.intakeSpin(0);
                 outtake.liftTo(BeaconScore? 7:3, outtake.liftPosition,1);
                 outtake.turretSpinInternalPID(0,1);
@@ -379,9 +382,9 @@ public class StormDrive extends LinearOpMode {
                 break;
             case CLAW_GRIP_TRANSFER_END: // fix so if i don't go
                 intakeClipHoldorNotHold(3); // old timer values - 200 ms and 300 ms
-                if (GlobalTimer.milliseconds() - OuttakeTimer > 90 || outtake.getIntakeClawPosition() == outtake.IntakeClawOpenHardPos){ // this is so that if the claw has already released don't waste time waiting
-                    outtake.IntakeClawOpenHard();
-                    if ((GlobalTimer.milliseconds() - OuttakeTimer > 155 || outtake.getIntakeClawPosition() == outtake.IntakeClawOpenHardPos) && ((liftTargetPosition != 0) || inputs.GroundJunctionsToggleMode)){ // make sure height is selected before transferring
+                if (GlobalTimer.milliseconds() - OuttakeTimer > 90){ // this is so that if the claw has already released don't waste time waiting
+                   outtake.IntakeClawOpenHard(); // opens after transfer
+                    if ((GlobalTimer.milliseconds() - OuttakeTimer > 155) && ((liftTargetPosition != 0) || inputs.GroundJunctionsToggleMode)){ // make sure height is selected before transferring
                         outtake.liftTo(-10, outtake.liftPosition, 1);
                         outtake.OuttakeArmScore();
                         outtake.BraceActive();

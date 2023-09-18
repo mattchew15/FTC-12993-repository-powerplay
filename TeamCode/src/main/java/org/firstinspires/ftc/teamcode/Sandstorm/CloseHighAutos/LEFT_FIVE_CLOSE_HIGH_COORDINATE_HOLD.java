@@ -13,6 +13,7 @@ import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.teamcode.Sandstorm.AutoTest.AprilTagDetectionPipeline;
 import org.firstinspires.ftc.teamcode.Sandstorm.DriveBase;
 import org.firstinspires.ftc.teamcode.Sandstorm.FarHighAutos.RIGHT_FIVE_FAR_HIGH;
+import org.firstinspires.ftc.teamcode.Sandstorm.HighSpeedCamera;
 import org.firstinspires.ftc.teamcode.Sandstorm.Inputs;
 import org.firstinspires.ftc.teamcode.Sandstorm.Outtake;
 import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
@@ -35,6 +36,7 @@ public class LEFT_FIVE_CLOSE_HIGH_COORDINATE_HOLD extends LinearOpMode {
     ElapsedTime GlobalTimer;
     double autoTimer;
     boolean goToPark;
+    HighSpeedCamera highSpeedCamera;
 
     int numCycles;
     int SignalRotation;
@@ -52,25 +54,8 @@ public class LEFT_FIVE_CLOSE_HIGH_COORDINATE_HOLD extends LinearOpMode {
     Outtake outtake = new Outtake();
     DriveBase drivebase = new DriveBase();
     Inputs inputs = new Inputs();
-    OpenCvCamera camera;
-    AprilTagDetectionPipeline aprilTagDetectionPipeline;
     SampleMecanumDrive drive;
 
-    static final double FEET_PER_METER = 3.28084;
-
-    // Lens intrinsics
-    // UNITS ARE PIXELS
-    // NOTE: this calibration is for the C920 webcam at 800x448.
-    // You will need to do your own calibration for other configurations!
-    double fx = 578.272;
-    double fy = 578.272;
-    double cx = 402.145;
-    double cy = 221.506;
-
-    // UNITS ARE METERS
-    double tagsize = 0.166;
-
-    AprilTagDetection tagOfInterest = null;
 
 
     enum AutoState {
@@ -114,25 +99,7 @@ public class LEFT_FIVE_CLOSE_HIGH_COORDINATE_HOLD extends LinearOpMode {
     public void runOpMode() throws InterruptedException {
         PhotonCore.enable();
 
-        int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
-        camera = OpenCvCameraFactory.getInstance().createWebcam(hardwareMap.get(WebcamName.class, webcamname), cameraMonitorViewId);
-        aprilTagDetectionPipeline = new AprilTagDetectionPipeline(tagsize, fx, fy, cx, cy);
 
-        camera.setPipeline(aprilTagDetectionPipeline);
-        camera.openCameraDeviceAsync(new OpenCvCamera.AsyncCameraOpenListener()
-        {
-            @Override
-            public void onOpened()
-            {
-                camera.startStreaming(800,448, OpenCvCameraRotation.UPRIGHT);
-            }
-
-            @Override
-            public void onError(int errorCode)
-            {
-
-            }
-        });
 
 
         // initialize hardware
@@ -164,58 +131,7 @@ public class LEFT_FIVE_CLOSE_HIGH_COORDINATE_HOLD extends LinearOpMode {
                 .build();
 
         while (!isStarted()) {
-            ArrayList<AprilTagDetection> currentDetections = aprilTagDetectionPipeline.getLatestDetections();
 
-            if(currentDetections.size() != 0)
-            {
-                boolean tagFound = false;
-
-                for(AprilTagDetection tag : currentDetections)
-                {
-                    if(tag.id == 1 || tag.id == 2 || tag.id == 3)
-                    {
-                        tagOfInterest = tag;
-                        tagFound = true;
-                        break;
-                    }
-                }
-
-                if(tagFound)
-                {
-                    telemetry.addLine("Tag of interest is in sight!\n\nLocation data:");
-                    tagToTelemetry(tagOfInterest);
-                }
-                else
-                {
-                    telemetry.addLine("Don't see tag of interest :(");
-
-                    if(tagOfInterest == null)
-                    {
-                        telemetry.addLine("(The tag has never been seen)");
-                    }
-                    else
-                    {
-                        telemetry.addLine("\nBut we HAVE seen the tag before; last seen at:");
-                        tagToTelemetry(tagOfInterest);
-                    }
-                }
-
-            }
-            else
-            {
-                telemetry.addLine("Don't see tag of interest :(");
-
-                if(tagOfInterest == null)
-                {
-                    telemetry.addLine("(The tag has never been seen)");
-                }
-                else
-                {
-                    telemetry.addLine("\nBut we HAVE seen the tag before; last seen at:");
-                    tagToTelemetry(tagOfInterest);
-                }
-
-            }
 
             telemetry.update();
             sleep(20); // idk why
@@ -229,23 +145,11 @@ public class LEFT_FIVE_CLOSE_HIGH_COORDINATE_HOLD extends LinearOpMode {
 
         // open cv changes the state at the start depending on cone rotation
         // open cv vision if statements to change variable and display telemetry here
-        if(tagOfInterest == null || tagOfInterest.id == 1) {
-            telemetry.addLine("Rotation Left");
-            SignalRotation = 1;
-        }
-        else if(tagOfInterest.id == 2) {
-            telemetry.addLine("Rotation Centre");
-            SignalRotation = 2;
-        }
-        else {
-            telemetry.addLine("Rotation Right");
-            SignalRotation = 3;
-        }
+
 
         // runs instantly once
         autoTimer = GlobalTimer.milliseconds();
         GlobalTimer.reset();
-        camera.stopStreaming();
 
         while (opModeIsActive() && !isStopRequested()) {
             // Read pose
@@ -506,15 +410,7 @@ public class LEFT_FIVE_CLOSE_HIGH_COORDINATE_HOLD extends LinearOpMode {
         }
     }
 
-    void tagToTelemetry(AprilTagDetection detection) {
-        telemetry.addLine(String.format("\nDetected tag ID=%d", detection.id));
-        telemetry.addLine(String.format("Translation X: %.2f feet", detection.pose.x*FEET_PER_METER));
-        telemetry.addLine(String.format("Translation Y: %.2f feet", detection.pose.y*FEET_PER_METER));
-        telemetry.addLine(String.format("Translation Z: %.2f feet", detection.pose.z*FEET_PER_METER));
-        telemetry.addLine(String.format("Rotation Yaw: %.2f degrees", Math.toDegrees(detection.pose.yaw)));
-        telemetry.addLine(String.format("Rotation Pitch: %.2f degrees", Math.toDegrees(detection.pose.pitch)));
-        telemetry.addLine(String.format("Rotation Roll: %.2f degrees", Math.toDegrees(detection.pose.roll)));
-    }
+
     public void holdDrivebasePosition(Pose2d currentPose){ // THE OUTCONESTACKROTATION SHOULD BE NEGATIVE
         //drivebase.DriveToPositionAutonomous(globalsCloseHighAuto.outconestackX * SideMultiplier, globalsCloseHighAuto.outconestackY,globalsCloseHighAuto.outconeStackRotationHOLDPID* SideMultiplier,xPosition,yPosition,offsetHeading, 1,1); // last values are translationalspeed, and rotational speed
         drivebase.DriveToPositionAutonomous3(GlobalsCloseHighAuto.stackTargetX*SideMultiplier,GlobalsCloseHighAuto.stackTargetY, globalsCloseHighAuto.outconestackX * SideMultiplier, globalsCloseHighAuto.outconestackY,xPosition,yPosition,headingPosition, 1,1, telemetry, currentPose); // last values are translationalspeed, and rotational speed

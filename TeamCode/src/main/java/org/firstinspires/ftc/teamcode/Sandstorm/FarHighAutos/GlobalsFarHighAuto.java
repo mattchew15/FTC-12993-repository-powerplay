@@ -27,25 +27,28 @@ public class GlobalsFarHighAuto {
     public static double startPoseAngle = Math.toRadians(0);
 
     public static double PreloadDriveX = 38.5;
-    public static double PreloadDriveY = -15; // was -17.7 , drives in further to ram in
+    public static double PreloadDriveY = -17.7; // was -17.7 , drives in further to ram in
     public static double PreloadDriveRotation = Math.toRadians(0);
 
     public static double inconestackX = 37.37;
     public static double inconestackY = -18.85;
-    public static double inStackRotation = Math.toRadians(0.45);
+    public static double inStackRotation = Math.toRadians(0.5);
     public static double inStackRotationOtherSide =  Math.toRadians(180);
-    public static double kookyinconestackY = -21;
-    public static double kookyinStackRotation = Math.toRadians(3);
+    public static double kookyinconestackY = -20;
+    public static double kookyinStackRotation = Math.toRadians(2.8);
+    public static double supersafeinconestackY = -21;
+    public static double supersafeinStackRotation = Math.toRadians(3);
 
     public static double outconestackX = 17;
     public static double outconestackY = -18.7;
-    public static double kookyoutconestackY = -21;
+    public static double kookyoutconestackY = -20;
     public static double outconeStackRotation = Math.toRadians(3);
+    public static double supersafeoutconestackY = -21;
     public static double outconeStackRotationOtherSide = Math.toRadians(180);
     public static double xValueBeforeSlidesExtend = 20;
 
     public static double farpoleTargetX = -0.5;
-    public static double farpoleTargetY = -28.8;
+    public static double farpoleTargetY = -28.9;
 
     public static double farpoleTargetX10 = 0;
     public static double farpoleTargetY10 = -29;

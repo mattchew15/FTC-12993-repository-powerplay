@@ -6,7 +6,7 @@ import com.acmerobotics.roadrunner.geometry.Pose2d;
 @Config
 public class GlobalsCloseHighAuto {
     // encoder positions
-    public static int IntakeSlideOutTicks = -610;
+    public static int IntakeSlideOutTicks = -608;
     public static int LiftHighPosition = -705;
     public static int LiftHighPosition10 = -740;
 
@@ -18,14 +18,14 @@ public class GlobalsCloseHighAuto {
     public String WebCamRightName  = "WebcamRight";
 
     public static int IntakeSlideNotQuiteOutTicks = IntakeSlideOutTicks + 105;
-    public static int IntakeSlideBackFromStack = IntakeSlideOutTicks + 110;
+    public static int IntakeSlideBackFromStack = IntakeSlideOutTicks + 112;
 
     // coordinates
     public static double startPoseX = 34;
     public static double startPoseY = -69;
     public static double startPoseAngle = Math.toRadians(0);
     public static double outconestackX = 42;
-    public static double outconestackY = -17.7;
+    public static double outconestackY = -17.6;
     public static double outconeStackRotation = Math.toRadians(-1.2);
     public static double outconeStackRotationHOLDPID = Math.toRadians(90 + -outconeStackRotation);
 

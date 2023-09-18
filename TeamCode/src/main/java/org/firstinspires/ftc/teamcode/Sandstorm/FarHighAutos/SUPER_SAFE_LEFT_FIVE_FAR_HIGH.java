@@ -3,12 +3,10 @@ import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.geometry.Vector2d;
 import com.acmerobotics.roadrunner.trajectory.Trajectory;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.teamcode.Sandstorm.AutoTest.AprilTagDetectionPipeline;
-import org.firstinspires.ftc.teamcode.Sandstorm.CloseHighAutos.LEFT_FIVE_CLOSE_HIGH_COORDINATE_HOLD;
 import org.firstinspires.ftc.teamcode.Sandstorm.DriveBase;
 import org.firstinspires.ftc.teamcode.Sandstorm.Inputs;
 import org.firstinspires.ftc.teamcode.Sandstorm.Outtake;
@@ -20,13 +18,13 @@ import org.openftc.easyopencv.OpenCvCameraFactory;
 import org.openftc.easyopencv.OpenCvCameraRotation;
 import java.util.ArrayList;
 
-@Disabled
-@Autonomous(name = "Right 1+5 Far High Auto", group = "Autonomous")
-public class RIGHT_FIVE_FAR_HIGH extends LinearOpMode {
+
+@Autonomous(name = "Super Safe Left 1+5 Far High Auto", group = "Autonomous")
+public class SUPER_SAFE_LEFT_FIVE_FAR_HIGH extends LinearOpMode {
     GlobalsFarHighAuto globalsFarHighAuto = new GlobalsFarHighAuto();
-    int SideMultiplier = 1; // this multiplies everything that changes with the right side
-    double AngleOffset = Math.toRadians(0); // this adds to every angle
-    String webcamname = globalsFarHighAuto.WebCamLeftName; // this is the webcam name for the right or left
+    int SideMultiplier = -1; // this multiplies everything that changes with the right side
+    double AngleOffset = Math.toRadians(180); // this adds to every angle
+    String webcamname = globalsFarHighAuto.WebCamRightName; // this is the webcam name for the right or left
 
     // class members
     ElapsedTime GlobalTimer;
@@ -136,7 +134,7 @@ public class RIGHT_FIVE_FAR_HIGH extends LinearOpMode {
 
         // out cone stack position
         Pose2d startPose = new Pose2d(GlobalsFarHighAuto.startPoseX*SideMultiplier, GlobalsFarHighAuto.startPoseY,GlobalsFarHighAuto.startPoseAngle*SideMultiplier+AngleOffset);
-        Pose2d OutConePose = new Pose2d(GlobalsFarHighAuto.outconestackX*SideMultiplier, GlobalsFarHighAuto.outconestackY, GlobalsFarHighAuto.outconeStackRotation*SideMultiplier+AngleOffset);
+        Pose2d OutConePose = new Pose2d(GlobalsFarHighAuto.outconestackX*SideMultiplier, GlobalsFarHighAuto.supersafeoutconestackY, GlobalsFarHighAuto.outconeStackRotation*SideMultiplier+AngleOffset);
 
         // functions runs on start
         Setup();
@@ -150,12 +148,12 @@ public class RIGHT_FIVE_FAR_HIGH extends LinearOpMode {
                 .build();
         // could make this one drive
         Trajectory DriveOutStackAfterPreload = drive.trajectoryBuilder(PreloadDrive.end()) // actual drive out will occur during loop
-                .lineToLinearHeading(new Pose2d(GlobalsFarHighAuto.outconestackX*SideMultiplier, GlobalsFarHighAuto.outconestackY, GlobalsFarHighAuto.outconeStackRotation*SideMultiplier+AngleOffset), SampleMecanumDrive.getVelocityConstraint(GlobalsFarHighAuto.slowerVelocityConstraintOut, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH),
+                .lineToLinearHeading(new Pose2d(GlobalsFarHighAuto.outconestackX*SideMultiplier, GlobalsFarHighAuto.supersafeoutconestackY, GlobalsFarHighAuto.outconeStackRotation*SideMultiplier+AngleOffset), SampleMecanumDrive.getVelocityConstraint(GlobalsFarHighAuto.slowerVelocityConstraintOut, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH),
                         SampleMecanumDrive.getAccelerationConstraint(DriveConstants.MAX_ACCEL))
                 .build();
 
         Trajectory DriveIntoStack = drive.trajectoryBuilder(DriveOutStackAfterPreload.end()) //
-                .lineToLinearHeading(new Pose2d(GlobalsFarHighAuto.inconestackX*SideMultiplier,  GlobalsFarHighAuto.inconestackY, GlobalsFarHighAuto.inStackRotation*SideMultiplier+AngleOffset), SampleMecanumDrive.getVelocityConstraint(GlobalsFarHighAuto.slowerVelocityConstraintIn, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH),
+                .lineToLinearHeading(new Pose2d(GlobalsFarHighAuto.inconestackX*SideMultiplier,  GlobalsFarHighAuto.supersafeinconestackY, GlobalsFarHighAuto.supersafeinStackRotation*SideMultiplier+AngleOffset), SampleMecanumDrive.getVelocityConstraint(GlobalsFarHighAuto.slowerVelocityConstraintIn, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH),
                         SampleMecanumDrive.getAccelerationConstraint(DriveConstants.MAX_ACCEL))
                 .build();
 
@@ -252,6 +250,7 @@ public class RIGHT_FIVE_FAR_HIGH extends LinearOpMode {
         }
 
         // runs instantly once
+
         GlobalTimer.reset();
         autoTimer = GlobalTimer.milliseconds();
         camera.stopStreaming(); // reduces loop times
@@ -267,7 +266,6 @@ public class RIGHT_FIVE_FAR_HIGH extends LinearOpMode {
             telemetry.addData("Auto State", currentState);
             telemetry.addData("Intake Arm Encoder", outtake.intakeArmPosition);
             telemetry.addData("Intake lift Encoder", outtake.intakeLiftPosition);
-            telemetry.addData("intake touch", outtake.intakeClawTouchPressed());
 
             xPosition = poseEstimate.getX();
             yPosition = poseEstimate.getY();
@@ -283,8 +281,7 @@ public class RIGHT_FIVE_FAR_HIGH extends LinearOpMode {
                     outtake.OuttakeClawClose();
                     outtake.IntakeClipOpen();
                     outtake.OuttakeArmReady();
-                    telemetry.addData("Delay", GlobalTimer.milliseconds() - autoTimer > 3000);
-                    if (GlobalTimer.milliseconds() - autoTimer > 4000){
+                    if (GlobalTimer.milliseconds() - autoTimer > 3000){
                         autoTimer = GlobalTimer.milliseconds(); // reset timer not rly needed here
                         currentState = AutoState.PRELOAD_DRIVE;
                         drive.followTrajectoryAsync(PreloadDrive);
@@ -325,7 +322,7 @@ public class RIGHT_FIVE_FAR_HIGH extends LinearOpMode {
                         autoTimer = GlobalTimer.milliseconds(); // reset timer not rly needed here
                     }
                     break;
-                case GRAB_OFF_STACK: // add a new state here for pole collisions, and have the slides retract if the current spikes
+                case GRAB_OFF_STACK:
                     dropCone(300,poseEstimate);
                     if (GlobalTimer.milliseconds() - autoTimer > 650){ // doesn't hit the pole
                         outtake.OuttakeArmReady();
@@ -334,16 +331,16 @@ public class RIGHT_FIVE_FAR_HIGH extends LinearOpMode {
                         outtake.OuttakeSlideReady(); // drops down on pole a bit
                         outtake.liftToInternalPID(0,1);
                     }
-                    if (Math.abs(xPosition) > GlobalsFarHighAuto.grabConeThreshold){ // close the claw earlier
+                    if (Math.abs(xPosition) > GlobalsFarHighAuto.grabConeThreshold10){ // close the claw earlier
                         outtake.IntakeClawClose();
                     }
                     outtake.IntakeSlideTo(GlobalsFarHighAuto.IntakeSlideOutTicks, outtake.intakeSlidePosition, 1); // slower
-                    if (outtake.intakeClawTouchPressed() || !drive.isBusy() || Math.abs(xPosition) > GlobalsFarHighAuto.grabConeThreshold){ // could replace this with if x is over a certain point for speed
+                    if (outtake.intakeClawTouchPressed() || !drive.isBusy() || Math.abs(xPosition) > GlobalsFarHighAuto.grabConeThreshold10){ // could replace this with if x is over a certain point for speed
                         autoTimer = GlobalTimer.milliseconds(); // reset timer not rly needed here
                         currentState = AutoState.AFTER_GRAB_OFF_STACK;
                         outtake.IntakeClawClose();
                         Trajectory OutConeStack = drive.trajectoryBuilder(poseEstimate)
-                                .lineToLinearHeading(new Pose2d(GlobalsFarHighAuto.outconestackX*SideMultiplier,GlobalsFarHighAuto.outconestackY, GlobalsFarHighAuto.outconeStackRotation*SideMultiplier+AngleOffset), SampleMecanumDrive.getVelocityConstraint(GlobalsFarHighAuto.slowerVelocityConstraintOut, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH),
+                                .lineToLinearHeading(new Pose2d(GlobalsFarHighAuto.outconestackX*SideMultiplier,GlobalsFarHighAuto.supersafeoutconestackY, GlobalsFarHighAuto.outconeStackRotation*SideMultiplier+AngleOffset), SampleMecanumDrive.getVelocityConstraint(GlobalsFarHighAuto.slowerVelocityConstraintOut, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH),
                                         SampleMecanumDrive.getAccelerationConstraint(DriveConstants.MAX_ACCEL))
                                 .build();
 
@@ -454,7 +451,7 @@ public class RIGHT_FIVE_FAR_HIGH extends LinearOpMode {
                     break;
 
             }
-            if ((GlobalTimer.milliseconds() > 27700) && goToPark && currentState != AutoState.IDLE){
+            if ((GlobalTimer.milliseconds() > 27500) && goToPark && currentState != AutoState.IDLE){
                 goToPark = false;
                 currentState = AutoState.PARK;
             }

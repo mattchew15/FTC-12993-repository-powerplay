@@ -3,6 +3,7 @@ import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.geometry.Vector2d;
 import com.acmerobotics.roadrunner.trajectory.Trajectory;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
@@ -19,7 +20,7 @@ import org.openftc.easyopencv.OpenCvCameraFactory;
 import org.openftc.easyopencv.OpenCvCameraRotation;
 import java.util.ArrayList;
 
-
+@Disabled
 @Autonomous(name = "Left 1+5 Far High Auto", group = "Autonomous")
 public class LEFT_FIVE_FAR_HIGH extends LinearOpMode {
     GlobalsFarHighAuto globalsFarHighAuto = new GlobalsFarHighAuto();
@@ -251,8 +252,8 @@ public class LEFT_FIVE_FAR_HIGH extends LinearOpMode {
         }
 
         // runs instantly once
-        autoTimer = GlobalTimer.milliseconds();
         GlobalTimer.reset();
+        autoTimer = GlobalTimer.milliseconds();
         camera.stopStreaming(); // reduces loop times
 
         while (opModeIsActive() && !isStopRequested()) {
@@ -263,6 +264,10 @@ public class LEFT_FIVE_FAR_HIGH extends LinearOpMode {
             dt = System.currentTimeMillis() - prev_time;
             prev_time = System.currentTimeMillis();
             telemetry.addData("Loop Time", dt);
+            telemetry.addData("Auto State", currentState);
+            telemetry.addData("Intake Arm Encoder", outtake.intakeArmPosition);
+            telemetry.addData("Intake lift Encoder", outtake.intakeLiftPosition);
+            telemetry.addData("intake touch", outtake.intakeClawTouchPressed());
 
             xPosition = poseEstimate.getX();
             yPosition = poseEstimate.getY();
@@ -278,6 +283,7 @@ public class LEFT_FIVE_FAR_HIGH extends LinearOpMode {
                     outtake.OuttakeClawClose();
                     outtake.IntakeClipOpen();
                     outtake.OuttakeArmReady();
+                    telemetry.addData("Delay", GlobalTimer.milliseconds() - autoTimer > 3000);
                     if (GlobalTimer.milliseconds() - autoTimer > 4000){
                         autoTimer = GlobalTimer.milliseconds(); // reset timer not rly needed here
                         currentState = AutoState.PRELOAD_DRIVE;
@@ -319,7 +325,7 @@ public class LEFT_FIVE_FAR_HIGH extends LinearOpMode {
                         autoTimer = GlobalTimer.milliseconds(); // reset timer not rly needed here
                     }
                     break;
-                case GRAB_OFF_STACK:
+                case GRAB_OFF_STACK: // add a new state here for pole collisions, and have the slides retract if the current spikes
                     dropCone(300,poseEstimate);
                     if (GlobalTimer.milliseconds() - autoTimer > 650){ // doesn't hit the pole
                         outtake.OuttakeArmReady();
@@ -334,8 +340,8 @@ public class LEFT_FIVE_FAR_HIGH extends LinearOpMode {
                     outtake.IntakeSlideTo(GlobalsFarHighAuto.IntakeSlideOutTicks, outtake.intakeSlidePosition, 1); // slower
                     if (outtake.intakeClawTouchPressed() || !drive.isBusy() || Math.abs(xPosition) > GlobalsFarHighAuto.grabConeThreshold){ // could replace this with if x is over a certain point for speed
                         autoTimer = GlobalTimer.milliseconds(); // reset timer not rly needed here
-                        outtake.IntakeClawClose();
                         currentState = AutoState.AFTER_GRAB_OFF_STACK;
+                        outtake.IntakeClawClose();
                         Trajectory OutConeStack = drive.trajectoryBuilder(poseEstimate)
                                 .lineToLinearHeading(new Pose2d(GlobalsFarHighAuto.outconestackX*SideMultiplier,GlobalsFarHighAuto.outconestackY, GlobalsFarHighAuto.outconeStackRotation*SideMultiplier+AngleOffset), SampleMecanumDrive.getVelocityConstraint(GlobalsFarHighAuto.slowerVelocityConstraintOut, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH),
                                         SampleMecanumDrive.getAccelerationConstraint(DriveConstants.MAX_ACCEL))
@@ -356,8 +362,9 @@ public class LEFT_FIVE_FAR_HIGH extends LinearOpMode {
                         if (GlobalTimer.milliseconds() - autoTimer > 120){
                             if (outtake.intakeLiftPosition > 275){
                                 outtake.IntakeArmTransfer();
-                                if ((outtake.getIntakeArmPos() > 137)){ // this reads the position of the intake arm
+                                if ((outtake.intakeArmPosition > 137)){ // this reads the position of the intake arm
                                     outtake.IntakeSlideInternalPID(7,1);
+                                    telemetry.addLine("Intake Slides Into Transfer");
                                     if (outtake.intakeSlidePosition > -400){
                                         outtake.IntakeLiftTransfer();
                                         if (outtake.intakeSlidePosition > -4){ // this controls when the claw closes
@@ -387,7 +394,7 @@ public class LEFT_FIVE_FAR_HIGH extends LinearOpMode {
                             outtake.OuttakeArmUpright();
                             outtake.OuttakeClawClose();
                             outtake.BraceActiveAuto();
-                            if (GlobalTimer.milliseconds()-autoTimer > 400) {
+                            if (GlobalTimer.milliseconds()-autoTimer > 400) { // turret cannot turn if intake slides are in
                                 holdTurretPosition(poseEstimate,1); // holds position while driving backwards
                             }
                             if (xPosition < GlobalsFarHighAuto.xValueBeforeSlidesExtend){ // kinda like a temporal marker
@@ -447,7 +454,7 @@ public class LEFT_FIVE_FAR_HIGH extends LinearOpMode {
                     break;
 
             }
-            if ((GlobalTimer.milliseconds() > 27500) && goToPark && currentState != AutoState.IDLE){
+            if ((GlobalTimer.milliseconds() > 27700) && goToPark && currentState != AutoState.IDLE){
                 goToPark = false;
                 currentState = AutoState.PARK;
             }
